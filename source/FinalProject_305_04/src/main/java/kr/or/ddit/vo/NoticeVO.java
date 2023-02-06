@@ -1,10 +1,14 @@
 package kr.or.ddit.vo;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import kr.or.ddit.validate.DeleteGroup;
 import kr.or.ddit.validate.UpdateGroup;
@@ -28,16 +32,21 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(of="notiId")
 @ToString
-public class NoticeVO implements Serializable {
+public class NoticeVO extends CommonAttaFileVO implements Serializable {
 	private int rnum;
 	@NotNull(groups={UpdateGroup.class, DeleteGroup.class})
 	private String notiId;
-	@NotBlank
-	private String empId = "관리자";
-	@NotBlank
+	private String empId;
 	private String tit;
-	@NotBlank
 	private String cont;
 	private String wrDate;
 	private Integer hit;
+	@Override
+	public String getAttaId() {
+		return notiId;
+	}
+	
+	// 첨부파일
+	
+	
 }

@@ -40,7 +40,7 @@
 		p:configuration-ref="configuration"
 	/>
 	
-	<mybatis-spring:scan base-package="kr.or.ddit.*.*.dao" 
+	<mybatis-spring:scan base-package="kr.or.ddit.*.*.dao, kr.or.ddit.*.dao" 
 		annotation="org.apache.ibatis.annotations.Mapper"
 		factory-ref="sqlSessionFactory"
 	/>

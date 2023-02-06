@@ -45,7 +45,7 @@
 						</div>
 					</div>
 					<div class="box-btn">
-						<button type="button" class="btn purple">등록</button>
+						<button type="button" class="insertBtn btn purple">등록</button>
 					</div>
 				</div>
 			</div>
@@ -61,12 +61,12 @@
 					</colgroup>
 					<thead>
 						<tr>
-							<th scope="col">선택</th>			<!-- 얘는 emp만 보이게 할 예정이에요(삭제할때사용) -->
-							<th scope="col">글번호</th>
-							<th scope="col">제목</th>
+							<th scope="col" class="w5">선택</th>			<!-- 얘는 emp만 보이게 할 예정이에요(삭제할때사용) -->
+							<th scope="col" class="w5">글번호</th>
+							<th scope="col" class="w50">제목</th>
 							<th scope="col">작성자</th>
 							<th scope="col">등록일</th>
-							<th scope="col">조회수</th>
+							<th scope="col" class="w5">조회수</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -84,8 +84,7 @@
 												</div>
 											</td>
 											<td>${notice.rnum }</td>
-											<td>
-											${notice.tit }</td>
+											<td style="text-align: left">${notice.tit }</td>
 											<td>${notice.empId }</td>
 											<td>${notice.wrDate }</td>
 											<td>${notice.hit }</td>
@@ -150,5 +149,17 @@ $("a.paging").on('click', function(event){
 	searchForm.submit();
 	return false;
 });
+
+function f_insertBtn(){
+	
+}
+$(".insertBtn").on('click', function(event){
+// 	event.preventDefault();
+	let url = "${pageContext.request.contextPath}/campus/notice/insert";
+	location.href = url;
+	console.log("등록버튼클릭!");
+// 	return false;
+});
+
 </script>
 

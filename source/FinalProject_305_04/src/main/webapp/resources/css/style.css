@@ -258,11 +258,14 @@ ul,ol{list-style:none;}
 .cont-title .star.on {background: url(../images/star-ov.png) no-repeat; transition: all 0.3s ease;}
 .white-box { background: #fff; padding: 25px 32px; border-radius: 10px;}
 .cont-box-inner:not(:first-of-type) {padding-top: 35px;}
+.cont-box-inner:first-of-type { padding-top: 0;}
+
+
 
 /***  title  ***/
 .title {position:relative;min-height: 37px;}
 .title h3, .title h4 {display: inline-block;font-weight: 600;}
-.title h3 {font-size:20px;}
+.title h3, .title h4 {font-size:20px;}
 .title  > .box-btn { margin-top: 0;position: absolute;right: 0; top: -3px;}
 .title .total{ margin-left: 10px;min-width: 39px;    height: 22px; line-height: 22px;padding: 0 5px;border-radius: 600px;background: #131c38; display: inline-block;text-align: center;padding: 1px 9px;color: #fff;font-size: 12px;font-weight: 600;}
 .title .total em{font-size: 12px;}
@@ -531,14 +534,38 @@ table i { font-size: 12px;}
 
 
 
+/*** top-info ***/
+.top-info {padding: 0; margin-bottom: 45px;}
+.top-info:after {content: ""; display: block; clear: both;}
+.top-info > * {float: left; margin-left: 35px; display: flex;align-items: center;}
+.top-info > *:first-of-type {margin-left: 0;}
+.top-info .label-tit {padding-right: 15px;}
 
 
 
 
 
-
-
-
+/*tbl-half*/
+.tbl-half {display: flex;}
+.tbl-half > div:first-of-type {margin-right: 5px;}
+.half28 > div:first-of-type {width: 20%;}
+.half28 > div:last-of-type {width: 80%;}
+.half82 > div:first-of-type {width: 80%;}
+.half82 > div:last-of-type {width: 20%;}
+.half37 > div:first-of-type {width: 30%;}
+.half37 > div:last-of-type {width: 70%;}
+.half73 > div:first-of-type {width: 70%;}
+.half73 > div:last-of-type {width: 30%;}
+.half46 > div:first-of-type {width: 40%;}
+.half46 > div:last-of-type {width: 60%;}
+.half64 > div:first-of-type {width: 60%;}
+.half64 > div:last-of-type {width: 40%;}
+.half19 > div:first-of-type {width: 10%;}
+.half19 > div:last-of-type {width: 90%;}
+.half91 > div:first-of-type {width: 90%;}
+.half91 > div:last-of-type {width: 10%;}
+.tbl-half .title .right-part {  position: absolute;  right: 0;  top: 0;}
+.tbl-half .right-part .btn-wrap { margin-top: 0;  display: inline-block;   position: static;}
 
 
 

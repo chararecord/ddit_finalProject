@@ -29,6 +29,7 @@
 
 
 
+
 		<!-- styletab  -->
 		<div class="tab-wrap">
 			<!-- tablist  -->
@@ -79,6 +80,456 @@
 				제출되며, 풀지 않은 문항은 자동으로 0점 처리됩니다. </strong>
 		</div>
 		<!-- // tob-box -->
+
+
+
+		<!-- cont-box-inner" -->
+		<div class="cont-box-inner">
+			<div class="tbl-half">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>5:5</h4>
+                        <p class="highlight red-txt">* 빨간색 글자에 대한 설명입니다.</p>
+                        <div class="right-part">
+                            <div class="btn-wrap">
+                              		<button type="button" class="btn default">삭제</button>
+									<button type="button" class="btn default">수정</button>
+									<button type="button" class="btn purple">등록</button>
+                           </div>
+                        </div>
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">플라즈마장비지능화연구단<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">사업관리팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">연구지원팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">데이터연구팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">해석기술개발팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">지능제어팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">기술실증팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">부원장<em class="org-txt asterisk">*</em></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>5:5</h4>
+                        <p class="highlight red-txt">* 빨간색 글자에 대한 설명입니다.</p>
+                        <div class="right-part">
+                            <div class="btn-wrap">
+									<button type="button" class="btn default">삭제</button>
+									<button type="button" class="btn default">수정</button>
+									<button type="button" class="btn purple">등록</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">플라즈마장비지능화연구단<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">사업관리팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">연구지원팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">데이터연구팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">해석기술개발팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">지능제어팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">기술실증팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">부원장<em class="org-txt asterisk">*</em></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+		<!--  //cont-box-inner" -->
+		
+		
+		<div class="tob-box">
+		클래스명 : 
+					half28, half82
+		half37, half73
+		half46, half64
+		half19, half91
+		</div>
+			
+			
+			
+			
+		<!-- cont-box-inner" -->
+		<div class="cont-box-inner">
+			<div class="tbl-half half28">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>half28</h4> 
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: auto">
+
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                			 </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>half28</h4>
+                        <p class="highlight red-txt">* 빨간색 글자에 대한 설명입니다.</p>
+                        <div class="right-part">
+                            <div class="btn-wrap">
+									<button type="button" class="btn default">삭제</button>
+									<button type="button" class="btn default">수정</button>
+									<button type="button" class="btn purple">등록</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">플라즈마장비지능화연구단<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">사업관리팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">연구지원팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">데이터연구팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">해석기술개발팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">지능제어팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">기술실증팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">부원장<em class="org-txt asterisk">*</em></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+		<!--  //cont-box-inner" -->
+
+
+		<!-- cont-box-inner" -->
+		<div class="cont-box-inner">
+			<div class="tbl-half half37">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>half37</h4> 
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: auto">
+
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                			 </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>half37</h4>
+                        <p class="highlight red-txt">* 빨간색 글자에 대한 설명입니다.</p>
+                        <div class="right-part">
+                            <div class="btn-wrap">
+									<button type="button" class="btn default">삭제</button>
+									<button type="button" class="btn default">수정</button>
+									<button type="button" class="btn purple">등록</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">총원<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">원장실<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">윤리감사부<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">플라즈마장비지능화연구단<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">사업관리팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">연구지원팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">데이터연구팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">해석기술개발팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">지능제어팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">기술실증팀<em class="org-txt asterisk">*</em></th>
+                                <th scope="col">부원장<em class="org-txt asterisk">*</em></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" id="checkbox44444" name="radio-group"><label for="checkbox44444"><span class="sr-only">선택</span></label>
+                                </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+		<!--  //cont-box-inner" -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

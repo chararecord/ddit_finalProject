@@ -20,6 +20,41 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+   		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class> 
+   		<init-param>
+   			<param-name>encoding</param-name>
+   			<param-value>UTF-8</param-value>
+   		</init-param>  
+   		<init-param>
+   			<param-name>forceEncoding</param-name>
+   			<param-value>true</param-value>
+   		</init-param>  
+	</filter>
+	<filter-mapping>
+   		<filter-name>CharacterEncodingFilter</filter-name>
+   		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+   
+	<filter>
+	  	<filter-name>MultipartFilter</filter-name>
+	  	<filter-class>org.springframework.web.multipart.support.MultipartFilter</filter-class>
+	</filter>
+	<filter-mapping>
+ 		<filter-name>MultipartFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+ 
+<!-- 	<filter> -->
+<!-- 		<filter-name>springSecurityFilterChain</filter-name> -->
+<!-- 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class> -->
+<!-- 	</filter> -->
+<!-- 	<filter-mapping> -->
+<!-- 		<filter-name>springSecurityFilterChain</filter-name> -->
+<!-- 		<url-pattern>/*</url-pattern> -->
+<!-- 	</filter-mapping> -->
+	
 	<!-- front controller Spring MVC 프로그래밍 모델이 동작하기 위한 하위 컨테이너 생성 *.do붙은 애들 
 		다 받겠다 => load-on-startup : 1 대문에 서서 -->
 	<!-- The front controller of this Spring Web application, responsible for 
