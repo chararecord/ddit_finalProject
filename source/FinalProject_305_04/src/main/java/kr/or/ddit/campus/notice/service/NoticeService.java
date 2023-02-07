@@ -21,7 +21,7 @@ public interface NoticeService {
 	 * @param notiId
 	 * @return
 	 */
-	public NoticeVO retrieveNotice(int notiId);
+	public NoticeVO retrieveNotice(String notiId);
 	/**
 	 * 게시글 수정
 	 * @param notice
@@ -33,5 +33,5 @@ public interface NoticeService {
 	 * @param notiId
 	 * @return
 	 */
-	public int removeNotice(int notiId);
+	public int removeNotice(String notiId);
 }

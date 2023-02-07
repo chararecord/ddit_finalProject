@@ -25,10 +25,18 @@
 	<!-- end cont-title -->
 
 	<div class="white-box">
-
+		<div class="tob-box">
+			<strong class="tit">게시판 안내 사항 </strong>
+			<p>게시판에 작성되는 본문 내용 및 첨부파일 내에 성명, 주민등록번호, 핸드폰 번호, 이메일 등 2개 이상의 개인정보 작성 시
+			개인정보보호법 제2조제1호에 의거 개인정보에 해당되어 작성 및 등록을 제한하고 관리자에 의해 삭제 처리될 수 있습니다. 게시판 사용에 유의하시기 바랍니다.</p>
+			<br>
+			<p>※ 개인정보를 위조 또는 도용, 외부에 유출한 자는 관련법에 의거 법적 처벌을 받을 수 있으며,
+			게시글에 포함된 개인정보 또한 책임은 게시자에게 있으며 정보 노출을 원하지 않으실 경우에는 수정 및 삭제하시기 바랍니다.</p>
+			<strong class="red-txt">(개인정보보호법 제71조에 의거 개인정보를 유출한 자는 5년 이하의 징역 또는 5천만원 이하의 벌금이 부과될 수 있습니다.)</strong>
+		</div>
 
 		<!-- cont-box-inner -->
-		<form:form modelAttribute="notice" enctype="multipart/form-data" method="post">
+		<form:form id="notiForm" modelAttribute="notice" enctype="multipart/form-data" method="post">
 		<div class="cont-box-inner">
 			<div class="tbl-wrap">
 				<table class="tbl">
@@ -53,7 +61,7 @@
 						<tr>
 							<th scope="row">내용</th>
 							<td>
-								<form:textarea path="cont" type="text" cssClass="col display-tblCell" />
+								<form:textarea id="cont" path="cont" type="text" cssClass="col display-tblCell" />
 							</td>
 						</tr>
 						<tr>
@@ -66,7 +74,7 @@
 				</table>
 				<div class="title">
 					<div class="box-btn">
-						<form:button type="submit" class="btn purple">등록</form:button>
+						<form:button id="regBtn" type="submit" class="btn purple">등록</form:button>
 					</div>
 				</div>
 			</div>
@@ -76,16 +84,38 @@
 	</div>
 </div>
 <script>
-let tit = $("input[name='tit']");
-let empId = $("input[name='empId']");
-let cont = $("input[name='cont']");
-console.log("tit >>>>>>>>>>>> ", tit);
-console.log("empId >>>>>>>>>>>> ", empId);
-console.log("cont >>>>>>>>>>>> ", cont);
-  $(function(){
-    $('.datepicker').datepicker();
-  })
-  	CKEDITOR.replace('cont', {
-		filebrowserUploadUrl: '${pageContext.request.contextPath}/board/boardImage.do?command=QuickUpload&type=Files&responseType=json'
-	});
+CKEDITOR.replace('cont', {
+	filebrowserUploadUrl: '${pageContext.request.contextPath}/board/boardImage.do?command=QuickUpload&type=Files&responseType=json'
+});
+// $(notiForm).on("submit", function(event){
+// 	event.preventDefault();
+// 	CKupdate();
+// 	let data = $("#notiForm").serialize();
+// 	console.log(data);
+	
+	
+// 	$.ajax({
+// 		enctype : enctype,
+// 		url : url,
+// 		method : method,
+// 		data : data,
+// 		dataType : "json",
+// 		success : function(resp) {
+// 			alert("게시글이 등록되었습니다.");
+// 			location.href='${pageContext.request.contextPath}/campus/notice';
+// 		},
+// 		error : function(jqXHR, status, error) {
+// 			console.log(jqXHR);
+// 			console.log(status);
+// 			console.log(error);
+// 		}
+// 	});
+// 	return false;
+// });
+
+// function CKupdate(){
+// 	CKEDITOR.instances.cont.updateElement();
+// }
+
+
 </script>

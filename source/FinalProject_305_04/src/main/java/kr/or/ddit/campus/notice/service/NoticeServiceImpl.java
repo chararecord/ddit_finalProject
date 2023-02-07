@@ -68,19 +68,25 @@ public class NoticeServiceImpl implements NoticeService {
 	}
 
 	@Override
-	public NoticeVO retrieveNotice(int notiId) {
-		// TODO Auto-generated method stub
-		return null;
+	public NoticeVO retrieveNotice(String notiId) {
+		NoticeVO notice = noticeDAO.selectNotice(notiId);
+		if(notice==null) {
+			throw new RuntimeException();
+		}
+		noticeDAO.incrementHit(notiId);
+		return notice;
 	}
 
 	@Override
 	public int modifyNotice(NoticeVO notice) {
-		// TODO Auto-generated method stub
-		return 0;
+		NoticeVO savedNotice = noticeDAO.selectNotice(notice.getNotiId());
+		int rowcnt = noticeDAO.updateNotice(notice);
+		rowcnt += processAttaFilelist(notice);
+		return rowcnt;
 	}
 
 	@Override
-	public int removeNotice(int notiId) {
+	public int removeNotice(String notiId) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

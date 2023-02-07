@@ -23,29 +23,36 @@
 	<!-- end cont-title -->
 
 	<div class="white-box">
+		<div class="tob-box">
+			<strong class="tit">게시판 안내 사항 </strong>
+			<p>게시판에 작성되는 본문 내용 및 첨부파일 내에 성명, 주민등록번호, 핸드폰 번호, 이메일 등 2개 이상의 개인정보 작성 시
+			개인정보보호법 제2조제1호에 의거 개인정보에 해당되어 작성 및 등록을 제한하고 관리자에 의해 삭제 처리될 수 있습니다. 게시판 사용에 유의하시기 바랍니다.</p>
+			<br>
+			<p>※ 개인정보를 위조 또는 도용, 외부에 유출한 자는 관련법에 의거 법적 처벌을 받을 수 있으며,
+			게시글에 포함된 개인정보 또한 책임은 게시자에게 있으며 정보 노출을 원하지 않으실 경우에는 수정 및 삭제하시기 바랍니다.</p>
+			<strong class="red-txt">(개인정보보호법 제71조에 의거 개인정보를 유출한 자는 5년 이하의 징역 또는 5천만원 이하의 벌금이 부과될 수 있습니다.)</strong>
+		</div>
 
 		<!-- cont-box-inner -->
-		
-		
-		
 		<div class="cont-box-inner">
 			<div class="title">
-				<p class="highlight-txt">총<em class="red-txt">26</em>건의 게시물이 있습니다</p>
+				<p class="highlight-txt">총<em class="red-txt">${pagingVO.totalRecord }</em>건의 게시물이 있습니다</p>
 				<div class="right-part">
 					<div class="search-form">
-						<select>
-							<option>전체</option>
-							<option>전체</option>
-							<option>전체</option>
-						</select>
-						<div class="input-group">
-							<label for="searchTxt" class="sr-only">검색어를 입력하세요</label>
-							<input type="text" class="form-control text input with dropdown button" id="searchTxt" name="searchTxt" value="" placeholder="검색어를 입력하세요.">
-							<button class="btn btn-search primary" type="button">검색</button>
-						</div>
-					</div>
-					<div class="box-btn">
-						<button type="button" class="insertBtn btn purple">등록</button>
+						<form:form id="searchUI" modelAttribute="simpleCondition" onsubmit="return false;">
+							<form:select path="searchType">
+								<option value>전체</option>
+								<form:option value="tit" label="제목" />
+								<form:option value="cont" label="내용" />
+							</form:select>
+							<div class="input-group">
+								<form:input path="searchWord"/>
+								<input id="searchBtn" class="btn btn-search primary" type="button" value="검색" />
+							</div>
+							<div class="box-btn">
+								<button type="button" class="insertBtn btn purple">등록</button>
+							</div>
+						</form:form>
 					</div>
 				</div>
 			</div>
@@ -69,7 +76,7 @@
 							<th scope="col" class="w5">조회수</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody id="listBody">
 						<tr>
 							<c:set var="noticeList" value="${pagingVO.dataList }" />
 							<c:choose>
@@ -79,12 +86,22 @@
 											<td>
 												<!-- 체크박스 -->
 												<div class="rc-wrap">
-													<input type="checkbox" id="checkbox5" name="radio-group">
+													<input type="checkbox" id="checkbox5" name="notiCheck" value="${notice.notiId }">
 													<label for="checkbox5"><span class="sr-only">선택</span></label>
 												</div>
 											</td>
 											<td>${notice.rnum }</td>
-											<td style="text-align: left">${notice.tit }</td>
+											<td style="text-align: left">
+<%-- 												<c:url value="/campus/notice/" var="viewURL" > --%>
+<%-- 													<c:param name="id" value="${notice.notiId }" /> --%>
+<%-- 												</c:url> --%>
+												<a href="${pageContext.request.contextPath }/campus/notice/${notice.notiId }">
+													${notice.tit }
+													<c:if test="${notice.attaCount ge 1}">
+														<span class="material-symbols-outlined" style="font-size: 15px">attach_file</span>
+													</c:if>
+												</a>
+											</td>
 											<td>${notice.empId }</td>
 											<td>${notice.wrDate }</td>
 											<td>${notice.hit }</td>
@@ -102,22 +119,10 @@
 			<!--tbl end-->
 
 			<!-- 페이지 네비게이션 -->
-			<div class="pagination_block">
+			<div id="pagingArea" class="pagination_block">
 				<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
 			</div>
 			<!-- //페이지 네비게이션 -->
-			<div>
-				<form:form id="searchUI" modelAttribute="simpleCondition" onclick="return false;">
-					<form:select path="searchType">
-						<option value>전체</option>
-						<form:option value="writer" label="작성자" />
-						<form:option value="content" label="내용" />
-					</form:select>
-					<form:input path="searchWord"/>
-					<input id="searchBtn" type="button" value="검색" />
-				</form:form>
-			</div>
-
 		</div>
 		<!-- end cont-box-inner -->
 	</div>
@@ -135,6 +140,7 @@ let searchUI = $("#searchUI").on('click', "#searchBtn", function(){
 	$.each(inputs, function(index, input){
 		let name = this.name;
 		let value = $(this).val();
+		console.log(name, value);
 		searchForm.find("[name="+name+"]").val(value);
 	});
 	searchForm.submit();
@@ -150,16 +156,10 @@ $("a.paging").on('click', function(event){
 	return false;
 });
 
-function f_insertBtn(){
-	
-}
 $(".insertBtn").on('click', function(event){
-// 	event.preventDefault();
-	let url = "${pageContext.request.contextPath}/campus/notice/insert";
+	event.preventDefault();
+	let url = "${pageContext.request.contextPath}/campus/notice/form";
 	location.href = url;
-	console.log("등록버튼클릭!");
-// 	return false;
 });
-
 </script>
 

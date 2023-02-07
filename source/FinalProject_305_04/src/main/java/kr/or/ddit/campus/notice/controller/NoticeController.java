@@ -5,13 +5,15 @@ import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.or.ddit.campus.notice.service.NoticeService;
 import kr.or.ddit.validate.InsertGroup;
+import kr.or.ddit.validate.UpdateGroup;
 import kr.or.ddit.vo.NoticeVO;
 import kr.or.ddit.vo.PagingVO;
 import kr.or.ddit.vo.SearchVO;
@@ -33,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/campus/notice/**")
+@RequestMapping("/campus/notice")
 @Controller
 public class NoticeController {
 	
@@ -72,10 +74,26 @@ public class NoticeController {
 	}
 	
 	/**
+	 * 게시글 조회 메소드
+	 * @param notiId
+	 * @param model
+	 * @return
+	 */
+	@GetMapping("/{notiId}")
+	public String noticeView(
+			@PathVariable String notiId
+			, Model model) {
+		NoticeVO notice = service.retrieveNotice(notiId);
+		model.addAttribute("notice", notice);
+		return "campus/notice/noticeView";
+	}
+	
+	
+	/**
 	 * notice 게시글 등록 폼
 	 * @return /jsp/campus/notice/noticeForm.jsp
 	 */
-	@GetMapping("/insert")
+	@GetMapping("/form")
 	public String noticeForm() {
 		return "campus/notice/noticeForm";
 	}
@@ -84,22 +102,62 @@ public class NoticeController {
 	 * notice 게시글 등록 메소드 (insert)
 	 * @param notice
 	 * @param model
-	 * @return
+	 * @return /jsp/campus/notice/noticeForm.jsp
 	 */
-	@PostMapping("/insert")
+	@PostMapping("/form")
 	public String noticeInsert(
 			@Validated(InsertGroup.class) @ModelAttribute("notice") NoticeVO notice
-			, Model model) {
+			, Model model ) {
 		
 		String viewName = null;
 		log.info("notice>>>>>>>>{}", notice);
 		int rowcnt = service.createNotice(notice);
 		if(rowcnt > 0) {
-			viewName = "redirect:/campus/notice";
-////		} else {
-////			model.addAttribute("message", "서버 오류");
-////			viewName = "campus/notice/noticeForm";
+			viewName = "redirect:/campus/notice/" + notice.getNotiId();
+		} else {
+			model.addAttribute("message", "서버 오류");
+			viewName = "campus/notice/noticeForm";
 		}
 		return viewName;
+	}
+	
+	/**
+	 * notice 게시글 수정 폼
+	 * @return /jsp/campus/notice/noticeEdit.jsp
+	 */
+	@GetMapping("/form/{notiId}")
+	public String noticeEditForm(
+			@PathVariable String notiId
+			, Model model
+			) {
+		log.info("notiId>>>>>{}", notiId);
+		NoticeVO notice = service.retrieveNotice(notiId);
+		log.info("notice>>>>>{}", notice);
+		model.addAttribute("notice", notice);
+		return "campus/notice/noticeEdit";
+	}
+	
+	/**
+	 * notice 게시글 수정
+	 * @return /jsp/campus/notice/noticeView.jsp
+	 */
+	@PostMapping("/form/{notiId}")
+	public String noticeEdit(
+			@Validated(UpdateGroup.class) @ModelAttribute("notice") NoticeVO notice
+			, @PathVariable String notiId
+			, Model model ) {
+		String viewName = null;
+		int rowcnt = service.modifyNotice(notice);
+		if(rowcnt > 0) {
+			viewName = "capmus/notice/" + notiId;
+		} else {
+			model.addAttribute("message", "서버 오류");
+			viewName = "campus/noticeForm";
+		}
+		return viewName;
+	}
+	
+	public String noticeDelete() {
+		return null;
 	}
 }

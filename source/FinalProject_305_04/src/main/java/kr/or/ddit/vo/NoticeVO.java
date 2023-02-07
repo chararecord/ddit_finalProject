@@ -41,12 +41,11 @@ public class NoticeVO extends CommonAttaFileVO implements Serializable {
 	private String cont;
 	private String wrDate;
 	private Integer hit;
+	
+	private List<AttaFileVO> attaFileList;
+	
 	@Override
 	public String getAttaId() {
 		return notiId;
 	}
-	
-	// 첨부파일
-	
-	
 }

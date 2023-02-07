@@ -21,7 +21,7 @@ public interface NoticeDAO {
 	 * 조회수 증가
 	 * @param notiId
 	 */
-	public void incrementHit(int notiId);
+	public void incrementHit(String notiId);
 	
 	/**
 	 * 게시글 목록 조회
@@ -29,7 +29,7 @@ public interface NoticeDAO {
 	 * @return
 	 */
 	public List<NoticeVO> selectNoticeList(PagingVO<NoticeVO> pagingVO);
-	public NoticeVO selectNotice(int notiId);
+	public NoticeVO selectNotice(String notiId);
 	/**
 	 * 게시글 등록
 	 * @param notice
@@ -37,5 +37,5 @@ public interface NoticeDAO {
 	 */
 	public int insertNotice(NoticeVO notice);
 	public int updateNotice(NoticeVO notice);
-	public int deleteNotice(int notiId);
+	public int deleteNotice(String notiId);
 }
