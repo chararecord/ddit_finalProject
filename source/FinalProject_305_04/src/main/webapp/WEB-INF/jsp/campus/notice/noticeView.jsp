@@ -80,7 +80,11 @@
 					<div class="box-btn">
 						<button type="button" class="btn default" onclick="f_movelist()">목록</button>
 						<button type="button" class="btn purple" onclick="f_moveedit()">수정</button>
-						<button type="button" class="btn purple" onclick="f_movedelete">삭제</button>
+						<form:form id="delForm" action="${pageContext.request.contextPath }/campus/notice/${notice.notiId}" method="post">
+							<input type="hidden" name="_method" value="delete" />
+<!-- 							<a onclick="if (confirm('정말로 삭제하시겠습니까?')) document.getElementById('delForm').submit();" class="btn purple">삭제</a> -->
+							<button type="button" class="btn purple" onclick="f_movedelete()">삭제</button>
+						</form:form>
 					</div>
 				</div>
 			</div>
@@ -120,8 +124,9 @@ function f_moveedit() {
 	location.href = url;
 }
 function f_movedelete() {
-	let url = "${pageContext.request.contextPath}/campus/notice/${notice.notiId}";
-	location.href = url;
+	if(confirm("정말로 삭제하시겠습니까?")){
+		document.getElementById('delForm').submit();
+	}
 }
 
 </script>

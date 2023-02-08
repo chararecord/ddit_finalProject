@@ -32,5 +32,6 @@ public class ProfessorVO {
 	private String pos;
 	
 	private UsrVO usrList;
+	private MajorVO majorList;
 	private List<RecordVO> recordList;
 }

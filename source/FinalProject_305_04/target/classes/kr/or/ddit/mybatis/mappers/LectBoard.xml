@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.lectBoard.dao.LectureBoardDAO">
+
+	<resultMap type="LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lectId" column="LECT_ID" />
+		<association property="profId" javaType="ProfessorVO" autoMapping="true">
+			<association property="usrList" javaType="UsrVO" autoMapping="true" />
+			<association property="majorList" javaType="MajorVO" autoMapping="true" >
+				<association property="collList" javaType="CollVO" autoMapping="true" />
+			</association>
+		</association>
+		<association property="semesterList" javaType="SemesterVO" />
+	</resultMap>
+	<!-- 강의 정보 조회 -->
+	<select id="selectLectInfo" parameterType="String" resultMap="lectureMap">
+		SELECT A.USER_NM AS 이름
+	    	, A.USER_PHONE AS 연락처
+	        , A.USER_EMAIL AS 이메일
+	        , C.MAJOR_NM AS 학과명
+	        , D.COLL_NM AS 단과명
+	        , E.SUBJECT_NM AS 과목명
+	        , E.ESTA_SUB AS 이수구분
+	        , F.SEME_YEAR AS 학사연도
+	        , F.SEME AS 학기
+	        , I.LECT_ID AS 강의코드
+	        , I.LECT_NM AS 강의명
+	        , I.CAM_YEAR AS 대상학년
+	        , I.CREDIT AS 학점
+	        , I.NOTE AS 비고
+		FROM USR A INNER JOIN PROFESSOR B ON A.USER_ID = B.PROF_ID
+		            INNER JOIN MAJOR C ON B.MAJOR_ID = C.MAJOR_ID
+		            INNER JOIN COLL D ON C.COLL_ID = D.COLL_ID
+		            INNER JOIN SUB_MAJOR E ON C.MAJOR_ID = E.MAJOR_ID
+		            INNER JOIN SEMESTER F ON E.SEME_ID = F.SEME_ID
+		            INNER JOIN SYLLABUS G ON B.PROF_ID = G.PROF_ID
+		            INNER JOIN SYLLA_APPR H ON G.SYLLA_ID = H.SYLLA_ID
+		            INNER JOIN LECTURE I ON H.SYLLA_APPR_ID = I.SYLLA_APPR_ID
+		WHERE I.LECT_ID = 'DI10001'
+	</select>
+</mapper>

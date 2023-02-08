@@ -18,6 +18,7 @@ import lombok.ToString;
  *   수정일                    수정자                        수정내용
  * --------          --------    -----------------------
  * 2023. 2. 6.      이현주        		생성
+ * 2023. 2. 7. 		이현주			profId 추가
  *
  * Copyright (c) 2023 by DDIT All right reserved
  * </pre>
@@ -44,23 +45,29 @@ public class LectureVO extends CommonAttaFileVO implements Serializable {
 	private String note; // 비고
 	private String onfLine; // 대면여부(공통코드)
 	
-	private StudentVO stdId; // 학생 아이디
+	private String userNm; // 이름
+	private StudentVO student; // 학생 아이디
+	private ProfessorVO profId; // 교수 아이디
+	
+	
+	private String buildNm; // 건물명
+	private String roomNum; // 강의실 번호
 	
 	private String estaSub; // 이수구분
 	
 	private String semeYear; // 학사연도
 	private String seme; // 학기
 	
+	private String collNm; // 단과대학명
 	private String majorNm; // 학과명
 	
-	private String userNm; // 이름
 	
 	private String commDesc; //공통코드설명
+	
+	private SemesterVO semesterList;
 	
 	@Override
 	public String getAttaId() { // 첨부파일 쓸 때
 		return lectId;
 	}
-	
-	
 }
