@@ -36,6 +36,16 @@ public interface NoticeDAO {
 	 * @return
 	 */
 	public int insertNotice(NoticeVO notice);
+	/**
+	 * 게시글 수정
+	 * @param notice
+	 * @return
+	 */
 	public int updateNotice(NoticeVO notice);
+	/**
+	 * 게시글 삭제
+	 * @param notiId
+	 * @return
+	 */
 	public int deleteNotice(String notiId);
 }

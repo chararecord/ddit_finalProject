@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
 
@@ -71,6 +72,7 @@
 							<th scope="col" class="w5">선택</th>			<!-- 얘는 emp만 보이게 할 예정이에요(삭제할때사용) -->
 							<th scope="col" class="w5">글번호</th>
 							<th scope="col" class="w50">제목</th>
+							<th scope="col" class="w5">첨부파일</th>
 							<th scope="col">작성자</th>
 							<th scope="col">등록일</th>
 							<th scope="col" class="w5">조회수</th>
@@ -97,12 +99,19 @@
 <%-- 												</c:url> --%>
 												<a href="${pageContext.request.contextPath }/campus/notice/${notice.notiId }">
 													${notice.tit }
-													<c:if test="${notice.attaCount ge 1}">
-														<span class="material-symbols-outlined" style="font-size: 15px">attach_file</span>
-													</c:if>
 												</a>
 											</td>
-											<td>${notice.empId }</td>
+											<td>
+												<c:if test="${notice.attaCount ge 1}">
+													<span class="material-symbols-outlined" style="font-size: 15px">attach_file</span>
+												</c:if>
+											</td>
+											<td>
+												<c:set value="${notice.empId }" var="emp" />
+<%-- 												<c:if test="${fn:startWith(emp, '1')}"> --%>
+													관리자
+												</c:if>
+											</td>
 											<td>${notice.wrDate }</td>
 											<td>${notice.hit }</td>
 										</tr>
@@ -119,7 +128,7 @@
 			<!--tbl end-->
 
 			<!-- 페이지 네비게이션 -->
-			<div id="pagingArea" class="pagination_block">
+			<div id="pagingArea">
 				<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
 			</div>
 			<!-- //페이지 네비게이션 -->
@@ -150,9 +159,9 @@ $("a.paging").on('click', function(event){
 	event.preventDefault();
 	let page = $(this).data("page");
 	console.log(page);
-	if(!page){return false;}
-	searchForm.find("[name=page]").val(page);
-	searchForm.submit();
+// 	if(!page){return false;}
+// 	searchForm.find("[name=page]").val(page);
+// 	searchForm.submit();
 	return false;
 });
 

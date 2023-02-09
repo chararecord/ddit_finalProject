@@ -48,16 +48,61 @@
 	FROM SEMESTER
 	ORDER BY 2
 </select>
+
+<!-- <select id="selectSemeList" parameterType="kr.or.ddit.vo.SemesterVO" resultType="kr.or.ddit.vo.SemesterVO"> -->
+<!-- 	SELECT SEME_ID,  -->
+<!-- 	   	   SEME_YEAR,  -->
+<!-- 	   	   SEME -->
+<!-- 	FROM SEMESTER -->
+<!-- 	WHERE SEME_YEAR = #{semeYear} -->
+<!-- 	ORDER BY 3 -->
+<!-- </select> -->
+
 <!-- 건물목록 가져오기 -->
 <select id="selectBuildingList" resultType="kr.or.ddit.vo.BuildingVO">
-SELECT BUILD_ID, BUILD_NM, BUILD_COMM
-FROM BUILDING
+	SELECT BUILD_ID, BUILD_NM, BUILD_COMM
+	FROM BUILDING
 </select>
 
 <!-- 건물목록 중 한 건물을 선택하면 강의실 목록 가져오기 -->
 <select id="selectLectRoomList" parameterType="kr.or.ddit.vo.BuildingVO" resultType="kr.or.ddit.vo.LectRoomVO">
-SELECT LECT_ROOM_ID, BUILD_ID, ROOM_NUM, NUM_PPL
-FROM LECT_ROOM
-WHERE BUILD_ID = #{buildId}
+	SELECT LECT_ROOM_ID, BUILD_ID, ROOM_NUM, NUM_PPL
+	FROM LECT_ROOM
+	WHERE BUILD_ID = #{buildId}
 </select>
+
+<insert id="insertLectSyllabus" parameterType="kr.or.ddit.vo.SyllabusVO">
+	INSERT INTO SYLLABUS (
+	    SYLLA_ID,
+	    SEME_ID,
+	    PROF_ID,
+	    LECT_ROOM_ID,
+	    MAJOR_ID,
+	    LECT_NM,
+	    CAM_YEAR,
+	    LECT_HOUR,
+	    HOPE_TIME,
+	    HOPE_MAX,
+	    TEXTBOOK,
+	    LECT_COM,
+	    NOTE,
+	    SYLLA_MEET
+	) VALUES (
+    (SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLABUS),
+	    #{semeId},
+	    3120001,
+	    #{lectRoomId},
+	    #{majorId},
+	    #{lectNm},
+	    #{camYear},
+	    #{lectHour},
+	    #{hopeTime},
+	    #{hopeMax},
+	    #{textbook},
+	    #{lectCom},
+	    #{note},
+	    #{syllaMeet}
+	)
+</insert>
+
 </mapper>

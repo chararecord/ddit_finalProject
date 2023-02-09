@@ -25,48 +25,97 @@
 	<!-- end cont-title -->
 
 	<div class="white-box">
-		<div class="tab-wrap">
-			<!-- tablist  -->
-			<ul class="tab tab-1dep" role="tablist">
-				<li class="on"><a class="active tab1" href="${pageContext.request.contextPath }/prof/lectBoard" id="">강의게시판</a></li>
-				<li><a class="nav-link" href="${pageContext.request.contextPath }/prof/lectBoard/ref">자료실</a></li>
-			</ul>
-			<!--  // tablist  -->
-		</div>
-		<div class="tob-box">
-			console.log("${lect }");
-			<strong class="tit">게시판 안내 사항 </strong>
-			<p>게시판에 작성되는 본문 내용 및 첨부파일 내에 성명, 주민등록번호, 핸드폰 번호, 이메일 등 2개 이상의 개인정보 작성 시
-			개인정보보호법 제2조제1호에 의거 개인정보에 해당되어 작성 및 등록을 제한하고 관리자에 의해 삭제 처리될 수 있습니다. 게시판 사용에 유의하시기 바랍니다.</p>
-			<br>
-			<p>※ 개인정보를 위조 또는 도용, 외부에 유출한 자는 관련법에 의거 법적 처벌을 받을 수 있으며,
-			게시글에 포함된 개인정보 또한 책임은 게시자에게 있으며 정보 노출을 원하지 않으실 경우에는 수정 및 삭제하시기 바랍니다.</p>
-			<strong class="red-txt">(개인정보보호법 제71조에 의거 개인정보를 유출한 자는 5년 이하의 징역 또는 5천만원 이하의 벌금이 부과될 수 있습니다.)</strong>
-		</div>
 
 		<!-- cont-box-inner -->
 		<div class="cont-box-inner">
+			<div class="cont-box-inner">
+				<div class="title">
+					<h3>강의정보</h3>
+				</div>
+
+				<div class="tbl-wrap">
+				<c:set value="${lectInfo}" var="lect" />
+					<table class="tbl">
+						<caption>ㅎㅇㄴㅁㅎㄴㅇㅎㄴㅇㅎㄴㅇㅎ</caption>
+						<colgroup>
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+						</colgroup>
+						<tbody class="center">
+							<tr>
+								<th scope="row">학사연도</th>
+								<td>
+									${lect.semeYear }년
+								</td>
+								<th scope="row">학기</th>
+								<td>
+									${lect.seme }학기
+								</td>
+								<th scope="row">학년</th>
+								<td>
+									${lect.camYear }학년
+								</td>
+								<th scope="row">학점</th>
+								<td>
+									${lect.credit }학점
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">이수구분</th>
+								<td>
+									${lect.estaSub }
+								</td>
+								<th scope="row">학과과목</th>
+								<td>
+									${lect.subMajorVO.subjectNm }
+								</td>
+								<th scope="row">강의명</th>
+								<td>
+									${lect.lectNm }
+								</td>
+								<th scope="row">교수명</th>
+								<td>
+									${lect.userNm }
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<br />
+			<br />
+			<br />
 			<div class="title">
 				<div>
-					<h3>강의게시판</h3>
-					<p class="highlight red-txt"> 총 <em class="red-txt"></em>건의 게시물이 있습니다.</p>
+					<h3>공지사항</h3>
+					<p class="highlight red-txt"> 총 <em class="red-txt">${pagingVO.totalRecord }</em>건의 게시물이 있습니다.</p>
 					</div>
 				<div class="right-part">
 					<div class="search-form">
-					<!-- search 검색창 자리 -->
+						<form:form id="searchUI" modelAttribute="simpleCondition" onsubmit="return false;">
+							<form:select path="searchType">
+								<option value>전체</option>
+								<form:option value="tit" label="제목" />
+								<form:option value="cont" label="내용" />
+							</form:select>
+							<div class="input-group">
+								<form:input path="searchWord"/>
+								<input id="searchBtn" class="btn btn-search primary" type="button" value="검색" />
+							</div>
+							<div class="box-btn">
+								<button type="button" class="insertBtn btn purple">등록</button>
+							</div>
+						</form:form>
 					</div>
-				</div>
-				<div class="box-btn">
-					<button type="button" class="btn default">삭제</button>
-					<button type="button" class="btn default">수정</button>
-					<button type="button" class="btn purple">등록</button>
 				</div>
 			</div>
 			<!--tbl start-->
 			
 			<div class="tbl-wrap">
 				<table class="tbl center">
-					<caption>공지사항 페이지 목록 테이블</caption>
+					<caption>강의게시판 테이블</caption>
 					<colgroup>
 						<col style="width: 10%" />
 <%-- 						<col style="width: 20%" /> --%>
@@ -75,10 +124,50 @@
 					</colgroup>
 					<thead>
 						<tr>
+							<th scope="col" class="w5">선택</th>
+							<th scope="col" class="w5">글번호</th>
+							<th scope="col" class="w50">제목</th>
+							<th scope="col">작성자</th>
+							<th scope="col">등록일</th>
+							<th scope="col" class="w5">조회수</th>
 						</tr>
 					</thead>
 					<tbody id="listBody">
 						<tr>
+							<c:set var="lectNotiList" value="${pagingVO.dataList }" />
+							<c:choose>
+								<c:when test="${not empty lectNotiList }">
+									<c:forEach items="${lectNotiList }" var="lectNoti">
+										<tr>
+											<td>
+												<!-- 체크박스 -->
+												<div class="rc-wrap">
+													<input type="checkbox" id="checkbox5" name="notiCheck" value="${lectNoti.lectNotiId }">
+													<label for="checkbox5"><span class="sr-only">선택</span></label>
+												</div>
+											</td>
+											<td>${lectNoti.rnum }</td>
+											<td style="text-align: left">
+<%-- 												<c:url value="/campus/notice/" var="viewURL" > --%>
+<%-- 													<c:param name="id" value="${notice.notiId }" /> --%>
+<%-- 												</c:url> --%>
+												<a href="#">
+													${lectNoti.tit }
+													<c:if test="${lectNoti.attaCount ge 1}">
+														<span class="material-symbols-outlined" style="font-size: 15px">attach_file</span>
+													</c:if>
+												</a>
+											</td>
+											<td>${lectNoti.lectId }</td>
+											<td>${lectNoti.wrDate }</td>
+											<td>${lectNoti.hit }</td>
+										</tr>
+									</c:forEach>
+								</c:when>
+								<c:otherwise>
+									<td colspan="5">조건에 맞는 게시글이 없습니다.</td>
+								</c:otherwise>
+							</c:choose>
 						</tr>
 					</tbody>
 				</table>
@@ -87,10 +176,13 @@
 
 			<!-- 페이지 네비게이션 -->
 			<div id="pagingArea" class="pagination_block">
+				<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
 			</div>
 			<!-- //페이지 네비게이션 -->
 		</div>
 		<!-- end cont-box-inner -->
 	</div>
 </div>
+<script>
+</script>
 

@@ -39,7 +39,6 @@ public class NoticeServiceImpl implements NoticeService {
 	public int createNotice(NoticeVO notice) {
 		log.info("insert notice >>>>> {}", notice);
 		log.info("getAttaFileList >>>> {}",notice.getAttaFileList());
-		log.info("getFiles >>>> {}",notice.getFiles());
 		int rowcnt = noticeDAO.insertNotice(notice);
 		rowcnt += processAttaFilelist(notice);
 		return rowcnt;
@@ -81,13 +80,10 @@ public class NoticeServiceImpl implements NoticeService {
 
 	@Override
 	public int modifyNotice(NoticeVO notice) {
-		NoticeVO savedNotice = noticeDAO.selectNotice(notice.getNotiId());
+//		NoticeVO savedNotice = noticeDAO.selectNotice(notice.getNotiId());
 		log.info("getAttaFileList >>>> {}",notice.getAttaFileList());
-		log.info("getFiles >>>> {}",notice.getFiles());
 		int rowcnt = noticeDAO.updateNotice(notice);
-		log.info("rowcnt11111 >>>> {}",rowcnt);
 		rowcnt += processAttaFilelist(notice);
-		log.info("rowcnt222222 >>>> {}",rowcnt);
 		return rowcnt;
 	}
 

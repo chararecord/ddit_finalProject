@@ -31,10 +31,10 @@ public abstract class CommonAttaFileVO {
 	private int attaCount;
 	private MultipartFile[] files;
 	private int startAttaId;
-	public void setNotiFiles(MultipartFile[] notiFiles) {
-		if(notiFiles!=null && notiFiles.length > 0) {
+	public void setFiles(MultipartFile[] files) {
+		if(files!=null && files.length > 0) {
 			this.files = files;
-			this.attaFileList = Arrays.stream(notiFiles)
+			this.attaFileList = Arrays.stream(files)
 										.filter((f)->!f.isEmpty())
 										.map((f)->{
 											return new AttaFileVO(f);

@@ -4,30 +4,27 @@
 
 	<resultMap type="LectureVO" id="lectureMap" autoMapping="true">
 		<id property="lectId" column="LECT_ID" />
-		<association property="profId" javaType="ProfessorVO" autoMapping="true">
-			<association property="usrList" javaType="UsrVO" autoMapping="true" />
-			<association property="majorList" javaType="MajorVO" autoMapping="true" >
-				<association property="collList" javaType="CollVO" autoMapping="true" />
-			</association>
-		</association>
-		<association property="semesterList" javaType="SemesterVO" />
+		<association property="usrVO" javaType="UsrVO" autoMapping="true" />
+		<association property="subMajorVO" javaType="SubMajorVO" autoMapping="true" />
 	</resultMap>
 	<!-- 강의 정보 조회 -->
-	<select id="selectLectInfo" parameterType="String" resultMap="lectureMap">
-		SELECT A.USER_NM AS 이름
-	    	, A.USER_PHONE AS 연락처
-	        , A.USER_EMAIL AS 이메일
-	        , C.MAJOR_NM AS 학과명
-	        , D.COLL_NM AS 단과명
-	        , E.SUBJECT_NM AS 과목명
-	        , E.ESTA_SUB AS 이수구분
-	        , F.SEME_YEAR AS 학사연도
-	        , F.SEME AS 학기
-	        , I.LECT_ID AS 강의코드
-	        , I.LECT_NM AS 강의명
-	        , I.CAM_YEAR AS 대상학년
-	        , I.CREDIT AS 학점
-	        , I.NOTE AS 비고
+	<select id="selectLectInfo" parameterType="String" resultMap="lectureMap" >
+		SELECT A.USER_NM
+		    , A.USER_PHONE
+		    , A.USER_EMAIL
+		    , C.MAJOR_NM
+		    , D.COLL_NM
+		    , E.SUBJECT_NM
+		    , ( SELECT COMM_DESC
+		        FROM COMM
+		        WHERE COMM.COMM_ID = E.ESTA_SUB
+		        ) AS ESTA_SUB
+		    , F.SEME_YEAR
+		    , F.SEME
+		    , I.LECT_ID
+		    , I.LECT_NM
+		    , I.CAM_YEAR
+		    , I.CREDIT
 		FROM USR A INNER JOIN PROFESSOR B ON A.USER_ID = B.PROF_ID
 		            INNER JOIN MAJOR C ON B.MAJOR_ID = C.MAJOR_ID
 		            INNER JOIN COLL D ON C.COLL_ID = D.COLL_ID
@@ -36,6 +33,34 @@
 		            INNER JOIN SYLLABUS G ON B.PROF_ID = G.PROF_ID
 		            INNER JOIN SYLLA_APPR H ON G.SYLLA_ID = H.SYLLA_ID
 		            INNER JOIN LECTURE I ON H.SYLLA_APPR_ID = I.SYLLA_APPR_ID
-		WHERE I.LECT_ID = 'DI10001'
+		WHERE I.LECT_ID = #{lectId}
+	</select>
+	
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM LECT_NOTI
+	</select>
+	
+	<!-- 강의 게시판 게시글 조회 SELECT문 -->
+	<select id="selectLectNoticeList" parameterType="PagingVO" resultType="LectNotiVO">
+		WITH ORDEREDLECTNOTI AS (
+		    SELECT LECT_NOTI_ID, LECT_ID, TIT, CONT, WR_DATE, HIT
+		            , (
+		                SELECT COUNT(ATTA_SN)
+		                FROM ATTA_FILE
+		                WHERE ATTA_FILE.ATTA_ID = LECT_NOTI.LECT_NOTI_ID
+		            ) AS ATTA_COUNT
+		    FROM LECT_NOTI
+		    ORDER BY LECT_NOTI_ID 
+		)
+		SELECT  B.* FROM (
+		    SELECT ROWNUM RNUM2, A.*
+		    FROM (
+		            SELECT ROWNUM RNUM, ORDEREDLECTNOTI.*
+		            FROM ORDEREDLECTNOTI ORDER BY LECT_NOTI_ID DESC
+		    ) A
+		) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
 	</select>
 </mapper>
