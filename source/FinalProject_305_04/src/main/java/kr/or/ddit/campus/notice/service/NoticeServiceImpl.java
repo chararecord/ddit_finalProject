@@ -2,11 +2,14 @@ package kr.or.ddit.campus.notice.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -64,8 +67,10 @@ public class NoticeServiceImpl implements NoticeService {
 	
 	@Override
 	public void retrieveNoticeList(PagingVO<NoticeVO> pagingVO) {
-		pagingVO.setTotalRecord(noticeDAO.selectTotalRecord(pagingVO));
-		pagingVO.setDataList(noticeDAO.selectNoticeList(pagingVO));
+		int totalRecord = noticeDAO.selectTotalRecord(pagingVO);
+		pagingVO.setTotalRecord(totalRecord);
+		List<NoticeVO> noticeList = noticeDAO.selectNoticeList(pagingVO);
+		pagingVO.setDataList(noticeList);
 	}
 
 	@Override
@@ -86,6 +91,33 @@ public class NoticeServiceImpl implements NoticeService {
 		rowcnt += processAttaFilelist(notice);
 		return rowcnt;
 	}
+	
+	@Override
+	public int deleteAttaFileList(AttaFileVO attaFileVO) {
+		return this.attaFileDAO.deleteAttaFileList(attaFileVO);
+	}
+	
+//	@Override
+//	public int modifyNotice(NoticeVO notice) {
+//		NoticeVO savedNotice = noticeDAO.selectNotice(notice.getNotiId());
+//		log.info("getAttaFileList >>>> {}",notice.getAttaFileList());
+//		int rowcnt = noticeDAO.updateNotice(notice);
+//		rowcnt += processAttaFilelist(notice);
+//		String[] delAttaIds = notice.getDelAttaIds();
+//		Arrays.sort(delAttaIds);
+//		if(delAttaIds!=null && delAttaIds.length>0) {
+//			rowcnt += attaFileDAO.deleteAttaFile(notice);
+//			String[] delAttaSavenames = savedNotice.getAttaFileList().stream()
+//					.filter(attaFile->{
+//						return Arrays.binarySearch(delAttaIds, attaFile.getAttaId()) >= 0;
+//					}).map(AttaFileVO::getAttaSavenm)
+//					.toArray(String[]::new);
+//			for(String saveName : delAttaSavenames) {
+//				FileUtils.deleteQuietly(new File(saveFiles, saveName));
+//			}
+//		}
+//		return rowcnt;
+//	}
 
 	@Override
 	public int removeNotice(String notiId) {

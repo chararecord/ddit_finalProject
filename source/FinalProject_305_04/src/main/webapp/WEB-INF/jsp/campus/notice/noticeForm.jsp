@@ -67,7 +67,7 @@
 						<tr>
 							<th scope="row">첨부파일</th>
 							<td>
-								<input type="file" name="files" multiple="multiple" />
+								<input type="file" name="files" multiple="multiple" value="" />
 							</td>
 						</tr>
 					</tbody>
@@ -85,7 +85,7 @@
 </div>
 <script>
 CKEDITOR.replace('cont', {
-	filebrowserUploadUrl: '${pageContext.request.contextPath}/board/boardImage.do?command=QuickUpload&type=Files&responseType=json'
+	filebrowserUploadUrl: '${pageContext.request.contextPath}/imageUpload?command=QuickUpload&type=Files&responseType=json'
 });
 // $(notiForm).on("submit", function(event){
 // 	event.preventDefault();

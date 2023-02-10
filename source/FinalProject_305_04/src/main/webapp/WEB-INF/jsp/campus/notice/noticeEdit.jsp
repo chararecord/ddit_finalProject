@@ -38,6 +38,8 @@
 		<form:form id="updateForm" modelAttribute="notice" enctype="multipart/form-data" method="post">
 		<form:hidden path="notiId" />
 		<div class="cont-box-inner">
+		${notice }
+		${notice.attaFileList }
 			<div class="tbl-wrap">
 				<table class="tbl">
 					<caption></caption>
@@ -64,7 +66,20 @@
 								<form:textarea path="cont" type="text" cssClass="col display-tblCell" />
 							</td>
 						</tr>
-						<tr>
+						<c:if test="${not empty notice.attaFileList }">
+						<tr id="trOldFile">
+							<th>기존 파일</th>
+							<td>
+								<c:forEach items="${notice.attaFileList }" var="attaFile">
+									<span>
+										${attaFile.attaFilenm }
+										<input type="button" value="삭제" class="delBtn" data-atta-id=${attaFile.attaId} />
+									</span>
+								</c:forEach>
+							</td>		
+						</tr>					
+						</c:if>
+						<tr id="trNewFile">
 							<th scope="row">첨부파일</th>
 							<td>
 								<input type="file" name=files multiple="multiple" />
@@ -85,8 +100,32 @@
 </div>
 <script>
 CKEDITOR.replace('cont', {
-	filebrowserUploadUrl: '${pageContext.request.contextPath}/board/boardImage.do?command=QuickUpload&type=Files&responseType=json'
+	filebrowserUploadUrl: '${pageContext.request.contextPath}/imageUpload?command=QuickUpload&type=Files&responseType=json'
 });
 
 let updateForm = $("#updateForm");
+$(".delBtn").on("click", function(event){
+	let attaId = $(this).data("attaId");
+	
+	console.log("attaId : " + attaId);
+	
+	let data = {"attaId":attaId};
+	
+	
+	//아작났어유..피씨다타써
+	$.ajax({
+		url:"${pageContext.request.contextPath}/campus/notice/DeleteFile",
+		contentType:"application/json;charset=utf-8",
+		data:JSON.stringify(data),
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			console.log("result : " + JSON.stringify(result));
+			
+			if(result=="1"){
+				$("#trOldFile").css("display","none");
+			}
+		}
+	});
+});
 </script>

@@ -1,6 +1,13 @@
 package kr.or.ddit.campus.notice.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -9,15 +16,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import kr.or.ddit.campus.notice.service.NoticeService;
+import kr.or.ddit.ui.PaginationRenderer;
 import kr.or.ddit.validate.DeleteGroup;
 import kr.or.ddit.validate.InsertGroup;
 import kr.or.ddit.validate.UpdateGroup;
+import kr.or.ddit.vo.AttaFileVO;
 import kr.or.ddit.vo.NoticeVO;
 import kr.or.ddit.vo.PagingVO;
 import kr.or.ddit.vo.SearchVO;
@@ -38,12 +48,15 @@ import lombok.extern.slf4j.Slf4j;
  * </pre>
  */
 @Slf4j
-@RequiredArgsConstructor
-@RequestMapping("/campus/notice")
 @Controller
+@RequestMapping("/campus/notice")
 public class NoticeController {
 	
-	private final NoticeService service;
+	@Inject
+	private NoticeService service;
+	
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
 	
 	@Bean
 	public HiddenHttpMethodFilter hiddenHttpMethodFilter(){
@@ -67,7 +80,7 @@ public class NoticeController {
 	 * @return /jsp/campus/notice/notice.jsp
 	 */
 	@GetMapping
-	public String noticeList(
+	public String noticeListUI(
 			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
 			, @ModelAttribute("simpleCondition") SearchVO searchVO
 			, Model model ) {
@@ -80,6 +93,30 @@ public class NoticeController {
 		model.addAttribute("pagingVO", pagingVO);
 		
 		return "campus/notice/notice";
+	}
+	
+	/**
+	 * notice 게시판 글 목록 출력 메소드 (selectList)
+	 * @param currentPage
+	 * @param searchVO
+	 * @param model
+	 * @return
+	 */
+	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public String noticeListData(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model) {
+		
+		PagingVO<NoticeVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveNoticeList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		
+		return "jsonView";
 	}
 	
 	/**
@@ -97,6 +134,7 @@ public class NoticeController {
 		return "campus/notice/noticeView";
 	}
 	
+	//////////////////////////////////////////////////////////////////
 	
 	/**
 	 * notice 게시글 등록 폼
@@ -129,6 +167,8 @@ public class NoticeController {
 		}
 		return viewName;
 	}
+	
+	///////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * notice 게시글 수정 폼
@@ -167,6 +207,15 @@ public class NoticeController {
 		return viewName;
 	}
 	
+	////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * notice 게시글 삭제
+	 * @param id
+	 * @param notiId
+	 * @param model
+	 * @return
+	 */
 	@DeleteMapping("/{notiId}")
 	public String noticeDelete(
 			@Validated(DeleteGroup.class) @ModelAttribute("notiId") String id
@@ -182,5 +231,27 @@ public class NoticeController {
 			viewName = "campus/notice";
 		}
 		return viewName;
+	}
+	
+	/**
+	 * notice 파일 삭제
+	 * @param id
+	 * @param notiId
+	 * @param model
+	 * @return
+	 */
+	@ResponseBody
+	@PostMapping("/DeleteFile")
+	public int DeleteFile(
+			@RequestBody AttaFileVO attaFileVO
+			) {
+		log.info("attaFileVO : " + attaFileVO);
+		
+		//0 또는 1
+		int result = this.service.deleteAttaFileList(attaFileVO);
+		
+		log.info("result : " + result);
+		
+		return result;		
 	}
 }

@@ -82,15 +82,14 @@
 	<!-- 	Custom view preparer -->
 <!-- 	<bean id="menuCommonPreparer" class="kr.or.ddit.commons.preparer.MenuCommonPreparer" /> -->
 
+	<bean id="bootstrapPaginationRender" class="kr.or.ddit.ui.BootstrapPaginationRender" />
 	<bean id="paginationManager" class="kr.or.ddit.ui.DefaultPaginationManager">
 		<constructor-arg name="rendererMap">
 			<map>
 				<entry key="default">
 					<bean class="kr.or.ddit.ui.DefaultPaginationRenderer" />
 				</entry>
-				<entry key="bootstrap">
-					<bean class="kr.or.ddit.ui.BootstrapPaginationRender" />
-				</entry>
+				<entry key="bootstrap" value-ref="bootstrapPaginationRender" />
 			</map>
 		</constructor-arg>
 	</bean>

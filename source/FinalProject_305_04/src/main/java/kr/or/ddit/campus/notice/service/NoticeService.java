@@ -1,5 +1,8 @@
 package kr.or.ddit.campus.notice.service;
 
+import java.util.List;
+
+import kr.or.ddit.vo.AttaFileVO;
 import kr.or.ddit.vo.NoticeVO;
 import kr.or.ddit.vo.PagingVO;
 
@@ -34,4 +37,11 @@ public interface NoticeService {
 	 * @return
 	 */
 	public int removeNotice(String notiId);
+	
+	/**
+	 * 파일 삭제
+	 * @param notiId
+	 * @return
+	 */
+	public int deleteAttaFileList(AttaFileVO attaFileVO);
 }

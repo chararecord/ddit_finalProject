@@ -32,4 +32,10 @@
 		</foreach>
 		SELECT * FROM DUAL
 	</insert>
+	
+	<!-- 파일 삭제 -->
+	<delete id="deleteAttaFileList" parameterType="AttaFileVO">
+		DELETE FROM ATTA_FILE
+		WHERE ATTA_ID = #{attaId}
+	</delete>
 </mapper>

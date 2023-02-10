@@ -15,4 +15,5 @@ public interface AttaFileDAO {
 	public List<AttaFileVO> selectAttaFileList(int id);
 	public AttaFileVO selectAttaFile(int attaId);
 	public <T> int deleteAttaFile(T vo);
+	public int deleteAttaFileList(AttaFileVO attaFileVO);
 }

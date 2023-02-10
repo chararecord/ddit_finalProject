@@ -27,7 +27,7 @@ import lombok.Data;
 public abstract class CommonAttaFileVO {
 	
 	private List<AttaFileVO> attaFileList;
-	private int[] delAttaNos;				// 게시글 수정시 삭제할 첨부파일 번호 유지
+	private String[] delAttaIds;				// 게시글 수정시 삭제할 첨부파일 번호 유지
 	private int attaCount;
 	private MultipartFile[] files;
 	private int startAttaId;
