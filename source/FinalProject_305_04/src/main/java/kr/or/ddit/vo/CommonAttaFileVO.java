@@ -30,7 +30,7 @@ public abstract class CommonAttaFileVO {
 	private String[] delAttaIds;				// 게시글 수정시 삭제할 첨부파일 번호 유지
 	private int attaCount;
 	private MultipartFile[] files;
-	private int startAttaId;
+	private int startAttaSn;
 	public void setFiles(MultipartFile[] files) {
 		if(files!=null && files.length > 0) {
 			this.files = files;

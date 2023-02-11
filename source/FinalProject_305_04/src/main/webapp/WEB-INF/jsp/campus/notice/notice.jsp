@@ -81,44 +81,6 @@
 					<tbody id="listBody" >
 						<tr>
 							<c:set var="noticeList" value="${pagingVO.dataList }" />
-							<c:choose>
-								<c:when test="${not empty noticeList }">
-									<c:forEach items="${noticeList }" var="notice">
-										<tr>
-											<td>
-												<!-- 체크박스 -->
-												<input type="checkbox" id="checkbox5" name="notiCheck" value="${notice.notiId }">
-												<label for="checkbox5"><span class="sr-only">선택</span></label>
-											</td>
-											<td>${notice.rnum }</td>
-											<td style="text-align: left">
-												<c:url value="/campus/notice/" var="viewURL" >
-													<c:param name="id" value="${notice.notiId }" />
-												</c:url>
-												<a href="${pageContext.request.contextPath }/campus/notice/${notice.notiId }">
-													${notice.tit }
-												</a>
-											</td>
-											<td>
-												<c:if test="${notice.attaCount ge 1}">
-													<span class="material-symbols-outlined" style="font-size: 15px">attach_file</span>
-												</c:if>
-											</td>
-											<td>
-												<c:set value="${notice.empId }" var="emp" />
-												<c:if test="${fn:startsWith(emp, '1')}">
-													관리자
-												</c:if>
-											</td>
-											<td>${notice.wrDate }</td>
-											<td>${notice.hit }</td>
-										</tr>
-									</c:forEach>
-								</c:when>
-								<c:otherwise>
-									<td colspan="5">조건에 맞는 게시글이 없습니다.</td>
-								</c:otherwise>
-							</c:choose>
 						</tr>
 					</tbody>
 				</table>
@@ -142,7 +104,6 @@
 <script>
 let listBody = $("#listBody");
 
-
 let pagingArea = $("#pagingArea").on('click', "a.paging", function(event){
 	event.preventDefault();
 	let page = $(this).data("page");
@@ -152,7 +113,16 @@ let pagingArea = $("#pagingArea").on('click', "a.paging", function(event){
 	return false;
 });
 
-let makeTrTag = function(notice){
+let makeTrTag = function(notice, index){
+	
+	/* 날짜 format */
+	let wrDate = notice.wrDate;
+	let day = wrDate.split(' ');
+// 	let time = day[1];
+// 	console.log(time);
+// 	time = day[1].split('.');
+// 	console.log(time[0]);
+	
 	let aTag = $("<a>")
 				.attr("href", "${pageContext.request.contextPath}/campus/notice/" + notice.notiId)
 				.html(notice.tit);
@@ -160,13 +130,13 @@ let makeTrTag = function(notice){
 	let checkBoxInput = $("<input>")
 						.attr({
 							type:"checkbox"
-							,id:"checkbox5"
+							,id:"check_" +index
 							,name:"notiCheck"
 							,value:notice.notiId
 						}); 
 	let checkBoxLabel = $("<label>").append(
 							$("<span>").addClass("sr-only")
-						).attr('for', 'checkbox5')
+						).attr('for', "check_" +index)
 	let f_attach = function(){
 		if(notice.attaCount >= 1){
 			let attaTag = $("<span>").addClass('material-symbols-outlined')
@@ -182,6 +152,8 @@ let makeTrTag = function(notice){
 		}
 	}
 
+	
+
 	return $("<tr>").append(
 			$("<td>").append(
 				checkBoxInput, 	checkBoxLabel	
@@ -190,10 +162,11 @@ let makeTrTag = function(notice){
 			,$("<td>").html(aTag).css('text-align', 'left')
 			,$("<td>").html(f_attach())
 			,$("<td>").html(f_emp())
-			,$("<td>").html(notice.wrDate)
+			,$("<td>").html(day[0])
 			,$("<td>").html(notice.hit)
 	)
 }
+
 
 let searchForm = $('#searchForm').on('submit', function(event){
 	event.preventDefault();
@@ -201,7 +174,6 @@ let searchForm = $('#searchForm').on('submit', function(event){
 	let url = this.action;
 	let method = this.method;
 	let queryString = $(this).serialize();
-	console.log(queryString);
 
 	//아작스 보내는 방식이 다양한데, 확장성 좋은 요걸 외움(파일 전송빼고 모든 곳에 사용가능)
 	$.ajax({
@@ -215,15 +187,12 @@ let searchForm = $('#searchForm').on('submit', function(event){
 			searchForm[0].page.value="";
 			
 			let pagingVO = resp.pagingVO;
-			console.log(pagingVO);
 			let dataList = pagingVO.dataList;
-			console.log(dataList);
 			let trTags = [];
 			
-			console.log(makeTrTag(resp))
 			if(dataList){
 				$.each(dataList, function(index, notice){
-					trTags.push(makeTrTag(notice));
+					trTags.push(makeTrTag(notice, index));
 				});
 			} else {
 				let tr = $("<tr>").html(
@@ -239,7 +208,8 @@ let searchForm = $('#searchForm').on('submit', function(event){
 			console.log(error);
 		}
 	});
-});
+	return false;
+}).submit();
 
 let searchUI = $("#searchUI").on('click', "#searchBtn", function(){
 	// :input[name] : name 속성을 갖고 있는 모든 input/select 대상

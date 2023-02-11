@@ -65,7 +65,6 @@ public class NoticeController {
 	
 	/**
 	 * notice 속성 생성 메소드
-	 * @return noticeVO
 	 */
 	@ModelAttribute("notice")
 	public NoticeVO notice() {
@@ -74,10 +73,6 @@ public class NoticeController {
 
 	/**
 	 * notice 게시판 글 목록 출력 메소드 (selectList)
-	 * @param currentPage
-	 * @param searchVO
-	 * @param model
-	 * @return /jsp/campus/notice/notice.jsp
 	 */
 	@GetMapping
 	public String noticeListUI(
@@ -97,10 +92,6 @@ public class NoticeController {
 	
 	/**
 	 * notice 게시판 글 목록 출력 메소드 (selectList)
-	 * @param currentPage
-	 * @param searchVO
-	 * @param model
-	 * @return
 	 */
 	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public String noticeListData(
@@ -121,9 +112,6 @@ public class NoticeController {
 	
 	/**
 	 * 게시글 조회 메소드
-	 * @param notiId
-	 * @param model
-	 * @return
 	 */
 	@GetMapping("/{notiId}")
 	public String noticeView(
@@ -134,7 +122,7 @@ public class NoticeController {
 		return "campus/notice/noticeView";
 	}
 	
-	//////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * notice 게시글 등록 폼
@@ -168,7 +156,7 @@ public class NoticeController {
 		return viewName;
 	}
 	
-	///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * notice 게시글 수정 폼
@@ -188,7 +176,6 @@ public class NoticeController {
 	
 	/**
 	 * notice 게시글 수정
-	 * @return /jsp/campus/notice/noticeView.jsp
 	 */
 	@PostMapping("/form/{notiId}")
 	public String noticeEdit(
@@ -207,14 +194,10 @@ public class NoticeController {
 		return viewName;
 	}
 	
-	////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * notice 게시글 삭제
-	 * @param id
-	 * @param notiId
-	 * @param model
-	 * @return
 	 */
 	@DeleteMapping("/{notiId}")
 	public String noticeDelete(
@@ -235,10 +218,6 @@ public class NoticeController {
 	
 	/**
 	 * notice 파일 삭제
-	 * @param id
-	 * @param notiId
-	 * @param model
-	 * @return
 	 */
 	@ResponseBody
 	@PostMapping("/DeleteFile")

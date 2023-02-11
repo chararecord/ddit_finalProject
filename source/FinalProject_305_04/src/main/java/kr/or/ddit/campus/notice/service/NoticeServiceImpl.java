@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.or.ddit.campus.notice.dao.NoticeDAO;
 import kr.or.ddit.commons.dao.AttaFileDAO;
@@ -39,6 +40,7 @@ public class NoticeServiceImpl implements NoticeService {
 	}
 	
 	@Override
+	@Transactional
 	public int createNotice(NoticeVO notice) {
 		log.info("insert notice >>>>> {}", notice);
 		log.info("getAttaFileList >>>> {}",notice.getAttaFileList());

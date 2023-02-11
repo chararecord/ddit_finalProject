@@ -73,7 +73,7 @@
 								<c:forEach items="${notice.attaFileList }" var="attaFile">
 									<span>
 										${attaFile.attaFilenm }
-										<input type="button" value="삭제" class="delBtn" data-atta-id=${attaFile.attaId} />
+										<input type="button" value="X" class="btn default btn-s btn-pd delBtn" data-atta-id="${attaFile.attaId}" data-atta-sn="${attaFile.attaSn }" />
 									</span>
 								</c:forEach>
 							</td>		
@@ -104,13 +104,36 @@ CKEDITOR.replace('cont', {
 });
 
 let updateForm = $("#updateForm");
-$(".delBtn").on("click", function(event){
+// var $item = $('.delBtn').on('click', function(e){
+// });
+	
+	
+var selectedFile = $(".delBtn").on("click", function(event){
 	let attaId = $(this).data("attaId");
+	let attaSn = $(this).data("attaSn");
 	
 	console.log("attaId : " + attaId);
+	console.log("attaSn : " + attaSn);
 	
-	let data = {"attaId":attaId};
+	let data = {
+			"attaId":attaId
+			, "attaSn":attaSn
+	};
 	
+	var target = $(this).closest('span');
+	if(confirm('첨부파일을 삭제하시겠습니까?')){
+		var seq = selectedFile.index(this);
+		var dataTransfer = new DataTransfer();
+		console.log(seq + "||" + dataTransfer);
+		var files = $('input[name=files]')[0].files;
+		var fileArray = Array.from(files);
+		console.log(files + "||" + fileArray);
+		
+		fileArray.splice(seq, 1);
+		fileArray.forEach(file => { dataTransfer.items.add(file); });
+		$('input[name=files]')[0].files = dataTransfer.files;
+		target.remove();
+	}
 	
 	//아작났어유..피씨다타써
 	$.ajax({
@@ -122,9 +145,9 @@ $(".delBtn").on("click", function(event){
 		success:function(result){
 			console.log("result : " + JSON.stringify(result));
 			
-			if(result=="1"){
-				$("#trOldFile").css("display","none");
-			}
+// 			if(result=="1"){
+// 				$("#trOldFile").css("display","none");
+// 			}
 		}
 	});
 });

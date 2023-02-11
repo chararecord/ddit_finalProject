@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.ddit.commons.dao.AttaFileDAO">
+
+	<!-- 파일 추가 -->
 	<insert id="insertAttaFiles" parameterType="CommonAttaFileVO">
-<!-- 		<selectKey order="BEFORE" resultType="int" keyProperty="startAttaId"> -->
-<!-- 			SELECT NVL(MAX(0), 0)+1 -->
-<!-- 			FROM ATTA_FILE -->
-<!-- 		</selectKey> -->
+		<selectKey order="BEFORE" resultType="int" keyProperty="startAttaSn">
+			SELECT NVL(MAX(ATTA_SN), 0)+1
+			FROM ATTA_FILE
+			WHERE ATTA_ID = #{attaId}
+		</selectKey>
 		INSERT ALL
 		<foreach collection="attaFileList" item="attaFile" index="idx">
 			INTO ATTA_FILE(
@@ -20,7 +23,7 @@
 				, ATTA_PATH
 			) VALUES (
 				#{attaId, jdbcType=VARCHAR}
-				, #{idx}
+				, #{startAttaSn}+#{idx}
 				, #{attaFile.attaFilenm, jdbcType=VARCHAR}
 				, #{attaFile.attaSavenm, jdbcType=VARCHAR}
 				, #{attaFile.attaMime, jdbcType=VARCHAR}
@@ -37,5 +40,19 @@
 	<delete id="deleteAttaFileList" parameterType="AttaFileVO">
 		DELETE FROM ATTA_FILE
 		WHERE ATTA_ID = #{attaId}
+		AND ATTA_SN = #{attaSn}
 	</delete>
+	
+	<!-- 파일 다운로드 -->
+	<select id="">
+		SELECT
+			ATTA_ID
+			, ATTA_SN
+				, ATTA_FILENM
+				, ATTA_SAVENM
+		FROM
+			ATTA_FILE
+		WHERE ATTA_ID = #{attaId}
+		AND ATTA_SN = #{attaSn}
+	</select>
 </mapper>

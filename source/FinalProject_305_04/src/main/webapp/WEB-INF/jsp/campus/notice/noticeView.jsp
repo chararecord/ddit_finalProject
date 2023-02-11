@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <div class="cont">
 	<!-- cont-title -->
@@ -49,8 +50,12 @@
 							<td class="pl20">${notice.empId }</td>
 						</tr>
 						<tr>
+							<c:set var="wrDate" value="${notice.wrDate }" />
 							<th scope="row">작성일</th>
-							<td class="pl20">${notice.wrDate }</td>
+							<td class="pl20">
+								<fmt:parseDate value="${wrDate }" var="yymmdd" pattern="yyyy-MM-dd HH:mm:ss" />
+								<fmt:formatDate value="${yymmdd}" pattern="yyyy년 MM월 dd일 hh시 mm분" />
+							</td>
 						</tr>
 						<tr>
 							<th scope="row">조회수</th>
@@ -62,7 +67,9 @@
 								<c:when test="${not empty notice.attaFileList }">
 									<td class="pl20">
 										<c:forEach items="${notice.attaFileList }" var="file" varStatus="vs">
-											${file.attaFilenm } ${vs.last ? "" : "<br>" }
+											<a href="<c:url value="/download/${file.attaId }"/>">
+												${file.attaFilenm } <span class="pur-txt" style="font-size: 11px; font-weight: bold">${file.attaFancysize }</span> ${vs.last ? "" : "<br>" }
+											</a>
 										</c:forEach>
 									</td>
 								</c:when>
@@ -114,6 +121,8 @@ $("a.paging").on('click', function(event){
 	searchForm.submit();
 	return false;
 });
+
+$(".ymdtime")
 
 function f_movelist() {
 	let url = "${pageContext.request.contextPath}/campus/notice";

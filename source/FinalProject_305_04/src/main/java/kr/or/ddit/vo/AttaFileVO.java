@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,6 +29,18 @@ public class AttaFileVO {
 	@JsonIgnore
 	private transient MultipartFile realFile;
 	
+	@Value("#{appInfo.imageFolder}")
+	private File imageFolder;
+	
+	@Value("#{appInfo.imageFolder}")
+	private String imageFolderURL;
+	
+	@PostConstruct
+	public void init() throws IOException {
+		if(!imageFolder.exists()) {
+			imageFolder.mkdirs();
+		}
+	}
 	public AttaFileVO(MultipartFile realFile) {
 		super();
 		this.realFile = realFile;
@@ -35,9 +49,11 @@ public class AttaFileVO {
 		this.attaMime = realFile.getContentType();
 		this.attaFilesize = realFile.getSize();
 		this.attaFancysize = FileUtils.byteCountToDisplaySize(attaFilesize);
+		this.attaPath = imageFolderURL;
 	}
 	
 	private String attaId;
+	private int attaSn;
 	private String attaPath;
 	private String attaFilenm;
 	private String attaSavenm;
