@@ -32,6 +32,7 @@
 				<div class="title">
 					<h3>강의정보</h3>
 				</div>
+				${lectInfo }
 
 				<div class="tbl-wrap">
 				<c:set value="${lectInfo}" var="lect" />
@@ -47,11 +48,11 @@
 							<tr>
 								<th scope="row">학사연도</th>
 								<td>
-									${lect.semeYear }년
+									${lect.semeVO.semeYear }년
 								</td>
 								<th scope="row">학기</th>
 								<td>
-									${lect.seme }학기
+									${lect.semeVO.seme }학기
 								</td>
 								<th scope="row">학년</th>
 								<td>
@@ -77,7 +78,7 @@
 								</td>
 								<th scope="row">교수명</th>
 								<td>
-									${lect.userNm }
+									${lect.profVO.userNm }
 								</td>
 							</tr>
 						</tbody>

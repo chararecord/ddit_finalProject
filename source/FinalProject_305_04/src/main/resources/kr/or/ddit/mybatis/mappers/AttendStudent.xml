@@ -20,10 +20,12 @@
 	<result property="curlectId"  column="CURLECT_ID"/>
 	<result property="attendDate"  column="ATTEND_DATE"/>
 	<result property="attendStat"  column="ATTEND_STAT"/>
+	<association property="lecture" javaType="MyLectureVO"></association>
+	<association property="student" javaType="MyStudentVO"></association>
 </resultMap>
 
 <!--'강의' 테이블  -->
-<resultMap type="LectureVO" id="lectureMap">
+<resultMap type="MyLectureVO" id="lectureMap">
 	<result property="lectId"  column="LECT_ID"/>
 	<result property="assignRoomId"  column="ASSIGN_ROOM_ID"/>
 	<result property="semeId"  column="SEME_ID"/>
@@ -42,7 +44,7 @@
 
 
 <!--'학생' 테이블  -->
-<resultMap type="StudentVO" id="studentMap" autoMapping="true">
+<resultMap type="MyStudentVO" id="studentMap" autoMapping="true">
 <!-- 	<result property="stdId" column="STD_ID"/> -->
 <!-- 	<result property="profId" column="ONF_LINE"/> -->
 <!-- 	<result property="entDate" column="ONF_LINE"/> -->
@@ -57,7 +59,7 @@
 
 <!--학생이 본인의 출결 현황을 조회  -->
 
-<select id="selectAttendList" parameterType="StudentVO" resultType="AttendVO">
+<select id="selectAttendList" parameterType="StudentVO" resultMap="attendMap">
 		SELECT
 				TO_CHAR(A.ATTEND_DATE, 'YYYY-MM-DD') AS ATTEND_DATE,
 				A.ATTEND_STAT,

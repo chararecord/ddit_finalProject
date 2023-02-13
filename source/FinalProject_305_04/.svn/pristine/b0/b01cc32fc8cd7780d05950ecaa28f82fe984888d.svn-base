@@ -32,19 +32,12 @@ public class NoticeServiceImpl implements NoticeService {
 	@Inject
 	private AttaFileDAO attaFileDAO;
 	
-	//appInfo.imageFolder
-	@Value("#{appInfo.imgFolder}")
-	private File imgFolder;
-	
 	@Value("#{appInfo.imageFolder}")
-	private String imageFolderURL;
+	private File imageFolder;
 	
 	@PostConstruct
 	public void init() throws IOException {
-		//첨부파일 저장 경로 : D:\A_TeachingMaterial\06_JSP_Spring\workspace\
-		//.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\FinalProject_305_04\resources\images\attaFile
-//		log.info("첨부파일 저장 경로 : {}", imageFolder.getCanonicalPath());
-		log.info("첨부파일 저장 경로 : {}", imgFolder);
+		log.info("첨부파일 저장 경로 : {}", imageFolder.getCanonicalPath());
 	}
 	
 	@Override
@@ -60,9 +53,6 @@ public class NoticeServiceImpl implements NoticeService {
 	private int processAttaFilelist(NoticeVO notice) {
 		List<AttaFileVO> attaFileList = notice.getAttaFileList();
 		if(attaFileList==null || attaFileList.isEmpty()) {return 0;}
-		attaFileList.stream().forEach(attaFile -> {
-			attaFile.setImageFolder(imageFolderURL);
-		});
 		int rowcnt = attaFileDAO.insertAttaFiles(notice);
 //		int rowcnt = 0;
 		try {
@@ -70,8 +60,7 @@ public class NoticeServiceImpl implements NoticeService {
 			for(AttaFileVO attaFile : attaFileList) {
 //				attaFile.setAttaId(notice.getNotiId());
 //				rowcnt = attaFileDAO.insertAttaFile(attaFile);
-				File f = new File(imgFolder + "");
-				attaFile.saveTo(f);
+				attaFile.saveTo(imageFolder);
 			}
 			return rowcnt;
 		} catch (IOException e) {

@@ -5,8 +5,11 @@
 
 <!--수강중인 강의 목록(학생) -->
 
+<resultMap type="MyLectureVO" id="stdLect">
+	<collection property="myStudentList" ofType="MyStudentVO" autoMapping="true"></collection>
+</resultMap>
 
-<select id="selectLectList" parameterType="StudentVO"  resultType="LectureVO">
+<select id="selectLectList" parameterType="MyStudentVO"  resultMap="stdLect">
 
 SELECT 
 (SELECT COMM_DESC

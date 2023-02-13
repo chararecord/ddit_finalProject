@@ -112,7 +112,9 @@
 function f_attendList(){
 	let url = "${pageContext.request.contextPath}/prof/lectroom/profAttendList?lectId=${profLectList[0].lectId}";
 	location.href= url;
+
 }
+
 
  function f_lectBoard(){
  // 	console.log("${profLectList[0].lectId}");

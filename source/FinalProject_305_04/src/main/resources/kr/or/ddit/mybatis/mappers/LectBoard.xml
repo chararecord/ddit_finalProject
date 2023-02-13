@@ -4,35 +4,43 @@
 
 	<resultMap type="LectureVO" id="lectureMap" autoMapping="true">
 		<id property="lectId" column="LECT_ID" />
-		<association property="usrVO" javaType="UsrVO" autoMapping="true" />
+		<association property="profVO" javaType="ProfessorVO" autoMapping="true" />
 		<association property="subMajorVO" javaType="SubMajorVO" autoMapping="true" />
+		<association property="semeVO" javaType="SemesterVO" autoMapping="true" />
 	</resultMap>
 	<!-- 강의 정보 조회 -->
 	<select id="selectLectInfo" parameterType="String" resultMap="lectureMap" >
-		SELECT A.USER_NM
-		    , A.USER_PHONE
-		    , A.USER_EMAIL
-		    , C.MAJOR_NM
-		    , D.COLL_NM
-		    , E.SUBJECT_NM
-		    , ( SELECT COMM_DESC
-		        FROM COMM
-		        WHERE COMM.COMM_ID = E.ESTA_SUB
-		        ) AS ESTA_SUB
-		    , F.SEME_YEAR
-		    , F.SEME
-		    , I.LECT_ID
-		    , I.LECT_NM
-		    , I.CAM_YEAR
-		    , I.CREDIT
-		FROM USR A INNER JOIN PROFESSOR B ON A.USER_ID = B.PROF_ID
-		            INNER JOIN MAJOR C ON B.MAJOR_ID = C.MAJOR_ID
-		            INNER JOIN COLL D ON C.COLL_ID = D.COLL_ID
-		            INNER JOIN SUB_MAJOR E ON C.MAJOR_ID = E.MAJOR_ID
-		            INNER JOIN SEMESTER F ON E.SEME_ID = F.SEME_ID
-		            INNER JOIN SYLLABUS G ON B.PROF_ID = G.PROF_ID
-		            INNER JOIN SYLLA_APPR H ON G.SYLLA_ID = H.SYLLA_ID
-		            INNER JOIN LECTURE I ON H.SYLLA_APPR_ID = I.SYLLA_APPR_ID
+		WITH PROFVIEW AS (
+		    SELECT
+		        A.USER_NM
+		        , B.PROF_ID
+		        , A.USER_PHONE
+		        , A.USER_EMAIL
+		        , D.COLL_NM
+		        , C.MAJOR_NM
+		        , (
+		            SELECT COMM_DESC
+		            FROM COMM
+		            WHERE COMM.COMM_ID = E.ESTA_SUB
+		        )
+		        , E.SUBJECT_NM
+		    FROM USR A LEFT OUTER JOIN PROFESSOR B ON (A.USER_ID = B.PROF_ID)
+		                LEFT OUTER JOIN MAJOR C ON (B.MAJOR_ID = C.MAJOR_ID)
+		                LEFT OUTER JOIN COLL D ON (C.COLL_ID = D.COLL_ID)
+		                LEFT OUTER JOIN SUB_MAJOR E ON (C.MAJOR_ID = E.MAJOR_ID)
+		), LECTUREVIEW AS (
+		    SELECT
+		        F.*
+		        , H.SYLLA_APPR_ID
+		    FROM PROFESSOR F INNER JOIN SYLLABUS G ON (F.PROF_ID = G.PROF_ID)
+		                    INNER JOIN SYLLA_APPR H ON (G.SYLLA_ID = H.SYLLA_ID)
+		)
+		SELECT
+		    I.*
+		    , K.SEME_YEAR AS 학사연도
+		    , K.SEME AS 학기
+		FROM LECTURE I INNER JOIN LECTUREVIEW J ON (I.SYLLA_APPR_ID = J.SYLLA_APPR_ID)
+		                INNER JOIN SEMESTER K ON (I.SEME_ID = K.SEME_ID)
 		WHERE I.LECT_ID = #{lectId}
 	</select>
 	

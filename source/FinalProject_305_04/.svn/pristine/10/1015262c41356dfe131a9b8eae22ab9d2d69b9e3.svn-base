@@ -28,7 +28,19 @@ public class AttaFileVO {
 	
 	@JsonIgnore
 	private transient MultipartFile realFile;
-
+	
+	@Value("#{appInfo.imageFolder}")
+	private File imageFolder;
+	
+	@Value("#{appInfo.imageFolder}")
+	private String imageFolderURL;
+	
+	@PostConstruct
+	public void init() throws IOException {
+		if(!imageFolder.exists()) {
+			imageFolder.mkdirs();
+		}
+	}
 	public AttaFileVO(MultipartFile realFile) {
 		super();
 		this.realFile = realFile;
@@ -37,6 +49,7 @@ public class AttaFileVO {
 		this.attaMime = realFile.getContentType();
 		this.attaFilesize = realFile.getSize();
 		this.attaFancysize = FileUtils.byteCountToDisplaySize(attaFilesize);
+		this.attaPath = imageFolderURL + "/" + attaSavenm;
 	}
 	
 	private String attaId;
@@ -52,9 +65,5 @@ public class AttaFileVO {
 	public void saveTo(File saveFolder) throws IOException {
 		if(realFile==null || realFile.isEmpty()) {return;}
 		realFile.transferTo(new File(saveFolder, attaSavenm));
-	}
-	
-	public void setImageFolder(String imageFolder) {
-		this.attaPath = imageFolder;
 	}
 }

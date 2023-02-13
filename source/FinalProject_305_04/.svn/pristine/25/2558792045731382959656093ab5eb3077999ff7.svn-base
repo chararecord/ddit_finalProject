@@ -67,7 +67,7 @@
 								<c:when test="${not empty notice.attaFileList }">
 									<td class="pl20">
 										<c:forEach items="${notice.attaFileList }" var="file" varStatus="vs">
-											<a href="<c:url value="/download/${file.attaId}/${file.attaSn}" />">
+											<a href="<c:url value="/download/${file.attaId }/${file.attaSn }" />">
 												${file.attaFilenm } <span class="pur-txt" style="font-size: 11px; font-weight: bold">${file.attaFancysize }</span> ${vs.last ? "" : "<br>" }
 											</a>
 										</c:forEach>
