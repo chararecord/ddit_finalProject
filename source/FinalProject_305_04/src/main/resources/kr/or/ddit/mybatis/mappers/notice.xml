@@ -127,6 +127,4 @@
 		FROM NOTICE
 		WHERE NOTI_ID = #{notiId}
 	</delete>
-	
-	
 </mapper>

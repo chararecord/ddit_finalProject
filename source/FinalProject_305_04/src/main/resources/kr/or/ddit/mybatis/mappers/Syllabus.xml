@@ -2,11 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.ddit.prof.lectSylla.dao.LectureSyllabusDAO">
 
+<resultMap type="SyllabusVO" id="syllabusMap" autoMapping="true">
+	<id property="syllaId" column="SYLLA_ID"/>
+	<association property="semesterVO" autoMapping="true" javaType="SemesterVO">
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="professorVO" autoMapping="true" javaType="ProfessorVO"></association>
+	<association property="subMajorVO" autoMapping="true" javaType="SubMajorVO"></association>
+	<association property="buildingVO" autoMapping="true" javaType="BuildingVO"></association>
+	<association property="lectRoomVO" autoMapping="true" javaType="LectRoomVO"></association>
+	<association property="syllaApprVO" autoMapping="true" javaType="SyllaApprVO"></association>
+</resultMap>
+
 <!-- 해당 교수의 강의계획서 전체목록 조회 -->
-<select id="selectSyllabusList" parameterType="kr.or.ddit.vo.ProfessorVO" resultType="SyllabusVO">
+<select id="selectSyllabusList" parameterType="kr.or.ddit.vo.ProfessorVO" resultMap="syllabusMap">
 	SELECT 
-	    B.SEME_YEAR AS SEME_YEAR, 
-	    B.SEME AS SEMESTER, 
+		B.SEME_YEAR AS SEME_YEAR, 
+	    B.SEME AS SEME, 
 	    A.CAM_YEAR AS CAM_YEAR, 
 	    A.LECT_NM AS LECT_NM, 
 	    A.HOPE_MAX AS HOPE_MAX,
@@ -20,13 +32,18 @@
 	      WHERE BUILDING.BUILD_ID = D.BUILD_ID
 	    ) AS BUILD_NM,
 	    D.ROOM_NUM AS ROOM_NUM,
-	    A.SYLLA_MEET AS SYLLA_MEET, 
-	    E.APRV_STATE AS APRV_STATE
+        (SELECT COMM_DESC
+           FROM COMM
+          WHERE COMM.COMM_ID = A.SYLLA_MEET
+        ) AS SYLLA_MEET,
+	    (SELECT COMM_DESC
+           FROM COMM
+          WHERE COMM.COMM_ID = E.APRV_STATE) AS APRV_STATE
 	FROM SYLLABUS A INNER JOIN SEMESTER B ON (A.SEME_ID = B.SEME_ID)
                		INNER JOIN SUB_MAJOR C ON (A.SUB_MAJOR_ID = C.SUB_MAJOR_ID)
                 	INNER JOIN LECT_ROOM D ON (A.LECT_ROOM_ID = D.LECT_ROOM_ID)
                 	INNER JOIN SYLLA_APPR E ON (A.SYLLA_ID = E.SYLLA_ID)
-	WHERE A.PROF_ID = ${profId}
+	WHERE A.PROF_ID = #{profId}
 </select>
 
 <!--해당 학과의 과목 조회 -->
@@ -36,12 +53,12 @@
 	       (SELECT COMM_DESC
 	          FROM COMM
 	         WHERE COMM.COMM_ID = A.ESTA_SUB) AS ESTA_SUB,
-			       A.SUBJECT_NM, 
-			       A.CREDIT
-		FROM SUB_MAJOR A INNER JOIN PROFESSOR B ON(A.MAJOR_ID = B.MAJOR_ID)
+	       A.SUBJECT_NM, 
+	       A.CREDIT
+	FROM SUB_MAJOR A INNER JOIN PROFESSOR B ON(A.MAJOR_ID = B.MAJOR_ID)
 		                 INNER JOIN SEMESTER C ON(A.SEME_ID = C.SEME_ID)
-		WHERE B.PROF_ID = #{profId}
-		  AND C.SEME_ID = #{semeId}
+	WHERE B.PROF_ID = #{profId}
+	AND C.SEME_ID = #{semeId}
 </select>
 
 
@@ -130,5 +147,7 @@
 	    '2'
 	)
 </insert>
+
+
 
 </mapper>

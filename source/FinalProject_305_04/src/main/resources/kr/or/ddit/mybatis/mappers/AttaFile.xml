@@ -37,7 +37,7 @@
 	</insert>
 	
 	<!-- 강의 공지사항 게시판 파일 추가 쿼리 -->
-	<insert id="insertAttaFiles" parameterType="LectNotiVO">
+	<insert id="insertAttaFiles" parameterType="LectBOARDVO">
 		<selectKey order="BEFORE" resultType="int" keyProperty="startAttaSn">
 			SELECT NVL(MAX(ATTA_SN), 0)+1
 			FROM ATTA_FILE

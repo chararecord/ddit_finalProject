@@ -51,6 +51,7 @@
 		FROM (
 		    SELECT ROWNUM RNUM, ORDEREDTEST.*
 		    FROM ORDEREDTEST
+		    WHERE ORDEREDTEST.STD_ID = '65778452'
 		    ORDER BY RNUM DESC
 		) A
      
@@ -73,6 +74,22 @@
 
 	</select>
 	
+	<!-- 시험상세 2번째 정보 
+		학번, 학생명, 강의코드, 강의명, 중간기말구분
+		1행 리턴
+	-->
+	<select id="selectTest2" parameterType="string" resultType="hashMap">
+		SELECT A.TEST_ALLOW_ID, A.CURLECT_ID, A.TEST_ID, A.TEST_SCORE
+		     , B.EXAM_ID, B.LECT_ID, B.TEST_NM, B.TEST_RDATE, B.TEST_STIME, B.TEST_ETIME, B.TEST_MEET, B.TEST_DATE
+		     , (SELECT C.LECT_NM FROM LECTURE C WHERE C.LECT_ID = B.LECT_ID) LECT_NM
+		     , D.STD_ID, D.FIN_SCORE, (SELECT E.USER_NM FROM USR E WHERE E.USER_ID = D.STD_ID) USER_NM
+		     , F.SEME_ID, F.EXAM_TYPE
+		FROM   TEST_ALLOW A, TEST_INFO B, CURR_LECT D, EXAM_CAL F
+		WHERE  A.TEST_ID = B.TEST_ID
+		AND    A.CURLECT_ID = D.CURLECT_ID
+		AND    B.EXAM_ID = F.EXAM_ID
+		AND    A.TEST_ALLOW_ID = #{testAllowId} 
+	</select>
 	
 	<!--  시험응시  insert -->
 	<insert id="insertTestAllow" parameterType="TestVO">
