@@ -1,5 +1,6 @@
 package kr.or.ddit.student.lectList.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import kr.or.ddit.student.lectList.service.LectListService;
 import kr.or.ddit.vo.LectureVO;
 import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.MyStudentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,8 +56,12 @@ public class LectureListController {
 			, Model model) {
 		
 		log.info("lectList에 왔다");
-		List<MyLectureVO> stdLectList = service.retrieveLectList(stdId, semeId);
+		System.out.println(stdId + semeId);
 		
+		List<MyStudentVO> stdLectList = service.retrieveLectList(stdId, semeId);		
+		
+		log.info("왔는지 보자 : " + stdLectList);
+			
 		model.addAttribute("stdLectList", stdLectList);
 		
 		return "student/lectList/lectList";

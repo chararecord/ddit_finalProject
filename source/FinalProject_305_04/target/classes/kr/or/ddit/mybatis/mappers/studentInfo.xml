@@ -8,13 +8,13 @@
 	    <where>
 	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
 	    		<choose>
-	    			<when test="simpleCondition.searchType eq 'tit'">
+	    			<when test="simpleCondition.searchType eq 'camYear'">
 	    				INSTR(CAM_YEAR, #{simpleCondition.searchWord}) > 0
 	    			</when>
-	    			<when test="simpleCondition.searchType eq 'cont'">
+	    			<when test="simpleCondition.searchType eq 'userId'">
 	    				INSTR(USER_ID, #{simpleCondition.searchWord}) > 0
 	    			</when>
-	    			<when test="simpleCondition.searchType eq 'cont'">
+	    			<when test="simpleCondition.searchType eq 'userNm'">
 	    				INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
 	    			</when>
 					<otherwise>
@@ -28,9 +28,6 @@
 	    	</if>
 	    </where>
 	</sql>
-
-
-
 
 
 	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
@@ -53,24 +50,29 @@
 	<!-- 게시글 리스트 조회 SELECT문 -->
 	<select id="selectStudentInfoList" parameterType="PagingVO" resultMap="studentMap">
 		WITH STUINFO AS (
-		    SELECT A.CAM_YEAR,
+		    SELECT A.STD_ID,
+		           A.CAM_YEAR,
 		           A.REC_NM,
-		           B.STD_ID,
+		           A.REC_UPDATE,
 		           C.USER_NM,
 		           D.MAJOR_NM,
 		           E.COLL_NM
 		      FROM USR C INNER JOIN STUDENT B ON(B.STD_ID = C.USER_ID)
-                         LEFT OUTER JOIN RECORD  A ON(A.STD_ID = B.STD_ID)
-                         LEFT OUTER JOIN MAJOR   D ON(B.MAJOR_ID = D.MAJOR_ID)
-                         LEFT OUTER JOIN COLL    E ON(D.COLL_ID = E.COLL_ID)
-			  <include refid="searchFrag" />		           
+		                 LEFT OUTER JOIN V_STD_RECORD  A ON(A.STD_ID = B.STD_ID)
+		                 LEFT OUTER JOIN MAJOR   D ON(B.MAJOR_ID = D.MAJOR_ID)
+		                 LEFT OUTER JOIN COLL    E ON(D.COLL_ID = E.COLL_ID)
+		      ORDER BY STD_ID
 		)
-		SELECT A.*
+		SELECT B.*
 		FROM (
-		    SELECT ROWNUM RNUM, STUINFO.*
-		    FROM STUINFO
-		    ORDER BY RNUM DESC
-		) A
+		        SELECT ROWNUM RNUM2, A.*
+		        FROM (
+		            SELECT ROWNUM RNUM, STUINFO.*
+		            FROM STUINFO
+		            ORDER BY STD_ID DESC
+		        )A
+		    ) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
 	</select>
 	
 	
@@ -162,6 +164,8 @@
 		WHERE USER_ID = #{userId}
 	</update>
 	
+
+
 
 
 

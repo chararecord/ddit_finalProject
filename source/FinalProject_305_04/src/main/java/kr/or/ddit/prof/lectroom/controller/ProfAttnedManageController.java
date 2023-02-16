@@ -5,12 +5,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.or.ddit.prof.lectroom.service.ProfLectListService;
+import kr.or.ddit.validate.UpdateGroup;
 import kr.or.ddit.vo.AttendVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +38,9 @@ import lombok.extern.slf4j.Slf4j;
  * </pre>
  */
 
+/**
+ * @return
+ */
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("prof/")
@@ -48,6 +56,14 @@ public class ProfAttnedManageController {
 		return new AttendVO();
 	}
 	
+	
+	/**
+	 * 한 학생의 상세 출결 현황 조회
+	 * @param stdId
+	 * @param lectId
+	 * @param model
+	 * @return
+	 */
 	@GetMapping("lectroom/profAttendManage")
 	public String lectList(
 			@RequestParam(value="stdId", required=true) int stdId
@@ -61,6 +77,26 @@ public class ProfAttnedManageController {
 		model.addAttribute("attendVO", attendVO);
 		
 		return "prof/lectroom/profAttendManage";
+	}
+	
+	/**
+	 * 출결 관리(update)
+	 * @param attendVO
+	 * @return
+	 */
+	@ResponseBody
+	@PostMapping("lectroom/profAttendManage")
+	public AttendVO lectUpdate(
+		@RequestBody AttendVO attendVO
+		, Model model
+	){
+		System.out.println("attendVO 뭐임" + attendVO);
+		
+		int chgCnt = service.modifyAttendManage(attendVO);
+		System.out.println("chgCnt값 얼마임?" + chgCnt);
+
+		
+		return attendVO;
 	}
 	
 }

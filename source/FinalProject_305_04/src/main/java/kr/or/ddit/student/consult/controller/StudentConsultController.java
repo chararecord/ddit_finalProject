@@ -14,16 +14,16 @@ public class StudentConsultController {
 
 	@RequestMapping("/on")
 	public String onConsult() {
-		return "student/onConsult";
+		return "student/consult/onConsult";
 	}
 	
 	@RequestMapping("/on/detail")
 	public String onConsultdetail() {
-		return "student/onConsultDetail";
+		return "student/consult/onConsultDetail";
 	}
 	
 	@RequestMapping("/off")
 	public String offConsult() {
-		return "student/offConsult";
+		return "student/consult/offConsult";
 	}
 }

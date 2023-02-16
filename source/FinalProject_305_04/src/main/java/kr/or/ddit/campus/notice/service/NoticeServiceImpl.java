@@ -32,9 +32,8 @@ public class NoticeServiceImpl implements NoticeService {
 	@Inject
 	private AttaFileDAO attaFileDAO;
 	
-	//appInfo.imageFolder
-	@Value("#{appInfo.imgFolder}")
-	private File imgFolder;
+	@Value("#{appInfo.imageFolder}")
+	private File imageFolder;
 	
 	@Value("#{appInfo.imageFolder}")
 	private String imageFolderURL;
@@ -43,8 +42,7 @@ public class NoticeServiceImpl implements NoticeService {
 	public void init() throws IOException {
 		//첨부파일 저장 경로 : D:\A_TeachingMaterial\06_JSP_Spring\workspace\
 		//.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\FinalProject_305_04\resources\images\attaFile
-//		log.info("첨부파일 저장 경로 : {}", imageFolder.getCanonicalPath());
-		log.info("첨부파일 저장 경로 : {}", imgFolder);
+		log.info("첨부파일 저장 경로 : {}", imageFolder.getCanonicalPath());
 	}
 	
 	@Override
@@ -63,14 +61,14 @@ public class NoticeServiceImpl implements NoticeService {
 		attaFileList.stream().forEach(attaFile -> {
 			attaFile.setImageFolder(imageFolderURL);
 		});
-		int rowcnt = attaFileDAO.insertAttaFiles(notice);
+		int rowcnt = attaFileDAO.insertCommonAttaFiles(notice);
 //		int rowcnt = 0;
 		try {
 			// 일반 포문으로 바꾸고 인덱스 잡아서 집어넣으면 순서도 해결 가
 			for(AttaFileVO attaFile : attaFileList) {
 //				attaFile.setAttaId(notice.getNotiId());
 //				rowcnt = attaFileDAO.insertAttaFile(attaFile);
-				File f = new File(imgFolder + "");
+				File f = new File(imageFolder + "");
 				attaFile.saveTo(f);
 			}
 			return rowcnt;

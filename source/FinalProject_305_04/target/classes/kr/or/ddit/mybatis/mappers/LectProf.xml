@@ -7,23 +7,31 @@
 	<resultMap type="ProfessorVO" id="professorMap" autoMapping="true">
 		<id property="profId" column="PROF_ID" />
 		<collection property="myLectureList" autoMapping="true" ofType="MyLectureVO">
-			<association property="semeVO" javaType="SemesterVO" autoMapping="true"></association>
+			<id property="lectId" column="LECT_ID" />
+			<association property="semeVO" javaType="SemesterVO" autoMapping="true">
+				<id property="semeId" column="SEME_ID" />
+			</association>
+		</collection>
+		<collection property="currlectList" autoMapping="true" ofType="CurrLectVO">
+			<id property="curlectId" column="CURLECT_ID" />
 		</collection>
 	</resultMap>
 
-	<select id="selectProfLectList" parameterType="ProfessorVO"
-		resultMap="professorMap">
-		SELECT 
+	<select id="selectProfLectList" parameterType="ProfessorVO" resultMap="professorMap">
+		SELECT  
 				(
-				SELECT COMM_DESC
+				SELECT DISTINCT COMM_DESC
 				        FROM COMM
 				        WHERE COMM.COMM_ID = A.ESTA_SUB
 				) ESTA_SUB,
-				A.LECT_ID, A.LECT_NM, A.CREDIT, A.CAM_YEAR, 
-				(SELECT COMM_DESC
+				A.LECT_ID, A.LECT_NM, A.CREDIT, A.CAM_YEAR
+                ,B.CURLECT_ID, A.PROF_ID,
+                C.SEME_YEAR, C.SEME,
+				(SELECT DISTINCT COMM_DESC
 				    FROM COMM
 				    WHERE COMM.COMM_ID = A.SYLLA_MEET) SYLLA_MEET
-		FROM V_LECTUREINFO A
+		FROM V_LECTUREINFO A INNER JOIN CURR_LECT B ON(A.LECT_ID = B.LECT_ID)
+                            INNER JOIN SEMESTER C ON (A.SEME_ID = C.SEME_ID)
 		WHERE A.PROF_ID=#{profId}
 		   AND A.SEME_ID=#{semeId}
 	</select>

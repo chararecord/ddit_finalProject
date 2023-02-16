@@ -190,11 +190,11 @@ let searchForm = $('#searchForm').on('submit', function(event){
 					trTags.push(makeTrTag(notice, index));
 				});
 			}
-// 			else {
-// 				let tr = $("<tr>").html(
-// 							$("<td>").attr("colspan", "7").html("조건에 맞는 게시글이 없습니다."));
-// 				trTags.push(tr);
-// 			}
+			else {
+				let tr = $("<tr>").html(
+							$("<td>").attr("colspan", "7").html("조건에 맞는 게시글이 없습니다."));
+				trTags.push(tr);
+			}
 			listBody.html(trTags);
 			pagingArea.html(resp.pagingHTML)
 		},

@@ -39,8 +39,6 @@
 		<form:form id="updateForm" modelAttribute="lectBoard" enctype="multipart/form-data" method="post">
 		<form:hidden path="lectBoardId" />
 		<div class="cont-box-inner">
-		${lectBoard }
-		${lectBoard.attaFileList }
 			<div class="tbl-wrap">
 				<table class="tbl">
 					<caption></caption>
@@ -58,7 +56,7 @@
 						<tr>
 							<th scope="row">작성자</th>
 							<td>
-								<form:input path="empId" type="text" cssClass="w100 display-tblCell" value="1010001" />
+								<form:input path="lectId" type="text" cssClass="w100 display-tblCell" value="DI10001" readonly="true" />
 							</td>
 						</tr>
 						<tr>
@@ -138,17 +136,13 @@ var selectedFile = $(".delBtn").on("click", function(event){
 	
 	//아작났어유..피씨다타써
 	$.ajax({
-		url:"${pageContext.request.contextPath}/prof/lectBoard/DeleteFile",
+		url:"${pageContext.request.contextPath}/prof/lectBoard/${lectBoard.lectId}/${lectBoard.lectBoardId}/DeleteFile",
 		contentType:"application/json;charset=utf-8",
 		data:JSON.stringify(data),
 		dataType:"json",
 		type:"post",
 		success:function(result){
 			console.log("result : " + JSON.stringify(result));
-			
-// 			if(result=="1"){
-// 				$("#trOldFile").css("display","none");
-// 			}
 		}
 	});
 });

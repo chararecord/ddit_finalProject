@@ -108,27 +108,39 @@
 	    NOTE,
 	    SYLLA_MEET
 	) VALUES (
-    (SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLABUS),
-	    #{semeId},
-	    3120001,
-	    #{lectRoomId},
-	    #{subMajorId},
-	    #{lectNm},
-	    #{camYear},
-	    #{lectHour},
-	    #{hopeTime},
-	    #{hopeMax},
-	    #{textbook},
-	    #{lectCom},
-	    #{note},
-	    #{syllaMeet}
+    	(SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLABUS)
+		, #{semeId,jdbcType=VARCHAR}
+		, #{professorVO.profId,jdbcType=NUMERIC}
+		, #{lectRoomVO.lectRoomId,jdbcType=VARCHAR}
+		, #{subMajorId,jdbcType=VARCHAR}
+		, #{lectNm,jdbcType=VARCHAR}
+		, #{camYear,jdbcType=NUMERIC}
+		, #{lectHour,jdbcType=NUMERIC}
+		, #{hopeTime,jdbcType=VARCHAR}
+		, #{hopeMax,jdbcType=NUMERIC}
+		, #{textbook,jdbcType=VARCHAR}
+		, #{lectCom,jdbcType=VARCHAR}
+		, #{note,jdbcType=VARCHAR}
+		, #{syllaMeet,jdbcType=VARCHAR}
 	)
 </insert>
 
-<select id="selectSyllaAppr" resultType="kr.or.ddit.vo.SyllabusVO">
-	SELECT *
+<select id="selectSyllaAppr" parameterType="SyllabusVO" resultMap="syllabusMap">
+	SELECT SYLLA_ID,
+       	   SEME_ID,
+       	   PROF_ID,
+       	   LECT_ROOM_ID,
+       	   SUB_MAJOR_ID,
+       	   LECT_NM,
+       	   CAM_YEAR,
+       	   LECT_HOUR,
+       	   HOPE_MAX,
+       	   TEXTBOOK,
+       	   LECT_COM,
+       	   NOTE,
+       	   SYLLA_MEET
 	  FROM SYLLABUS
-	 WHERE PROF_ID = #{profId}
+	 WHERE PROF_ID = #{professorVO.profId,jdbcType=NUMERIC}
 	   AND ROWNUM = 1
 	 ORDER BY 1 DESC
 </select>
@@ -141,10 +153,10 @@
 	    PROF_ID,
 	    APRV_STATE
 	) VALUES (
-	     (SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLA_APPR),
-	    #{syllaId},
-	    #{profId},
-	    '2'
+	     (SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLA_APPR)
+	    , #{syllaId,jdbcType=VARCHAR}
+	    , #{professorVO.profId,jdbcType=NUMERIC}
+	    , '2'
 	)
 </insert>
 

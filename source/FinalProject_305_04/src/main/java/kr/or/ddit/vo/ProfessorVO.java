@@ -44,4 +44,9 @@ public class ProfessorVO extends UsrVO {
 	private List<RecordVO> recordList;
 	
 	private List<MyLectureVO> myLectureList; // has many관계
+	private List<CurrLectVO> currlectList; // has many 관계
+
+
+
+
 }

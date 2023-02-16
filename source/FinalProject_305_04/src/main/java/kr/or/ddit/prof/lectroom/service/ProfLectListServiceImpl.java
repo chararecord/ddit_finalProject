@@ -33,7 +33,7 @@ public class ProfLectListServiceImpl implements ProfLectListService {
 	
 //	 교수의 나의 강의 목록 조회
 	@Override
-	public ProfessorVO retrieveProfLectList(int profId, String semeId) {
+	public List<ProfessorVO> retrieveProfLectList(int profId, String semeId) {
 		// TODO Auto-generated method stub
 		return this.profLectListDAO.selectProfLectList(profId, semeId);
 	}
@@ -52,6 +52,12 @@ public class ProfLectListServiceImpl implements ProfLectListService {
 	public List<AttendVO> retrieveAttendManage(int stdId, String lectId) {
 		// TODO Auto-generated method stub
 		return this.profLectListDAO.selectAttendManage(stdId, lectId);
+	}
+
+// 출결 관리(update)
+	@Override
+	public int modifyAttendManage(AttendVO attendVO) {
+		return this.profLectListDAO.updateAttendStat(attendVO);
 	}
 	
 	

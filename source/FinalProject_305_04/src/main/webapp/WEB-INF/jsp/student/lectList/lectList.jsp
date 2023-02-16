@@ -45,6 +45,7 @@
 							<col style="width: 10%">
 							<col style="width: 15%">
 							<col style="width: 10%">
+							<col style="width: 10%">
 						</colgroup>
 
 						<thead class="">
@@ -52,31 +53,32 @@
 								<th>이수구분</th>
 								<th>개설학과</th>
 								<th>강의명</th>
-								<th>담당교수</th>
+								<th>교수명</th>
 								<th>학점</th>
 								<th>출결현황</th>
 								<th>강의계획서</th>
 								<th>강의평가</th>
+								<th>과제</th>
 							</tr>
 						</thead>
 
 						<tbody>
-						${stdLectList }
+						${ stdLectList}
 							<tr>
-							<!-- lectureVO : List<LectureVO> lectureVO -->
 								<c:set var="stdLectList" value="${stdLectList }" />
 								<c:choose>
 									<c:when test="${not empty stdLectList }">
-										<c:forEach items="${stdLectList }" var="lecture">
+										<c:forEach items="${stdLectList }" var="lecture" varStatus="i">
 											<tr>
-												<td>${lecture.estaSub  }</td>
-												<td>${lecture.majorNm }</td>
-												<td>${lecture.lectNm }</td>
-												<td>${lecture.userNm}</td>
-												<td>${lecture.credit }</td>
-												<td><button type="button" class="btn btn-s purple" onclick="f_attendStatus()">출결관리</button></td>
-												<td>강의계획서</td>
-												<td>강의평가</td>
+												<td>${lecture.mylectureList[i.index].estaSub  }</td>
+												<td>${lecture.mylectureList[i.index].majorVO.majorNm }</td>
+												<td>${lecture.mylectureList[i.index].lectNm }</td>
+												<td>${lecture.mylectureList[i.index].userVO.userNm}</td>
+												<td>${lecture.mylectureList[i.index].credit }</td>
+												<td><button type="button" class="btn btn-s purple" onclick="f_attendStatus('${lecture.stdId}','${lecture.mylectureList[i.index].lectId }')">출결 현황</button></td>
+												<td><button type="button" class="btn btn-s purple" onclick="f_lectSylla()">강의계획서</td>
+												<td><button type="button" class="btn btn-s purple" onclick="f_lectEval()">강의평가</td>
+												<td><button type="button" class="btn btn-s purple" onclick="f_lectEval()">과제</td>
 										</c:forEach>
 									</c:when>
 									<c:otherwise>
@@ -88,22 +90,25 @@
 					</table>
 				</div>
 			</div>
-
-
-
-<!-- 펀션  학사 년도 불러오기!!! 어려워요 그래도 해야지!!!! -->
-		
 		</div>
 	</div>
 </div>
 
 <script>
 
-function f_attendStatus(){
-	let url = "${pageContext.request.contextPath}/student/attend/attend?stdId=${stdLectList.stdId}&lectId=${stdLectList[0].lectId}";
+// '출결 현황' 버튼
+function f_attendStatus(mystdId,mylectId){
+	let url = "${pageContext.request.contextPath}/student/attend?stdId="+mystdId+"&lectId="+mylectId;
 	location.href= url;
-
 }
+
+// 강의계획서 버튼
+
+
+// 강의 평가 버튼
+
+// 과제 버튼
+
 
 </script>
 

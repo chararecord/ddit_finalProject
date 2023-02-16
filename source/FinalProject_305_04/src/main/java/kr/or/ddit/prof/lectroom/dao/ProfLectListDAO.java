@@ -33,7 +33,7 @@ public interface ProfLectListDAO {
 	 * @param profId
 	 * @return
 	 */
-	public ProfessorVO selectProfLectList(@Param("profId") int profId, @Param("semeId") String semeId);
+	public List<ProfessorVO> selectProfLectList(@Param("profId") int profId, @Param("semeId") String semeId);
 	
 	
 	/**
@@ -52,7 +52,12 @@ public interface ProfLectListDAO {
 	public List<AttendVO> selectAttendManage(@Param("stdId") int stdId, @Param("lectId") String lectId);
 	
 	
-	
+	/**
+	 * 출결 관리(update)
+	 * @param attendStat
+	 * @return
+	 */
+	public int updateAttendStat(AttendVO attendVO);
 	
 	
 	

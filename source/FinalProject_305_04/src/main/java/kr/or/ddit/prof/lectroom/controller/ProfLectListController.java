@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *   수정일                    수정자                        수정내용
  * --------          --------    -----------------------
  * 2023. 2. 7.      이현주   	 		수정
+ * 2023. 2. 11.      이현주   	 		수정
  *
  * Copyright (c) 2023 by DDIT All right reserved
  * </pre>
@@ -58,10 +59,13 @@ public class ProfLectListController {
 			) {
 		log.info("교수 강의목록에 왔다");
 		
-		ProfessorVO professorVO = service.retrieveProfLectList(profId, semeId);
+		List<ProfessorVO> professorVO = service.retrieveProfLectList(profId, semeId);
+		System.out.println(professorVO);
+//		log.info("professorVO", professorVO);
 		
 		model.addAttribute("professorVO", professorVO);
-		
+		model.addAttribute("profId", profId);
 		return "prof/lectroom/lectroom";
 	}
 }
+

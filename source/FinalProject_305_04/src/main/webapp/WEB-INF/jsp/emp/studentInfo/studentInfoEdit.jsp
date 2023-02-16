@@ -70,12 +70,16 @@
 									<form:input path="userNmEn" type="text" cssClass="form-control" />
 									<form:errors path="userNmEn" element="span" cssClass="text-danger" />
 								</td>
+								
 								<th scope="row">주민번호<em class="red-txt asterisk">*</em></th>
 								<td>
-									<form:input path="userRrn1" type="text" cssClass="form-control" />
-									<form:input path="userRrn2" type="text" cssClass="form-control" />
-									<form:errors path="userRrn1" element="span" cssClass="text-danger" />
-									<form:errors path="userRrn2" element="span" cssClass="text-danger" />
+									<div class="flex">
+										<form:input path="userRrn1" type="text" cssClass="form-control" class="w10" />
+										<span class="cal-dash"></span>
+										<form:input path="userRrn2" type="text" cssClass="form-control"  class="w10" />
+										<form:errors path="userRrn1" element="span" cssClass="text-danger" />
+										<form:errors path="userRrn2" element="span" cssClass="text-danger" />
+									</div>
 								</td>
 
 							</tr>
@@ -162,7 +166,7 @@
 							<th scope="row">단과대학</th>
 							<c:set var="collList" value="${collVO }" />
 							<td>
-							<select id="selColl" name="collVO.collNm">
+							<select id="selColl" name="collVO.collNm" class="w100">
 								<option value>단과대학</option>
 							<c:choose>
 								<c:when test="${not empty collList }">
@@ -175,7 +179,7 @@
 							</td>
 							<th scope="row">학과</th>
 							<td>
-								<select id="selMajor" name="majorVO.majorId">
+								<select id="selMajor" name="majorVO.majorId" class="w100">
 									<option value>학과</option>
 								</select>
 							</td>
@@ -217,7 +221,7 @@
 							</td>	
 						</tr>	
 						<tr>					
-							<th scope="row">학사년도</th>
+							<th scope="row" class="w100">학사년도</th>
 							<td>${studentInfo.semeYear }</td>	
 							<th scope="row">연락처<em class="red-txt asterisk">*</em></th>
 							<td>

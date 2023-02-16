@@ -27,7 +27,7 @@ public interface ProfLectListService {
 	/**
 	 * 나의 강의 목록 조회(교수)
 	 */
-	public ProfessorVO retrieveProfLectList(int profId, String semeId);
+	public List<ProfessorVO> retrieveProfLectList(int profId, String semeId);
 	
 	/**
 	 * 나의 강의를 듣는 학생 목록 조회(교수)
@@ -41,5 +41,11 @@ public interface ProfLectListService {
 	public List<AttendVO> retrieveAttendManage(int stdId, String lectId);
 	
 	
+	/**
+	 * 출결 관리(update)
+	 * @param attendStat
+	 * @return
+	 */
+	public int modifyAttendManage(AttendVO attendVO);
 	
 }

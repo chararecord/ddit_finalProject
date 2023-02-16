@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 출결 컨트롤러
+ * 학생의 출결 컨트롤러
  * @author 민경진
  *
  */
@@ -43,7 +43,7 @@ public class AttendController {
 			, @RequestParam("lectId") String lectId
 			, Model model) {
 		
-		log.info("교수 -출석 관리에 왔다" + stdId);
+		log.info("학생 출결 현황에 왔다" + stdId);
 		
 		List<AttendVO> attendVO = service.retrieveAttendList(stdId, lectId);
 		

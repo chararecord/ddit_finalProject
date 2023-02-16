@@ -34,7 +34,6 @@
 					</c:url> 
 					<a class="btn purple" href="${updateURL}">수정</a> 
 					
-					<button type="button" class="btn default">삭제</button>
 				</div>
 			</div>
 

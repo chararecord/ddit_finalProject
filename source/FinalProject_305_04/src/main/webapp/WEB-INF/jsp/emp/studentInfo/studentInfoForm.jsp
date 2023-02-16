@@ -108,23 +108,20 @@
 								<th scope="row">영문이름<em class="red-txt asterisk">*</em></th>
 								<td><form:input path="userNmEn" type="text" cssClass="form-control"  />
 						        <form:errors path="userNmEn" element="span" cssClass="text-danger" /></td>
-								<th scope="row">주민번호<em class="red-txt asterisk">*</em></th>
-								<td><form:input path="userRrn1" type="text" cssClass="form-control"  />
-<!-- 								<div class="flex"> -->
-<!-- 		                            <input type="text" class=""> -->
-<!-- 		                            <span class="cal-dash"></span> -->
-<!-- 		                            <input type="text" class=""> -->
-<!-- 		                        </div> -->
-								
-								<div class="flex">
-							        <form:errors path="userRrn1" element="span" class="w5" cssClass="text-danger" /><span class="cal-dash"></span>
-							        <form:input path="userRrn2" type="text" class="w5" cssClass="form-control"  />
-							     </div>   
-						        <form:errors path="userRrn2" element="span" cssClass="text-danger" /></td>
-								
-							</tr>
-							<tr>
 						        
+								<th scope="row">주민번호<em class="red-txt asterisk">*</em></th>
+								<td>
+									<div class="flex">
+										<form:input path="userRrn1" type="text" cssClass="form-control" class="w10" />
+										<span class="cal-dash"></span>
+										<form:input path="userRrn2" type="text" cssClass="form-control"  class="w10" />
+										<form:errors path="userRrn1" element="span" cssClass="text-danger" />
+										<form:errors path="userRrn2" element="span" cssClass="text-danger" />
+									</div>
+								</td>
+						        
+							
+							<tr>
 								<th scope="row">생년월일<em class="red-txt asterisk">*</em></th>
 								<td><form:input path="userBir" type="date" cssClass="form-control"  />
 						        <form:errors path="userBir" element="span" cssClass="text-danger" /></td>
@@ -199,7 +196,7 @@
 							<form:errors path="recordList[0].camYear" element="span" cssClass="text-danger" /></td>
 						</tr>
 						<tr>
-							<th scope="row">단과대학</th>
+							<th scope="row" class="w100">단과대학</th>
 							<c:set var="collList" value="${collVO }" />
 							<td>
 							<select id="selColl" class="w100">

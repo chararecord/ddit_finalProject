@@ -3,6 +3,7 @@ package kr.or.ddit.prof.lectBoard.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -35,7 +36,7 @@ public class LectureBoardServiceImpl implements LectureBoardService {
 	
 	@PostConstruct
 	public void init() throws IOException {
-		log.info("첨부파일 저장 경로 : {}", imageFolder.getCanonicalPath());
+		log.info("첨부파일 저장 경로 : {}", imageFolder);
 	}
 	
 	@Override
@@ -72,15 +73,19 @@ public class LectureBoardServiceImpl implements LectureBoardService {
 	}
 	
 	private int processAttaFilelist(LectBoardVO lectBoard) {
+		log.info("lectBoard**************{}", lectBoard);
 		List<AttaFileVO> attaFileList = lectBoard.getAttaFileList();
 		if(attaFileList==null || attaFileList.isEmpty()) {return 0;}
 		attaFileList.stream().forEach(attaFile -> {
 			attaFile.setImageFolder(imageFolderURL);
+			attaFile.setAttaId(lectBoard.getLectBoardId());
 		});
-		int rowcnt = attaFileDAO.insertAttaFiles(lectBoard);
+		log.info("lectBoard=============={}", lectBoard);
+		int rowcnt = attaFileDAO.insertLectBoardFiles(lectBoard);
 		try {
 			for(AttaFileVO attaFile : attaFileList) {
-				attaFile.saveTo(imageFolder);
+				File f = new File(imageFolder + "");
+				attaFile.saveTo(f);
 			}
 			return rowcnt;
 		} catch (IOException e) {
@@ -101,4 +106,13 @@ public class LectureBoardServiceImpl implements LectureBoardService {
 		return rowcnt;
 	}
 
+	@Override
+	public int deleteAttaFileList(AttaFileVO attaFileVO) {
+		return this.attaFileDAO.deleteAttaFileList(attaFileVO);
+	}
+
+	@Override
+	public Map<String, Object> downloadFile(Map<String, Object> map) {
+		return attaFileDAO.selectAttaFile(map);
+	}
 }

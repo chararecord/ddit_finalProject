@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +24,7 @@ import kr.or.ddit.ui.PaginationRenderer;
 import kr.or.ddit.validate.DeleteGroup;
 import kr.or.ddit.validate.InsertGroup;
 import kr.or.ddit.validate.UpdateGroup;
+import kr.or.ddit.vo.AttaFileVO;
 import kr.or.ddit.vo.LectBoardVO;
 import kr.or.ddit.vo.LectureVO;
 import kr.or.ddit.vo.PagingVO;
@@ -135,9 +137,9 @@ public class LectureBoardController {
 	/**
 	 * lectBoard 게시글 등록 폼
 	 */
-	@GetMapping("/form")
+	@GetMapping(value="/{lectId}/form")
 	public String lectBoardForm(
-			
+			@PathVariable("lectId") String lectId
 			) {
 		return "prof/lectBoard/lectBoardForm";
 	}
@@ -145,7 +147,7 @@ public class LectureBoardController {
 	/**
 	 * lectBoard 게시글 등록 메소드 (INSERT)
 	 */
-	@PostMapping("/{lectId}/form")
+	@PostMapping(value="/{lectId}/form")
 	public String lectBoardInsert(
 			@Validated(InsertGroup.class) @ModelAttribute("lectBoard") LectBoardVO lectBoard
 			, @PathVariable("lectId") String lectId
@@ -154,7 +156,7 @@ public class LectureBoardController {
 		String viewName = null;
 		int rowcnt = service.createLectBoard(lectBoard);
 		if(rowcnt > 0) {
-			viewName = "redirect:/prof/lectBoard/" + lectBoard.getLectId() + "/" + lectBoard.getLectBoardId();
+			viewName = "redirect:/prof/lectBoard/" + lectId + "/" + lectBoard.getLectBoardId();
 		} else {
 			model.addAttribute("message", "서버 오류");
 			viewName = "prof/lectBoard/lectBoardForm";
@@ -177,7 +179,7 @@ public class LectureBoardController {
 		LectBoardVO lectBoard = service.retreiveLectBoard(lectBoardId);
 		model.addAttribute("lectBoard", lectBoard);
 		
-		return "prof/lectBoard/lectBoardForm";
+		return "prof/lectBoard/lectBoardEdit";
 	}
 	
 	@PostMapping("/{lectId}/form/{lectBoardId}")
@@ -219,5 +221,22 @@ public class LectureBoardController {
 			viewName = "prof/lectBoard/lectBoardView";
 		}
 		return viewName;
+	}
+	
+	/**
+	 * notice 파일 삭제
+	 */
+	@ResponseBody
+	@PostMapping("/{lectId}/{lectBoardId}/DeleteFile")
+	public int DeleteFile(
+			@RequestBody AttaFileVO attaFileVO
+			, @PathVariable String lectId
+			, @PathVariable String lectBoardId
+			) {
+		log.info("attaFileVO : " + attaFileVO);
+		//0 또는 1
+		int result = this.service.deleteAttaFileList(attaFileVO);
+		log.info("result : " + result);
+		return result;		
 	}
 }

@@ -90,7 +90,7 @@
 						<form:form id="delForm" action="${pageContext.request.contextPath }/campus/notice/${notice.notiId}" method="post">
 							<input type="hidden" name="_method" value="delete" />
 <!-- 							<a onclick="if (confirm('정말로 삭제하시겠습니까?')) document.getElementById('delForm').submit();" class="btn purple">삭제</a> -->
-							<button type="button" class="btn purple" onclick="f_movedelete()">삭제</button>
+							<button type="button" class="btn red" onclick="f_movedelete()">삭제</button>
 						</form:form>
 					</div>
 				</div>

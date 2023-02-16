@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.MyStudentVO;
 
 
 /**
@@ -30,5 +31,5 @@ public interface LectListDAO {
 	 * @param stdId
 	 * @return
 	 */
-	public List<MyLectureVO> selectLectList(@Param("stdId") int stdId, @Param("semeId") String semeId);
+	public List<MyStudentVO> selectLectList(@Param("stdId") int stdId, @Param("semeId") String semeId);
 }

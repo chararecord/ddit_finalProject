@@ -91,7 +91,7 @@ public class NoticeController {
 	}
 	
 	/**
-	 * notice 게시판 글 목록 출력 메소드 (selectList)
+	 * notice 게시판 글 목록 출력 메소드 (ajax)
 	 */
 	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public String noticeListData(

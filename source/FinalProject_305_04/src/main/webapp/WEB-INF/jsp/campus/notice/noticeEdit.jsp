@@ -144,10 +144,6 @@ var selectedFile = $(".delBtn").on("click", function(event){
 		type:"post",
 		success:function(result){
 			console.log("result : " + JSON.stringify(result));
-			
-// 			if(result=="1"){
-// 				$("#trOldFile").css("display","none");
-// 			}
 		}
 	});
 });

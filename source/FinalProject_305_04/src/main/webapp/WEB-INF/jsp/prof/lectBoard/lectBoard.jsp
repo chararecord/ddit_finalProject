@@ -281,7 +281,7 @@ let searchUI = $("#searchUI").on('click', "#searchBtn", function() {
 
 $(".insertBtn").on('click', function(event){
 	event.preventDefault();
-	let url = "${pageContext.request.contextPath}/prof/lectBoard/form";
+	let url = "${pageContext.request.contextPath}/prof/lectBoard/${lectInfo.lectId}/form";
 	location.href = url;
 });
 </script>

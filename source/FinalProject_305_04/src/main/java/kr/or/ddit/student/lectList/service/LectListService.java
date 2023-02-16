@@ -2,7 +2,7 @@ package kr.or.ddit.student.lectList.service;
 
 import java.util.List;
 
-import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.MyStudentVO;
 
 /**
  * @author 이현주
@@ -22,6 +22,6 @@ public interface LectListService {
 	/**
 	 * 수강중인 강의 목록 조회 (학생꺼)
 	 */
-	public List<MyLectureVO> retrieveLectList(int stdId, String semeId);
+	public List<MyStudentVO> retrieveLectList(int stdId, String semeId);
 	
 }

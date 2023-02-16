@@ -2,6 +2,7 @@ package kr.or.ddit.vo;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +25,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of="attaId")
 @NoArgsConstructor
 @ToString(exclude="realFile")
-public class AttaFileVO {
+public class AttaFileVO implements Serializable {
 	
 	@JsonIgnore
 	private transient MultipartFile realFile;

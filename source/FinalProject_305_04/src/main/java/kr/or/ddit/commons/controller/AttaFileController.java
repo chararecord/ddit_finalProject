@@ -56,14 +56,6 @@ public class AttaFileController {
 	@Inject
 	private AttaFileDAO attaFileDAO;
 	
-//	@GetMapping(value="/download/{attaId}/{attaSn}", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	public void download(
-//			@PathVariable String attaId
-//			, @PathVariable String attaSn
-//			, @RequestParam MultipartFile files ) throws IOException {
-//		
-//	}
-	
 	//파일 다운로드
 	// localhost/download?fileName=2022/07/25/cd862ebd-10a2-4220-bbbb-5bbf8ffdadd7_phone01.jpg
 	@ResponseBody
@@ -71,7 +63,8 @@ public class AttaFileController {
 	public ResponseEntity<Resource> download(
 			@PathVariable String attaId
 			, @PathVariable String attaSn
-			, @RequestParam(value="fileName", required=false) String fileName){
+			, @RequestParam(value="fileName", required=false) String fileName
+			, HttpServletRequest req){
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		
@@ -83,11 +76,15 @@ public class AttaFileController {
 		fileName = (String)resultMap.get("ATTA_SAVENM");
 				
 		//resource : 다운로드 받을 파일(자원)
-		Resource resource = new FileSystemResource(
-				"D:\\A_TeachingMaterial\\06_JSP_Spring\\workspace\\FinalProject_305_04\\src\\main\\webapp\\resources\\images\\attaFile\\"
-				+fileName
-				);
-		//cd862ebd-10a2-4220-bbbb-5bbf8ffdadd7_phone01.jpg
+//		Resource resource = new FileSystemResource(
+//				"D:\\A_TeachingMaterial\\06_JSP_Spring\\workspace\\FinalProject_305_04\\src\\main\\webapp\\resources\\images\\attaFile\\"
+//				+fileName
+//				);
+		
+		String url = String.format("%s%s/%s", req.getContextPath(), imageFolderURL, fileName);
+		log.info(">>>>>>>>>>>>>>가만안둬>>>>>>>>>>>>>>{}",url);
+		Resource resource = new FileSystemResource(url);
+		
 		String resourceName = (String)resultMap.get("ATTA_FILENM");
 		//header : 인코딩 정보, 파일명 정보
 		HttpHeaders headers = new HttpHeaders();

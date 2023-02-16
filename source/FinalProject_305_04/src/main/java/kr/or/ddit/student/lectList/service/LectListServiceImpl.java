@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import kr.or.ddit.student.lectList.dao.LectListDAO;
 import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.MyStudentVO;
 
 @Service
 public class LectListServiceImpl implements LectListService {
@@ -14,7 +15,7 @@ public class LectListServiceImpl implements LectListService {
 	LectListDAO lectListDAO;
 	
 	@Override
-	public List<MyLectureVO> retrieveLectList(int stdId, String semeId) {
+	public List<MyStudentVO> retrieveLectList(int stdId, String semeId) {
 		// TODO Auto-generated method stub
 		return this.lectListDAO.selectLectList(stdId, semeId);
 	}

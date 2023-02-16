@@ -1,7 +1,5 @@
 package kr.or.ddit.prof.lectroom.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import kr.or.ddit.prof.lectroom.dao.ProfLectListDAO;
 import kr.or.ddit.prof.lectroom.service.ProfLectListService;
 import kr.or.ddit.vo.LectureVO;
 import kr.or.ddit.vo.MyLectureVO;
@@ -48,8 +45,7 @@ public class ProfAttendListController {
 	
 	
 //	@ResponseBody
-	@GetMapping("/lectroom/profAttendList"
-//			,produces="application/json;charset=utf-8"
+	@GetMapping(value="/lectroom/profAttendList",produces="application/json;charset=utf-8"
 			)
 	public String lectList(
 			@RequestParam(value="lectId", required=true) String lectId

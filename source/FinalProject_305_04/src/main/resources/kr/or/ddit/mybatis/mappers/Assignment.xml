@@ -34,6 +34,34 @@
 	
 	
 	
+	<!-- 과제 제출하기 AssignmentSubmitVO insert  -->
+	<insert id="insertAssignmentSubmit" parameterType="AssignmentSubmitVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="asgnSubmId">
+		SELECT 'DN1'||LPAD(ASSIGNMENT_SEQ.NEXTVAL, 4, '0')
+		FROM DUAL
+		</selectKey>
+		INSERT INTO asgn_subm (
+		    asgn_subm_id,
+		    curlect_id,
+		    asgn_id,
+		    assign_sdate,
+		    assign_cont,
+		    assign_score
+		) VALUES (
+		    , #{asgnSubmId}
+			, #{curlectId,jdbcType=VARCHAR}
+			, #{asgnId,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{assignCont,jdbcType=VARCHAR}
+			, 0
+		);
+	</insert>
+	
+	
+
+	
+	
+	
 
 
 

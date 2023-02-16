@@ -1,12 +1,15 @@
 package kr.or.ddit.emp.studentInfo.service;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.or.ddit.commons.dao.AttaFileDAO;
 import kr.or.ddit.emp.studentInfo.dao.StudentInfoDao;
 import kr.or.ddit.vo.CollVO;
 import kr.or.ddit.vo.MajorVO;
@@ -23,11 +26,16 @@ public class StudentInfoServiceImpl implements StudentInfoService {
 
 	@Inject
 	private StudentInfoDao studentInfoDao;
-	
+	@Inject
+	private AttaFileDAO attaFileDAO;
 
+	
+	
 	@Override
 	public void retrieveStudentInfoList(PagingVO<StudentVO> pagingVO) {
+		int totalRecord = studentInfoDao.selectTotalRecord(pagingVO);
 		pagingVO.setTotalRecord(studentInfoDao.selectTotalRecord(pagingVO));
+		List<StudentVO> studentInfoList = studentInfoDao.selectStudentInfoList(pagingVO);
 		pagingVO.setDataList(studentInfoDao.selectStudentInfoList(pagingVO));
 	}
 

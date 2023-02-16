@@ -33,7 +33,7 @@ public class MyLectureVO {
 	private String syllaMeet; //공통코드설명
 	private String estaSub; //공통코드설명
 	
-	private MajorVO majorNm; // 학과명 , 1:1
-	private UsrVO userNm; // 
+	private MajorVO majorVO; // 학과명 , 1:1
+	private UsrVO userVO; // 
 	
 }

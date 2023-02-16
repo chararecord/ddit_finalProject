@@ -44,11 +44,12 @@ public class LectBoardVO implements Serializable {
 	private Integer hit;
 	private String userNm;
 	
+////////////////////////////// 파일 첨부 //////////////////////////////
 	private List<AttaFileVO> attaFileList;
-	private int[] delAttaNos;				// 게시글 수정시 삭제할 첨부파일 번호 유지
+	private int[] delAttaIds;				// 게시글 수정시 삭제할 첨부파일 번호 유지
 	private int attaCount;
 	private MultipartFile[] files;
-	private int startAttaId;
+	private int startAttaSn;
 	public void setFiles(MultipartFile[] files) {
 		if(files!=null && files.length > 0) {
 			this.files = files;

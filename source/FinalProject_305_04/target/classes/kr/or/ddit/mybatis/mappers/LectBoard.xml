@@ -44,6 +44,7 @@
 		SELECT
 		    E.SEME_YEAR
 		    , E.SEME
+		    , C.LECT_ID
 		    , C.LECT_NM
 		    , C.CAM_YEAR
 		    , (

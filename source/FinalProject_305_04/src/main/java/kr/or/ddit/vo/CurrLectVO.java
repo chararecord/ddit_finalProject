@@ -56,5 +56,8 @@ public class CurrLectVO implements Serializable {
 	private List<TestVO> testInfoList;
 	private TestAllowVO testAllow; //has a 관계 - 거래처명
 	
+	//과제
+	private List<AssignmentVO> assignmentList; //has many 관계 (1:N)
+	
 	
 }

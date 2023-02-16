@@ -1,5 +1,8 @@
 package kr.or.ddit.prof.lectBoard.service;
 
+import java.util.Map;
+
+import kr.or.ddit.vo.AttaFileVO;
 import kr.or.ddit.vo.LectBoardVO;
 import kr.or.ddit.vo.LectureVO;
 import kr.or.ddit.vo.PagingVO;
@@ -41,4 +44,18 @@ public interface LectureBoardService {
 	 * @return
 	 */
 	public int removeLectBoard(String lectBoardId);
+	
+	/**
+	 * 파일 삭제
+	 * @param notiId
+	 * @return
+	 */
+	public int deleteAttaFileList(AttaFileVO attaFileVO);
+	
+	/**
+	 * 파일 다운로드
+	 * @param attaFileVO
+	 * @return
+	 */
+	public Map<String, Object> downloadFile(Map<String, Object> map);
 }

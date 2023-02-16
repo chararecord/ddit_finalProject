@@ -36,12 +36,12 @@
 		SELECT * FROM DUAL
 	</insert>
 	
-	<!-- 강의 공지사항 게시판 파일 추가 쿼리 -->
-	<insert id="insertAttaFiles" parameterType="LectBOARDVO">
+	<!-- 강의 게시판 파일 추가 쿼리 -->
+	<insert id="insertLectBoardFiles" parameterType="LectBoardVO">
 		<selectKey order="BEFORE" resultType="int" keyProperty="startAttaSn">
 			SELECT NVL(MAX(ATTA_SN), 0)+1
 			FROM ATTA_FILE
-			WHERE ATTA_ID = #{attaId}
+			WHERE ATTA_ID = #{lectBoardId, jdbcType=VARCHAR}
 		</selectKey>
 		INSERT ALL
 		<foreach collection="attaFileList" item="attaFile" index="idx">
@@ -56,7 +56,7 @@
 				, ATTA_DOWNLOAD
 				, ATTA_PATH
 			) VALUES (
-				#{attaId, jdbcType=VARCHAR}
+				#{attaFile.attaId, jdbcType=VARCHAR}
 				, #{startAttaSn}+#{idx}
 				, #{attaFile.attaFilenm, jdbcType=VARCHAR}
 				, #{attaFile.attaSavenm, jdbcType=VARCHAR}

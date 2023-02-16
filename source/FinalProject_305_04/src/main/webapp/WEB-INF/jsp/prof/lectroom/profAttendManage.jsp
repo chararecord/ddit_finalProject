@@ -76,36 +76,36 @@
 										<td id ="attnedId" hidden="true">${attendManage.attendId }</td>
 										<th scope="row">${status.count }주차</th>
 										<td>${attendManage.attendDate }</td>
-										<td id="attendState">${attendManage.attendStat }</td>
+										<td id="attendState${status.index}">${attendManage.attendStat}</td>
 										<td>
 											<!-- 라디오버튼 -->
 											<div class="rc-wrap">
 												<div class="rc-inner">
-													<input type="radio" id="rdo_attend${status.index}" name="radio-group"
-														checked=""> 
+													<input type="radio" id="rdo_attend${status.index}" name="radio-group${status.index}"
+														checked="" value="출석"> 
 														<label for="rdo_attend${status.index}">출석</label>
 												</div>
 												<div class="rc-inner">
-													<input type="radio" id="rdo_absence${status.index}" name="radio-group"
-														checked=""> 
-														<label for="rdo_absence${status.index}">결석</label>
+													<input type="radio" id="rdo_absence${status.index}" name="radio-group${status.index}"
+														checked="" value="결석"> 
+													<label for="rdo_absence${status.index}">결석</label>
 												</div>
 												<div class="rc-inner">
-													<input type="radio" id="rdo_late${status.index}" name="radio-group"
-														checked=""> 
+													<input type="radio" id="rdo_late${status.index}" name="radio-group${status.index}"
+														checked="" value="지각"> 
 														<label for="rdo_late${status.index}">지각</label>
 												</div>
 												<div class="rc-inner">
-													<input type="radio" id="rdo_leave${status.index}" name="radio-group"
-														checked=""> 
+													<input type="radio" id="rdo_leave${status.index}" name="radio-group${status.index}"
+														checked="" value="조퇴"> 
 														<label for="rdo_leave${status.index}">조퇴</label>
 												</div>
 												<div class="rc-inner">
-													<input type="radio" id="rdo_excused${status.index}" name="radio-group"
-														checked=""> 
+													<input type="radio" id="rdo_excused${status.index}" name="radio-group${status.index}"
+														checked="" value="공결"> 
 														<label for="rdo_excused${status.index}">공결</label>
 												</div>
-												<button id="checkBtn" onclick="f_checkBtn()" type="button" class="btn btn-s purple">확인</button>
+												<button id="chkBtn" onclick="f_checkBtn('radio-group${status.index}','attendState${status.index}','${attendManage.attendId }' )" type="button" class="btn btn-s purple">확인</button>
 											</div> 
 											<!-- // 라디오버튼 -->
 										</td>
@@ -125,18 +125,32 @@
 
 
 <script>
-function f_checkBtn(attendState){
-	var checkedValue = $("input[name='radio-group']:checked");
-	var attendStat = checkedValue.next().text();
-	var userNm = $("#userNm").text();
-	var attendId = $("#attnedId").text();
-	console.log(attendId);
-	var data = {
+function f_checkBtn(radiostate, attendState, attendIdd){
+// 	console.log("radiostate : ",radiostate);
+// 	console.log("attendState : ",attendState);
+	console.log("attendIdd : ",attendIdd);
+	
+	let checkedValue = radiostate;
+	let inputCode = "input[name='" + checkedValue + "']:checked"
+	console.log("inputCode : ",inputCode);
+	
+	let attendStat = $(inputCode).next().text();
+	console.log("attendStat : ",attendStat);
+
+// 		checkedValue.next().text();
+	
+	let userNm = $("#userNm").text();
+	let attendId = attendIdd;
+	
+	console.log("attendID", attendId);
+	console.log("attendStat", attendStat);
+	console.log("userNm", userNm);
+	let data = {
 			"attendId" : attendId,
  			"attendStat" : attendStat,
 			"userNm" : userNm
 	};
-	 if(confirm(attendStat+ "로 처리하시겠습니까?") == true){
+	 if(confirm(attendStat+ "(으)로 처리하시겠습니까?") == true){
 		 console.log(userNm);
 		 console.log("data : ",data);
 		 $.ajax({
@@ -146,8 +160,11 @@ function f_checkBtn(attendState){
 			contentType : "application/json;charset=UTF-8",
 			dataType : "json",
 			success : function(resp) {
-// 					console.log(resp);
-					$("#attendState").html(resp.attendStat);
+					console.log("attendState",attendState);
+					console.log(resp);
+					
+					$("#"+attendState).html(resp.attendStat);
+					
 			},
 			error : function(jqXHR, status, error) {
 				console.log(jqXHR);
@@ -157,15 +174,11 @@ function f_checkBtn(attendState){
 		});
 	        
  		alert("처리 완료");
-	  var e = $("attendState").val();
+ 		let e = $("attendState").val();
 	    }
 	    else{
 	    	alert("취소하였습니다.");
 	    }
 }
-
-
-
-
 
 </script>
