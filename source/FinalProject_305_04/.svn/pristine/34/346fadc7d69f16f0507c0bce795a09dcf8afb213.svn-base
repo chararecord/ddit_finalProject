@@ -1,0 +1,33 @@
+package kr.or.ddit.student.graduation.service;
+
+import java.util.List;
+
+import kr.or.ddit.vo.GradReqVO;
+import kr.or.ddit.vo.MGradReqVO;
+import kr.or.ddit.vo.SemesterVO;
+
+/**
+ * @author 장은호
+ * @Since 2023. 2. 16.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 16.       장은호        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface GraduationService {
+	
+	public List<MGradReqVO> retrieveMGradReqList();
+	
+	public MGradReqVO retrieveMGradReq(String mGradReqId);
+	
+	public List<SemesterVO> retrieveSemesterList();
+	
+	public int createMGradReq(MGradReqVO mGradReqVO);
+	
+	public int createGradReq(List<GradReqVO> gradReqVO);
+}

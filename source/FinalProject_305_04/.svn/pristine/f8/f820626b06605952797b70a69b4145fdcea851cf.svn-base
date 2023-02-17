@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.assignment.dao.AssignmentStudentDAO">
+
+
+		
+	<!-- 과제 리스트 조회   -->
+<!-- 	 <resultMap type="CurrLectVO" id="currlectMap" autoMapping="true"> -->
+<!-- 		<id property="curlectId" column="CURLECT_ID" /> -->
+<!-- 		<collection property="assignmentList" ofType="AssignmentVO" autoMapping="true"> -->
+<!-- 			<id property="asgnId" column="ASGN_ID"/> -->
+<!-- 		</collection> -->
+<!-- 	</resultMap>   -->
+	<resultMap type="CurrLectVO" id="currlectMap">
+		<result property="curlectId" column="CURLECT_ID" /> 
+		<result property="stdId" column="STD_ID" /> 
+		<result property="finScore" column="FIN_SCORE" /> 
+		<collection property="lectureList" resultMap="lectureMap"></collection>
+		<collection property="assignmentList" resultMap="assignmentMap"></collection>
+	</resultMap>
+	
+	<resultMap type="LectureVO" id="lectureMap">
+		<result property="lectId" column="LECT_ID" /> 
+		<result property="syllaApprId" column="SYLLA_APPR_ID" /> 
+		<result property="lectNm" column="LECT_NM" /> 
+		<result property="lectState" column="LECT_STATE" /> 
+		<result property="camYear" column="CAM_YEAR" /> 
+		<result property="numClass" column="NUM_CLASS" /> 
+		<result property="credit" column="CREDIT" /> 
+		<result property="lectHour" column="LECT_HOUR" /> 
+		<result property="textbook" column="TEXTBOOK" /> 
+		<result property="lectCom" column="LECT_COM" /> 
+		<result property="note" column="NOTE" /> 
+		<result property="onfLine" column="ONF_LINE" /> 
+		<result property="assignRoomId" column="ASSIGN_ROOM_ID" /> 
+	</resultMap>
+	
+	<resultMap type="AssignmentVO" id="assignmentMap">
+		<result property="asgnId" column="ASGN_ID" /> 
+		<result property="assignNm" column="ASSIGN_NM" /> 
+		<result property="assignRdate" column="ASSIGN_RDATE" /> 
+		<result property="assignDdate" column="ASSIGN_DDATE" /> 
+		<result property="assignCont" column="ASSIGN_CONT" /> 
+		<association property="assignmentSubmitVO" resultMap="assignmentSubmitMap"></association>		
+	</resultMap>
+	
+	<resultMap type="AssignmentSubmitVO" id="assignmentSubmitMap">
+		<result property="asgnSubmId" column="ASGN_SUBM_ID" /> 
+		<result property="assignSdate" column="ASSIGN_SDATE" /> 
+		<result property="assignSubCont" column="ASSIGN_SUB_CONT" /> 
+		<result property="assignScore" column="ASSIGN_SCORE" /> 
+	</resultMap>
+
+	<select id="selectAssignmentList" parameterType="CurrLectVO" resultMap="currlectMap">
+		SELECT A.CURLECT_ID, A.STD_ID, A.FIN_SCORE 
+       		   ,B.LECT_ID, B.SYLLA_APPR_ID, B.LECT_NM, B.LECT_STATE, B.CAM_YEAR, B.NUM_CLASS, B.CREDIT, B.LECT_HOUR, B.TEXTBOOK, B.LECT_COM, B.NOTE, B.ONF_LINE, B.ASSIGN_ROOM_ID
+              ,C.ASGN_ID, C.ASSIGN_NM, C.ASSIGN_RDATE, C.ASSIGN_DDATE, C.ASSIGN_CONT
+              ,D.ASGN_SUBM_ID, D.ASSIGN_SDATE, D.ASSIGN_SUB_CONT, D.ASSIGN_SCORE
+		FROM CURR_LECT A LEFT OUTER JOIN LECTURE B ON(A.LECT_ID = B.LECT_ID )
+		               LEFT OUTER JOIN ASGN C ON(B.LECT_ID = C.LECT_ID)
+		               LEFT OUTER JOIN ASGN_SUBM D ON(C.ASGN_ID = D.ASGN_ID)
+		WHERE A.CURLECT_ID = #{curlectId}
+		ORDER BY CURLECT_ID
+	</select>
+	
+	
+	<!-- 과제 상세조회   -->
+	<resultMap type="AssignmentVO" id="AsgnMap" autoMapping="true">
+		<id property="asgnId" column="ASGN_ID" />
+		<association property="assignmentSubmitVO" javaType="AssignmentSubmitVO" autoMapping="true" />
+	</resultMap>  
+	
+	<select id="selectAssignmentView"  parameterType="AssignmentVO" resultMap="AsgnMap">
+		<!-- SELECT ASGN_ID, LECT_ID, ASSIGN_NM, ASSIGN_RDATE, ASSIGN_DDATE, ASSIGN_CONT
+		FROM ASGN
+		WHERE ASGN_ID = #{asgnId} -->
+		SELECT A.ASGN_ID, A.LECT_ID, A.ASSIGN_NM, A.ASSIGN_RDATE, A.ASSIGN_DDATE, A.ASSIGN_CONT
+		      , B.ASGN_SUBM_ID, B.CURLECT_ID, B.ASGN_ID, B.ASSIGN_SDATE, B.ASSIGN_SUB_CONT, B.ASSIGN_SCORE
+		FROM ASGN A LEFT OUTER JOIN ASGN_SUBM B ON (A.ASGN_ID = B.ASGN_ID)
+		WHERE A.ASGN_ID = #{asgnId}
+	</select>
+	<!-- <select id="selectAssignmentSubmit"  parameterType="string" resultType="AssignmentSubmitVO">
+		SELECT
+		    Asgn_Subm_Id,
+		    Curlect_Id,
+		    Asgn_Id,
+		    Assign_Sdate,
+		    Assign_Cont,
+		    Assign_Score
+		FROM
+		    ASGN_SUBM
+		WHERE Asgn_Id = #{asgnId}
+	</select> -->
+
+	
+	
+	
+	
+	<!-- 과제 제출하기 AssignmentSubmitVO insert  -->
+	<insert id="insertAssignmentSubmit" parameterType="AssignmentSubmitVO">
+	
+		
+		<selectKey resultType="AssignmentSubmitVO" keyProperty="asgnSubmId" order="BEFORE" >
+		SELECT 'DN1'||LPAD(ASSIGNMENT_SEQ.NEXTVAL, 4, '0') 
+		FROM DUAL
+		</selectKey>
+	<!-- 	<selectKey resultType="AssignmentSubmitVO" keyProperty="asgnSubmId,asgnId" order="BEFORE" >
+		SELECT 'DN1'||LPAD(ASSIGNMENT_SEQ.NEXTVAL, 4, '0') As asgnSubmId
+			   ,'DL1'||LPAD(ASSIGNMENT_SEQ.NEXTVAL, 4, '0') As asgnId
+		FROM DUAL
+		</selectKey> -->
+
+
+		INSERT INTO asgn_subm (
+		    asgn_subm_id,
+		    curlect_id,
+		    asgn_id,
+		    assign_sdate,
+		    assign_cont,
+		    assign_score
+		) VALUES (
+		    #{asgnSubmId}
+			, #{curlectId,jdbcType=VARCHAR}
+			, #{asgnId,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{assignCont,jdbcType=VARCHAR}
+			, 0
+		)
+	</insert>
+	
+	
+
+	
+	
+	
+
+
+
+
+</mapper>
