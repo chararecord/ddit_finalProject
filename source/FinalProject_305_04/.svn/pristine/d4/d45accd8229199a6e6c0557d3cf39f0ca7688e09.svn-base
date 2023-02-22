@@ -1,0 +1,18 @@
+package kr.or.ddit.student.consult.service;
+
+import java.util.HashMap;
+import java.util.List;
+
+import kr.or.ddit.vo.ConsultVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.ProfessorVO;
+
+public interface StudentConsultService {
+
+	public int createConsult(ConsultVO consult);
+	public void retreiveConsultList(PagingVO<ConsultVO> pagingVO);
+	public ConsultVO retrieveConsult(String consId);
+	public int removeConsultState(String consId);
+	
+	public List<ProfessorVO> retrieveProfList(String stdId);
+}

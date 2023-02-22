@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.assignment.dao.AssignmentProfDAO">
+
+
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM ASGN
+		WHERE LECT_ID = #{lectId}
+	</select>
+
+
+	<!-- 교수 출제과제목록   -->
+	<select id="selectProfAssignmentList" parameterType="PagingVO" resultType="AssignmentVO">
+
+		WITH ORDEREDASSIGNMENTPROF AS (
+		
+		    SELECT ASGN_ID, LECT_ID, ASSIGN_NM, TO_CHAR(ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE, 
+		    TO_CHAR(ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE, 
+		    ASSIGN_CONT
+			FROM ASGN
+			WHERE LECT_ID = #{detailCondition.lectId}
+		    
+		)
+		SELECT B.* FROM (
+		    SELECT ROWNUM RNUM2, A.*
+		    FROM (
+		        SELECT ROWNUM RNUM, ORDEREDASSIGNMENTPROF.*
+		        FROM ORDEREDASSIGNMENTPROF
+		    ) A
+		) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+
+	</select>
+	
+	
+	<!-- 교수 과제 조회   -->
+	<select id="selectProfAssignmentView" parameterType="String" resultType="AssignmentVO">
+	SELECT ASGN_ID 
+			, LECT_ID 
+			, ASSIGN_NM 
+			,TO_CHAR(ASSIGN_RDATE, 'YYYY-MM-DD')  AS ASSIGN_RDATE
+			,TO_CHAR(ASSIGN_DDATE, 'YYYY-MM-DD')  AS ASSIGN_DDATE
+			,ASSIGN_CONT
+	FROM ASGN
+	WHERE ASGN_ID = #{asgnId}
+	</select> 
+	
+	
+	
+	<!--  교수 출제과제 수정  -->
+	<update id="updateProfAssignmentView" parameterType="AssignmentVO">
+		
+		UPDATE ASGN
+		SET 
+			ASSIGN_NM = #{assignNm,jdbcType=DATE}
+		  , ASSIGN_DDATE = #{assignDdate,jdbcType=DATE}
+		  , ASSIGN_CONT = #{assignCont,jdbcType=VARCHAR}
+		WHERE ASGN_ID = #{asgnId}
+		
+		<!-- , #{asgnId,jdbcType=VARCHAR}
+		, #{lectId,jdbcType=VARCHAR}
+		, #{assignNm,jdbcType=VARCHAR}
+		, #{assignRdate,jdbcType=DATE}
+		, #{assignDdate,jdbcType=DATE}
+		, #{assignCont,jdbcType=VARCHAR} -->
+	</update>
+	
+	
+	<!--  교수 출제 과제 삭제  -->
+	<delete id="deleteProfAssignment" parameterType="String">
+		DELETE 
+		FROM ASGN
+		WHERE ASGN_ID = #{asgnId,jdbcType=VARCHAR}
+	</delete>
+
+
+	<!-- 교수 과제 출제  - 등록   -->
+	<insert id="insertProfAssignment" parameterType="AssignmentVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="asgnId" >
+			SELECT 'DL1'||LPAD(ASSIGNMENTLIST_SEQ.NEXTVAL, 4, '0') 
+			FROM DUAL
+		</selectKey>
+		INSERT INTO ASGN (
+		    ASGN_ID,
+		    LECT_ID,
+		    ASSIGN_NM,
+		    ASSIGN_RDATE,
+		    ASSIGN_DDATE,
+		    ASSIGN_CONT
+		) values (
+		    #{asgnId}
+			, #{lectId,jdbcType=VARCHAR}
+			, #{assignNm,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{assignDdate,jdbcType=DATE} 
+			, #{assignCont,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+	<!--
+	
+	///////////////////////////////////////////////////////////////
+	
+	  -->
+	
+	
+	
+	
+
+</mapper>

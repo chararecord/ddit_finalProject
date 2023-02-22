@@ -1,0 +1,11 @@
+package kr.or.ddit.vo;
+
+import lombok.Data;
+
+@Data
+public class BuildingVO {
+	private String buildId;
+	private String buildNum;
+	private String buildState;
+	private String commDesc;
+}
