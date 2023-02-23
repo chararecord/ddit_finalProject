@@ -1,0 +1,340 @@
+package kr.or.ddit.prof.assignment.constroller;
+
+import java.util.HashMap;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.prof.assignment.service.AssignmentProfService;
+import kr.or.ddit.validate.DeleteGroup;
+import kr.or.ddit.validate.InsertGroup;
+import kr.or.ddit.validate.UpdateGroup;
+import kr.or.ddit.vo.AssignmentSubmitVO;
+import kr.or.ddit.vo.AssignmentVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SearchVO;
+import kr.or.ddit.vo.StudentVO;
+import kr.or.ddit.vo.UsrVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * @author 이선민
+ * @Since 2023. 2. 20.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 20.       PC-20        생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+@Slf4j
+@Controller
+@RequestMapping("/prof/assignment")
+public class AssignmentProfessorController {
+	
+	
+	@Inject
+	private AssignmentProfService service;
+
+	
+	
+	/**
+	 * studentInfo 속성 생성 메소드 
+	 * @return
+	 */
+	@ModelAttribute("submitStudentList")
+	public StudentVO studentInfo() {
+		return new StudentVO();
+	}
+	
+	
+	
+	///////////////////////////////////////////////
+	
+	/**
+	 * 과제 글 목록 출력
+	 */
+	@GetMapping
+	public String assignmentUI(
+		@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+		, @RequestParam(value="lectId", required=true) String lectId
+		, @ModelAttribute("simpleCondition") SearchVO searchVO
+		, Model model
+	) {
+		
+		PagingVO<AssignmentVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		
+		
+		AssignmentVO assignmentVO = new AssignmentVO();
+		assignmentVO.setLectId(lectId);
+		pagingVO.setDetailCondition(assignmentVO);
+		
+		service.retrieveAssignmentProfList(pagingVO, lectId);
+		log.info("pagingVO {}", pagingVO);
+		log.info("lectId {}", lectId);
+		
+	
+		model.addAttribute("pagingVO",pagingVO);
+		model.addAttribute("lectId",lectId);
+		//model.addAttribute("lectId", lectId);
+		//log.info("pagingVO {} ", pagingVO.getDataList());
+		
+		return "prof/assignment/assignment";
+		
+		
+	}
+	
+
+	///////////////////////////////////////////////
+	
+	
+	/**
+	 * 과제 출제 insert
+	 */
+	@GetMapping("/insertAssignment")
+	public String insertAssignmentUI(
+		@RequestParam(value="lectId", required=true) String lectId
+		, Model model
+	) {
+		
+		AssignmentVO assignmentVO = new AssignmentVO();
+		assignmentVO.setLectId(lectId);
+		
+		model.addAttribute("lectId", lectId);
+		return "prof/assignment/assignmentForm";
+	}
+	
+	
+	@PostMapping("/insertAssignment")
+	public String insertAssignment(
+		@Validated(InsertGroup.class) @ModelAttribute("assignmentProf") AssignmentVO assignmentVO
+		, Model model
+	) {
+
+		
+		String viewName = null;
+		
+		int rowcnt = service.createAssignment(assignmentVO);
+		
+		log.info("!!!!!!!!{}", assignmentVO.getAssignDdate());
+		
+		if(rowcnt > 0) {
+			viewName = "redirect:/prof/assignment?lectId=" + assignmentVO.getLectId();
+		}else {
+			model.addAttribute("message", "서버오류");
+			viewName = "prof/assignment/assignmentForm";
+		}
+		return viewName;
+	}
+	
+	
+	
+	////////////////////////////////////////////////////
+	
+	
+	
+	/**
+	 * 교수 과제 조회 - 출제한 과제 상세보기 
+	 * @param assignmentVO
+	 * @param asgnId
+	 * @param model
+	 * @return
+	 */
+	@GetMapping("/viewAssignment")
+	public String assignmentProfListData(
+		@RequestParam String asgnId
+		, @RequestParam String lectId
+ 		, Model model	
+	) {	
+		
+		AssignmentVO assignmentVO = service.retrieveAssignment(asgnId);
+		assignmentVO.setLectId(lectId);
+		
+		model.addAttribute("assignmentVO", assignmentVO);
+		model.addAttribute("lectId", assignmentVO.getLectId());
+		
+		log.info("assignmentVO !!!!!!!!!!!!!!!! {} ", assignmentVO);
+		return "prof/assignment/assignmentView";
+	}
+	
+	
+	
+	////////////////////////////////////////////////////
+	
+	/**
+	 * 출제된 과제 삭제 
+	 * @param assignmentVO
+	 * @param model
+	 * @return
+	 */
+	@DeleteMapping("/viewAssignment")
+	public String assignmentDelete(
+		@Validated(DeleteGroup.class) @ModelAttribute("assignment") AssignmentVO assignmentVO
+		, @RequestParam String lectId
+		, Model model
+	) {
+		
+		log.info("sdsdfgsdgsdgsdgf {}", assignmentVO);
+		
+		String viewName = null;
+		
+		assignmentVO.setLectId(lectId);
+		
+		int rowcnt = service.removeAssignment(assignmentVO.getAsgnId());
+		
+		if(rowcnt > 0) {
+			viewName = "redirect:/prof/assignment?lectId=" + assignmentVO.getLectId();
+		}else {
+			model.addAttribute("message", "서버오류");
+			viewName = "prof/assignment/assignmentView";
+		}
+		
+		return viewName;
+		
+	}
+	
+
+	
+	////////////////////////////////////////////////////
+	
+	
+	
+	/**
+	 * 출제된 과제 수정 
+	 * @param assignmentVO
+	*/
+	@GetMapping("/editAssignment")
+	public String assignmentEditUI(
+		@RequestParam String asgnId
+		, Model model
+	) {
+		
+		AssignmentVO assignmentVO = service.retrieveAssignment(asgnId);
+		model.addAttribute("assignmentVO", assignmentVO);
+		
+		//log.info("assignmentVO!!!!!!!!!!!!!!!!xdgsdagsdg {}", assignmentVO);
+		
+		return "prof/assignment/assignmentEdit";
+	}
+	
+	
+	@PostMapping("/editAssignment")
+	public String assignmentEdit(
+		@Validated(UpdateGroup.class) @ModelAttribute("assignment") AssignmentVO assignmentVO	
+		, Model model
+	) {
+		
+		
+		
+		String viewName = null;
+		
+		
+		
+		int rowcnt = service.modifyAssignment(assignmentVO);
+		if(rowcnt > 0) {
+			viewName = "redirect:/prof/assignment/viewAssignment?lectId=" + assignmentVO.getLectId() + "&asgnId=" + assignmentVO.getAsgnId(); 
+		}else {
+			model.addAttribute("message", "서버오류");
+			viewName = "prof/assignment/editAssignment";
+		}
+		
+		log.info("rowcnt {}", rowcnt);
+		
+		return viewName;
+		
+	}
+	
+	
+	///////////////////////////////////////////////////////
+	
+	/**
+	 * 학생 과제 제출목록 
+	 * @return
+	 */
+	@RequestMapping("submitStudentList")
+	public String submitStudentList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @RequestParam(value="asgnId", required=true) String asgnId
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+	) {
+		//데이터 없음
+		PagingVO<AssignmentVO> pagingVO = new PagingVO<>(10, 5);
+		//페이지번호 세팅
+		pagingVO.setCurrentPage(currentPage);
+		//검색 정보 세팅
+		pagingVO.setSimpleCondition(searchVO);
+
+		AssignmentVO assignmentVO = new AssignmentVO();
+		assignmentVO.setAsgnId(asgnId);
+		pagingVO.setDetailCondition(assignmentVO);
+		
+		service.retrieveSubmitStudentList(pagingVO, asgnId);
+		log.info("pagingVO[4] : " + pagingVO);
+		
+		model.addAttribute("pagingVO", pagingVO);
+		log.info("pagingVO {}", pagingVO);
+		
+		return "prof/assignment/assignmentSubmitList";
+		
+	}
+	
+
+	
+	//////////////////////////////////////////////////////////
+	
+	
+	/**
+	 * 학생 제출 과제 상세 ajax
+	 * @return
+	 * 요청파라미터 : let data = {"asgnSubmId" : asgnSubmitId};	 
+	 * json 으로 리턴
+	 */
+	@ResponseBody
+	@PostMapping("/submitStudentView")
+	public AssignmentVO submitStudentView(
+		@RequestBody AssignmentSubmitVO asgnSubmId
+		, Model model
+	) {
+		
+		/*AssignmentVO assignmentVO = service.retrieveSubmitStudent(asgnSubmId);
+		model.addAttribute("assignmentVO" ,assignmentVO);
+		log.info("assignmentVO!!!!!!! {}" , assignmentVO);
+		return "prof/assignment/assignmentSubmitView";
+		*/
+		
+		log.info("asgnSubmId!!!!!!! {}" , asgnSubmId);
+		System.out.println("asgnSubmId?" + asgnSubmId.getAsgnSubmId());
+		AssignmentVO data = service.retrieveSubmitStudent(asgnSubmId.getAsgnSubmId());
+
+		
+		return data;
+		
+		
+		
+		
+	}
+	
+	
+	
+	
+}
