@@ -1,0 +1,52 @@
+package kr.or.ddit.vo;
+
+import java.io.Serializable;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+/**
+ * 장학금 내역 VO
+ * @author 이현주
+ * @Since 2023. 2. 3.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 2. 3.      이현주             		생성
+ * 2023. 2. 15.		이현주		myStudentList, subMajorList 추가
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+@Data
+@EqualsAndHashCode(of="schHistId")
+@ToString
+public class SchHistVO implements Serializable {
+
+	private int rnum;
+	
+	@NotNull
+	private String schHistId; //장학금내역아이디
+	@NotNull
+	private String stdId; //아이디(학번)
+	
+	private String semeId; // 학사연도
+	private String beneDate; //수혜일
+	
+	private String scholarshipId;
+	private List<ScholarshipVO> scholarshipList; //장학금VO
+	
+	private List<SemesterVO> semesterList; // 학사연도
+	private List<MyStudentVO> myStudentList; // 학생 , has many 관계
+	private List<SubMajorVO> subMajorList; //학과 과목, has many 관계
+	
+	
+	
+}

@@ -1,0 +1,3 @@
+javax.validation.constraints.NotBlank.message={0}, \ud544\uc218 \uc785\ub825 \ub370\uc774\ud130
+javax.validation.constraints.Pattern.message=\ub370\uc774\ud130(${validatedValue}) \ud615\uc2dd({regexp}) \ud655\uc778
+JdbcDaoImpl.notFound={0}, \ubabb\ucc3e\uaca0\ub2e4\ud68c\uc6d0

@@ -1,0 +1,5 @@
+/login=ROLE_STD,ROLE_PRF,ROLE_EMP
+/=ROLE_STD,ROLE_PRF,ROLE_EMP
+
+#username(id)=password,authority[,authority],enabled[disabled]
+1111111=1234,ROLE_ADMIN,1
