@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.consult.dao.ProfessorConsultDAO">
+
+	<!-- 학생의 수를 조회하는 SELECT문 -->
+	<select id="selectTotalStd" parameterType="String" resultType="int">
+		WITH STDLIST AS
+		(
+		    SELECT A.STD_ID, B.USER_NM, C.MAJOR_NM
+		    FROM STUDENT A INNER JOIN USR B ON (A.STD_ID = B.USER_ID)
+		                    INNER JOIN MAJOR C ON (A.MAJOR_ID = C.MAJOR_ID)
+		    WHERE A.PROF_ID = #{profId}
+		    ORDER BY STD_ID
+		)
+		SELECT COUNT(*)
+		FROM STDLIST
+	</select>
+	
+	<!-- 게시글의 수를 조회하는 SELECT문 -->
+	
+	<!-- 학생 목록을 조회하는 SELECT문 -->
+	
+	<resultMap type="UsrVO" id="usrMap" autoMapping="true">
+		<id property="userId" column="USER_ID" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+	</resultMap>
+	<select id="selectStdList" parameterType="String" resultMap="usrMap">
+		WITH STDLIST AS
+		(
+		    SELECT B.USER_ID, B.USER_NM, C.MAJOR_NM
+		    FROM STUDENT A INNER JOIN USR B ON (A.STD_ID = B.USER_ID)
+		                    INNER JOIN MAJOR C ON (A.MAJOR_ID = C.MAJOR_ID)
+		    WHERE A.PROF_ID = #{profId}
+		    ORDER BY B.USER_ID
+		)
+		SELECT ROWNUM RNUM, STDLIST.*
+		FROM STDLIST
+	</select>
+</mapper>
