@@ -1,0 +1,39 @@
+package kr.or.ddit.emp.lectroomManage.service;
+
+import java.util.HashMap;
+import java.util.List;
+
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SyllabusVO;
+
+public interface LectroomManageService {
+	
+	
+	/**
+	 * 학과장 승인 받은 강의계획서 목록 조회
+	 * @return
+	 */
+	public void retrieveLectroomManageList(PagingVO<SyllabusVO> pagingVO);
+	
+	
+	public SyllabusVO retrieveSyllaInfo(SyllabusVO syllaId);
+	
+	
+	public SyllabusVO retrieveSylla(SyllabusVO syllaId);
+	
+	
+	public int createLect(SyllabusVO syllabusVO);
+	
+	
+	public int createAssignRoom(SyllabusVO syllabusVO);
+	
+	
+	public int removeLecture(SyllabusVO syllabusVO);
+	
+	
+	public int removeAssignRoom(SyllabusVO syllabusVO);
+	
+	
+	public void retrieveLectureList(PagingVO<LectureVO> pagingVO);
+}
