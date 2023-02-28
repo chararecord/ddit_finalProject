@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.consult.dao.ProfessorConsultReplyDAO">
+
+	<insert id="insertReply" parameterType="ConsultReplyVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="profconsultReplyId">
+			SELECT 'FS1'||LPAD(LECTBOARD_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CONSULT_REPLY (
+		    CONS_REP_ID
+		    , CONS_ID
+		    , USER_ID
+		    , CONS_REP_DATE
+		    , CONS_REP_CONT
+		) VALUES (
+			#{consRepId}
+			, #{consId}
+			, #{userId}
+			, SYSDATE
+			, #{consRepCont}
+		)
+	</insert>
+	
+	<delete id="deleteReply" parameterType="ConsultReplyVO">
+		DELETE FROM CONSULT_REPLY
+		WHERE CONS_REP_ID = #{consRepId}
+		AND USER_ID = #{userId}
+	</delete>
+</mapper>
