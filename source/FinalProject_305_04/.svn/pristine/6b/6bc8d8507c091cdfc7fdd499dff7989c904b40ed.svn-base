@@ -1,0 +1,114 @@
+package kr.or.ddit.student.scholarship.controller;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
+
+import kr.or.ddit.student.scholarship.service.ScholarshipService;
+import kr.or.ddit.ui.PaginationRenderer;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SchHistVO;
+import kr.or.ddit.vo.SearchVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+/**
+ * 장학금 수혜 내역(학생)
+ * @author 민경진
+ * @Since 2023. 2. 2.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 2. 2.       민경진             생성
+ * 2023. 2. 3 		  이현주		수정
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@RequiredArgsConstructor
+@Controller
+@RequestMapping("/student/scholarship")
+public class ScholarshipController {
+
+	@Inject
+	private ScholarshipService service;
+
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+
+	@Bean
+	public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+		return new HiddenHttpMethodFilter();
+	}
+
+	/**
+	 * schHist 속성 생성 메소드
+	 */
+	@ModelAttribute("schHist")
+	public SchHistVO schHist() {
+		return new SchHistVO();
+	}
+
+	/**
+	 * SchHist 장학금 내역 출력 메소드(selectList) 
+	 */
+	@GetMapping
+	public String scholarshipUI(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			,@RequestParam(value="stdId", required=true) String stdId
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model ) {
+		PagingVO<SchHistVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		
+		SchHistVO schHistVO = new SchHistVO();
+		
+		log.info("stdId 어딨니", stdId);
+		schHistVO.setStdId(stdId);
+		pagingVO.setDetailCondition(schHistVO);
+		
+		service.retrieveScholarshipList(pagingVO, stdId);
+		
+		
+		
+		
+		model.addAttribute("pagingVO", pagingVO);
+	
+		return "student/scholarship/scholarship";
+
+	}
+
+	/**
+	 * SchHist 장학금내역 출력 메소드(ajax) 
+	 */
+	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public String scholarshipList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			,@RequestParam(value="stdId", required=true) String stdId
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model ) {
+		PagingVO<SchHistVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+
+		SchHistVO schHistVO = new SchHistVO();
+		schHistVO.setStdId(stdId);
+		pagingVO.setDetailCondition(schHistVO);
+		
+		service.retrieveScholarshipList(pagingVO, stdId);
+		model.addAttribute("pagingVO", pagingVO);
+		model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+
+		return "jsonView";
+	}
+}
