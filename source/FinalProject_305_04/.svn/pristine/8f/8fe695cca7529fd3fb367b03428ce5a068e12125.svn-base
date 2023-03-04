@@ -1,0 +1,122 @@
+package kr.or.ddit.student.priorSugang.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.student.priorSugang.service.PriorSugangService;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SugangCartVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 성적이의신청 컨트롤러
+ * @author 민경진
+ *
+ */
+@Slf4j
+@Controller
+@RequestMapping("/student/priorSugang")
+public class PriorSugangController {
+	
+	@Inject
+	private PriorSugangService service;
+
+	/**
+	 * 사전수강신청 게시판 UI 출력
+	 * @param model
+	 * @return
+	 */
+	@GetMapping
+	public String priorSugangUI(
+			Model model
+			) {
+		
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		
+		List<LectureVO> lectureList = service.retrieveLectureList(pagingVO);
+		
+		model.addAttribute("lectureList", lectureList);
+		
+		return "student/priorSugang/priorSugang";
+	}
+	
+	/**
+	 * 사전수강신청 강의 목록 출력 메소드
+	 * @param detailCondition
+	 * @param model
+	 * @return
+	 */
+	@ResponseBody
+	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public List<LectureVO> priorSugangList(
+			@ModelAttribute("detailCondition") LectureVO detailCondition
+			, Model model
+			) {
+		
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		log.info("detailCondition ======= > {}", detailCondition);
+		pagingVO.setDetailCondition(detailCondition);
+		
+		List<LectureVO> lectureList = service.retrieveLectureList(pagingVO);
+		log.info("lectureList ======= > {}", lectureList);
+		
+		return lectureList;
+	}
+	
+	/**
+	 * 장바구니 추가 메소드 (post)
+	 * @return
+	 */
+	@ResponseBody
+	@PostMapping
+	public List<LectureVO> insertCart(
+			@RequestBody SugangCartVO cartVO
+			, Model model
+			) {
+		
+		log.info("인서트컨트롤러탔땅~~~~~~~~~~~~~~~");
+		List<LectureVO> cartList = null;
+		
+		int rowcnt = service.createCart(cartVO);
+		if(rowcnt > 0) {
+			cartList = service.retrieveCartList(cartVO.getStdId());
+		} else {
+			model.addAttribute("message", "서버 오류");
+		}
+		return cartList;
+	}
+	
+	/**
+	 * 장바구니 삭제 메소드 (delete)
+	 * @return
+	 */
+	@DeleteMapping
+	public List<LectureVO> deleteCart(
+			@RequestBody SugangCartVO cartVO
+			, Model model
+			){
+		log.info("인서트컨트롤러탔땅~~~~~~~~~~~~~~~");
+		List<LectureVO> cartList = null;
+		
+		int rowcnt = service.removeCart(cartVO);
+		if(rowcnt > 0) {
+			cartList = service.retrieveCartList(cartVO.getStdId());
+		} else {
+			model.addAttribute("message", "서버 오류");
+		}
+		return cartList;
+	}
+}

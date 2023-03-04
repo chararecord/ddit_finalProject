@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.campus.certificate.dao.CertificateDAO">
+
+
+	<select id="selectCertificateList" resultType="CertificateVO">
+		SELECT 
+			A.CERT_ID
+			, A.CERT_NM
+			, A.USER_ROLE
+			, A.CERT_CHARGE
+			, B.COMM_DESC
+		FROM CERT A LEFT OUTER JOIN COMM B ON A.USER_ROLE = B.COMM_ID
+	</select>
+	
+	<select id="selectUserCertificateList" parameterType="int" resultType="CertificateVO">
+		SELECT 
+			ROWNUM AS RNUM
+			, A.CERT_ID
+			, A.CERT_NM
+			, A.USER_ROLE
+			, A.CERT_CHARGE
+			, B.COMM_DESC
+		FROM CERT A LEFT OUTER JOIN COMM B ON A.USER_ROLE = B.COMM_ID
+					LEFT OUTER JOIN USR C ON B.COMM_ID = C.USER_ROLE
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectUserInfo" parameterType="int" resultType="UsrVO">
+		SELECT 
+			USER_ID
+			, USER_NM
+			, USER_NM_EN
+			, USER_PASS
+			, USER_RRN1
+			, USER_RRN2
+			, USER_PHONE
+			, USER_POST
+			, USER_ADDR
+			, USER_DETAIL_ADDR
+			, USER_EMAIL
+			, USER_BANK
+			, USER_ACCT_HD
+			, USER_ACCT_NO
+			, USER_GENDER
+			, USER_NTL
+			, USER_BIR
+			, USER_ROLE
+		FROM USR
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<resultMap type="CertHistoryVO" id="certHistMap" autoMapping="true">
+		<id property="certHistId" column="CERT_HIST_ID" />
+		<association property="certVO" javaType="CertificateVO" autoMapping="true" />
+	</resultMap>
+	
+	<select id="selectHistoryList" parameterType="int" resultMap="certHistMap">
+		SELECT 
+			A.CERT_HIST_ID
+			, A.CERT_ID
+			, A.USER_ID
+			, TO_CHAR(A.CERT_DATE, 'YYYY-MM-DD HH24:MI') AS "CERT_DATE"
+			, A.CERT_CHKNUM
+			, B.CERT_NM
+			, B.CERT_CHARGE
+		FROM CERT_HIST A LEFT OUTER JOIN CERT B ON A.CERT_ID = B.CERT_ID
+		WHERE USER_ID = #{userId}
+		ORDER BY CERT_DATE DESC
+	</select>
+	
+</mapper>

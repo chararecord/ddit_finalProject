@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.tuition.dao.TuitionDao">
+
+<!-- 등록금 내역 조회(학생) -->
+
+<resultMap type="TuitionPayVO" id="tuitionMap" autoMapping="true">
+	<id property="tutionPayId" column="TUTION_PAY_ID"/>
+	<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true">
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+	</association>
+	<association property="semesterVO" javaType="SemesterVO" autoMapping="true">
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="tuitionVO" javaType="TuitionVO" autoMapping="true">
+		<id property="tuitionId" column="TUITION_ID"/>
+	</association>
+</resultMap>
+
+<select id="selectTuitionList" parameterType="String" resultMap="tuitionMap">
+WITH ORDEREDTUITIONPAY AS (
+			SELECT
+                 A.STD_ID
+               , E.SEME_ID 
+               , E.SEME_YEAR
+               , E.SEME
+               , B.TUITION_AMOUNT
+               , D.SCHS_NM
+               , D.SCHS_AMOUNT 
+               , A.AMOUNT_PAY
+               ,  (SELECT COMM_DESC
+	                FROM COMM
+	                WHERE COMM.COMM_ID = A.PAY_STAT) AS PAY_STAT
+			FROM TUITION_PAY A LEFT OUTER JOIN TUITION B ON (A.TUITION_ID = B.TUITION_ID)
+                                INNER JOIN SCH_HIST C ON (B.SCH_HIST_ID = C.SCH_HIST_ID)
+                                INNER JOIN SCHOLARSHIP D ON (C.SCHOLARSHIP_ID = D.SCHOLARSHIP_ID)
+                                INNER JOIN SEMESTER E ON (B.SEME_ID = E.SEME_ID)
+			WHERE A.STD_ID=#{stdId}
+		)
+			SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDTUITIONPAY.*
+					FROM ORDEREDTUITIONPAY
+			) A
+		) B
+
+
+</select>
+
+</mapper>

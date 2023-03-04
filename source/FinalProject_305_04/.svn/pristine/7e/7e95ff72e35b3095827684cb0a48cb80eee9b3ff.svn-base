@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.test.dao.TestProfDAO">
+
+
+	<resultMap type="TestVO" id="testProfMap" autoMapping="true">
+		<id property="testId" column="TEST_ID" />
+		<association property="semeVO" javaType="SemesterVO" autoMapping="true" />
+		<association property="currLect" javaType="CurrLectVO" autoMapping="true">
+			<id property="curlectId" column="CURLECT_ID"  />
+			<collection property="lectureList" ofType="LectureVO" autoMapping="true" />
+		</association>
+		<association property="myStudentVO" javaType="MyStudentVO" autoMapping="true" />
+	</resultMap>	
+
+
+	<!-- 교수 전체 시험 출제 목록  -->
+	<select id="testProfTotalList" parameterType="PagingVO"  resultMap="testProfMap">
+		WITH ORDEREDPROFTEST AS (
+		    SELECT A.TEST_ID, A.EXAM_ID,  A.TEST_NM, 
+		    		TO_CHAR(A.TEST_RDATE, 'YYYY-MM-DD') AS TEST_RDATE, 
+		    		A.TEST_STIME, A.TEST_ETIME, A.TEST_MEET, 
+		    		TO_CHAR(A.TEST_DATE, 'YYYY-MM-DD') AS TEST_DATE
+		           , B.SEME_ID, B.EXAM_TYPE
+		           , C.SEME_YEAR, C.SEME
+		           , D.LECT_ID, D.LECT_NM
+		           , E.CURLECT_ID, E.STD_ID, E.FIN_SCORE
+		           , F.MAJOR_ID, F.PROF_ID, F.ENT_DATE
+		           , G.USER_ID, G.USER_NM
+		    FROM TEST_INFO A INNER JOIN EXAM_CAL B ON (A.EXAM_ID = B.EXAM_ID)
+		                     INNER JOIN SEMESTER C ON (B.SEME_ID = C.SEME_ID)
+		                     INNER JOIN LECTURE D ON (A.LECT_ID = D.LECT_ID)
+		                     INNER JOIN CURR_LECT E ON (D.LECT_ID = E.LECT_ID)
+		                     INNER JOIN STUDENT F ON (E.STD_ID = F.STD_ID)
+		                     INNER JOIN USR G ON (G.USER_ID = E.STD_ID)        
+		    WHERE F.PROF_ID = #{detailCondition.profId} 
+		)
+		SELECT  B.* FROM (
+		                    SELECT ROWNUM RNUM2, A.*
+		                    FROM (
+		                            SELECT ROWNUM RNUM, ORDEREDPROFTEST.*
+		                            FROM ORDEREDPROFTEST 
+		                    ) A
+		                ) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	
+	<select id="selectTestInfo" parameterType="TestVO" resultMap="testProfMap">
+	 SELECT B.EXAM_ID, B.SEME_ID, B.EXAM_TYPE
+           , C.SEME_YEAR, C.SEME
+           , D.LECT_ID, D.LECT_NM
+           , E.CURLECT_ID, E.STD_ID, E.FIN_SCORE
+           , F.MAJOR_ID, F.PROF_ID, F.ENT_DATE
+           , G.USER_ID, G.USER_NM
+    FROM EXAM_CAL B INNER JOIN SEMESTER C ON (B.SEME_ID = C.SEME_ID)
+                     INNER JOIN LECTURE D ON (C.SEME_ID = D.SEME_ID)
+                     INNER JOIN CURR_LECT E ON (D.LECT_ID = E.LECT_ID)
+                     INNER JOIN STUDENT F ON (E.STD_ID = F.STD_ID)
+                     INNER JOIN USR G ON (G.USER_ID = E.STD_ID) 
+	</select>
+	
+	<!--  강의명 select 뷰  -->
+	<select id="selectLectureList" resultType="LectureVO">
+		 SELECT *
+ 		 FROM LECTURE
+	</select>
+	
+	
+	
+
+	<!-- 시험등록페이지   -->
+	<insert id="insertTest" parameterType="TestVO">
+		<!-- FG10642 -->
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testId">
+			SELECT 'FG1'||LPAD(TESTINFO_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+
+		INSERT INTO TEST_INFO (
+            TEST_ID,
+            EXAM_ID,
+            LECT_ID,
+            TEST_NM,
+            TEST_RDATE,
+            TEST_STIME,
+            TEST_ETIME,
+            TEST_MEET,
+            TEST_DATE
+        ) VALUES (
+              #{testId}
+			, #{examId,jdbcType=VARCHAR}
+			, #{lectId,jdbcType=VARCHAR}
+			, #{testNm,jdbcType=VARCHAR}
+			, #{testRdate,jdbcType=DATE}
+			, #{testStime,jdbcType=VARCHAR}
+			, #{testEtime,jdbcType=VARCHAR}
+			, #{testMeet,jdbcType=VARCHAR}
+			, #{testDate,jdbcType=DATE}
+        )       
+			 
+	</insert>
+	
+	<!-- TESTQUE_SEQ.NEXTVAL 값 가져오기 -->
+	<select id="getTestQueSeq" resultType="int">
+		SELECT TESTQUE_SEQ.NEXTVAL
+		FROM DUAL
+	</select>
+	
+	<select id="getTestPasgSeq" resultType="int">
+		SELECT TESTPASG_SEQ.NEXTVAL
+		FROM DUAL  
+	</select>
+	
+	<!-- 문제 insert  -->
+	<insert id="insertQue" parameterType="kr.or.ddit.vo.TestQueVO">
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testQueId">
+			SELECT 'FH1'||LPAD(TESTQUE_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+	
+		INSERT INTO TEST_QUE (
+	            TEST_QUE_ID,
+	            TEST_ID,
+	            TEST_NUM,
+	            TEST_QUE
+	        ) VALUES (
+	            #{testQueId}
+				, #{testId,jdbcType=VARCHAR}
+				, #{testNum,jdbcType=VARCHAR}
+				, #{testQue,jdbcType=VARCHAR}
+	    )  
+			
+	</insert>
+	
+	<!--  지문 insert -->
+	<insert id="insertPasg" parameterType="kr.or.ddit.vo.TestPasgVO">
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testPasgId">
+			SELECT 'FI1'||LPAD(TESTPASG_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+	
+		INSERT INTO TEST_PASG (
+			        TEST_PASG_ID,
+			        TEST_QUE_ID,
+			        TEST_PASG,
+			        ANSW_STATE,
+			        NOTE,
+			        QUE_TYPE
+			    ) VALUES (
+			       #{testPasgId}
+					, #{testQueId,jdbcType=VARCHAR}
+					, #{testPasg,jdbcType=VARCHAR}
+					, #{answState,jdbcType=VARCHAR}
+					, #{note,jdbcType=VARCHAR}
+					, #{queType,jdbcType=VARCHAR}
+			)
+	</insert>
+
+
+</mapper>

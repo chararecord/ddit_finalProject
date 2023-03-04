@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.consult.dao.StudentConsultDAO">
+	
+	<!-- where 조건 프레그먼트 -->
+
+	<!-- 상담 내역 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM CONSULT
+		WHERE STD_ID = 20110186
+	</select>
+	
+	<resultMap type="ConsultVO" id="consultMap" autoMapping="true">
+		<id property="consId" column="CONS_ID"/>
+		<association property="userVO" javaType="UsrVO" autoMapping="true" />
+	</resultMap>
+	<!-- 상담 내역 리스트 조회 SELECT문 -->
+	<select id="selectConsultList" parameterType="hashMap" resultMap="consultMap" >
+		SELECT RSLT.*
+		FROM
+		(
+		    WITH STDINFO AS
+		    (
+		        SELECT A.STD_ID, B.USER_NM AS STDNAME
+		        FROM CONSULT A INNER JOIN USR B ON (B.USER_ID = A.STD_ID)
+		    ), PROFINFO AS
+		    (
+		        SELECT C.PROF_ID, D.USER_NM AS PROFNAME
+		        FROM CONSULT C INNER JOIN USR D ON (D.USER_ID = C.PROF_ID)
+		    ), CONSULTS AS
+		    (
+		        SELECT STD_ID, PROF_ID, CONS_ID, CONS_CAT, CONS_TITLE, CONS_CONT, CONS_APP_DATE, CONS_DATE
+                        , CONS_TIME, CONS_STATE, CONS_MEET, CONS_REASON
+		        FROM CONSULT
+		        WHERE STD_ID = 20110186
+		        ORDER BY CONS_ID
+		    )
+		    SELECT DENSE_RANK() OVER(ORDER BY I.RNUM DESC) RNUM2, I.*
+		    FROM (
+		        SELECT DENSE_RANK() OVER(ORDER BY H.CONS_ID ASC) RNUM, H.*
+		        FROM (
+		            SELECT DISTINCT E.CONS_ID, E.STD_ID, E.PROF_ID,
+                        (
+                            SELECT COMM_DESC
+                            FROM COMM
+                            WHERE COMM.COMM_ID = E.CONS_CAT
+                        ) AS CONS_CAT
+                        ,
+                        (
+                            SELECT COMM_DESC
+                            FROM COMM
+                            WHERE COMM.COMM_ID = E.CONS_MEET
+                        ) AS CONS_MEET
+                        , E.CONS_STATE, E.CONS_TITLE, E.CONS_CONT, E.CONS_APP_DATE, E.CONS_DATE, E.CONS_TIME, E.CONS_REASON
+                        , F.STDNAME, G.PROFNAME
+		            FROM CONSULTS E INNER JOIN STDINFO F ON (F.STD_ID = E.STD_ID)
+		                            INNER JOIN PROFINFO G ON (G.PROF_ID = E.PROF_ID)
+		            WHERE E.STD_ID = 20110186
+		            ORDER BY CONS_ID DESC
+		        ) H
+		    ) I
+		) RSLT
+		WHERE RSLT.RNUM2 BETWEEN #{paging.startRow} AND #{paging.endRow}
+	</select>
+	
+	<!-- 학생이 속한 학과의 교수 리스트 조회 SELECT문 -->
+	<select id="selectProfList" parameterType="String" resultType="ProfessorVO">
+		WITH PROFINFO AS (
+		    SELECT PROF_ID, MAJOR_ID
+		    FROM PROFESSOR
+		), MAJORINFO AS (
+		    SELECT MAJOR_ID
+		    FROM MAJOR
+		)
+		SELECT (
+		        SELECT USER_NM
+		        FROM USR E
+		        WHERE C.PROF_ID = E.USER_ID
+		        ) AS PROF_NM,
+		C.PROF_ID
+		FROM STUDENT A INNER JOIN MAJORINFO B ON (A.MAJOR_ID = B.MAJOR_ID)
+		                INNER JOIN PROFINFO C ON (A.MAJOR_ID = C.MAJOR_ID)
+		                INNER JOIN USR D ON (A.STD_ID = D.USER_ID)
+		WHERE A.STD_ID = #{stdId}
+	</select>
+	
+	<!-- 상담 내역 세부 조회 SELECT문 -->
+	<select id="selectConsult" parameterType="String" resultType="kr.or.ddit.vo.ConsultVO">
+		SELECT
+		    A.CONS_ID
+		    , (
+		        SELECT USER_NM
+		        FROM USR
+		        WHERE USR.USER_ID = A.STD_ID
+		    ) AS STD_ID
+		    , (
+		        SELECT USER_NM
+		        FROM USR
+		        WHERE USR.USER_ID = A.PROF_ID
+		    ) AS STD_ID
+		    , (
+		        SELECT COMM_DESC
+		        FROM COMM
+		        WHERE COMM.COMM_ID = A.CONS_CAT
+		    ) AS CONS_CAT
+		    , (
+		        SELECT COMM_DESC
+		        FROM COMM
+		        WHERE COMM.COMM_ID = A.CONS_STATE
+		    ) AS CONS_STATE
+		    , (
+		        SELECT COMM_DESC
+		        FROM COMM
+		        WHERE COMM.COMM_ID = A.CONS_MEET
+		    ) AS CONS_MEET
+		    , A.CONS_TITLE, A.CONS_CONT, A.CONS_APP_DATE, A.CONS_DATE, A.CONS_TIME, A.CONS_REASON
+		FROM CONSULT A
+		WHERE A.CONS_ID = #{consId}
+	</select>
+	
+	<!-- 상담 등록 INSERT문 -->
+	<insert id="insertConsult" parameterType="ConsultVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="consId">
+			SELECT 'FR1'||LPAD(CONSULT_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CONSULT (
+		    CONS_ID,
+		    STD_ID,
+		    CONS_CAT,
+		    CONS_TITLE,
+		    CONS_CONT,
+		    CONS_APP_DATE,
+		    CONS_DATE,
+		    CONS_STATE,
+		    CONS_MEET,
+		    CONS_TIME,
+		    PROF_ID
+		) VALUES (
+		    #{consId}
+		    , #{stdId}
+		    , #{consCat}
+		    , #{consTitle}
+		    , #{consCont}
+		    , SYSDATE
+		    , #{consDate}
+		    , 2
+		    , #{consMeet}
+		    , #{consTime}
+		    , #{profId}
+		)
+	</insert>
+	
+	
+	<update id="deleteConsultState" parameterType="String">
+		UPDATE CONSULT
+		SET
+		CONS_STATE = 6
+		WHERE CONS_ID = #{consId}
+	</update>
+</mapper>

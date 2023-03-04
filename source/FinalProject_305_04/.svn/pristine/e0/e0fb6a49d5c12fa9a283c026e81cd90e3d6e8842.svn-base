@@ -1,0 +1,419 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
+
+<div class="cont">
+	
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>
+			성적
+			<button type="button" class="star on">
+				<span class="sr-only">즐겨찾기</span>
+			</button>
+		</h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i> 
+			<strong>path1</strong> <strong>path2</strong> <strong>path3</strong> <strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+		<div class="tob-box">
+			<strong class="tit">성적부여 안내사항 </strong>
+			<p>성적부여 화면입니다.</p>
+			<p>성적을 부여하시면 됩니다.</p>
+			<br>
+		</div>
+		<div class="cont-box-inner">
+			<div class="title">
+				<h3>수강생 목록</h3>
+				<input type="hidden" value="${pagingVO.dataList[0].lectId }" id="lectId"/>
+			</div>
+			<!--tbl-->
+			<div class="tbl-wrap">
+				<table class="tbl tbl-hover">
+					<caption>description about table</caption>
+					<colgroup>
+						<col style="width: 5%">
+						<col style="width: 10%">
+						<col style="width: 10%">
+						<col style="width: 5%">
+						<col style="width: 10%">
+						<col style="width: 20%">
+					</colgroup>
+					<thead>
+						<tr>
+							<th scope="col">번호</th>
+							<th scope="col">단과대학</th>
+							<th scope="col">학과</th>
+							<th scope="col">학년</th>
+							<th scope="col">학번</th>
+							<th scope="col">이름</th>
+						</tr>
+					</thead>
+					<tbody id="listBody">
+						<tr>
+							<c:set var="profStdList" value="${pagingVO.dataList }" />
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--end tbl-->
+			
+			<!-- 페이지 네비게이션 -->
+			<div id="pagingArea">
+				<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
+			</div>
+			<!-- 페이지 네비게이션 끝 -->
+			
+			
+			
+			
+			
+			<div class="cont-box-inner">
+				<div class="title">
+				<h3>성적 등록</h3>
+				<div class="box-btn">
+					<button type="button" class="btn purple">등록</button>
+				</div>
+			</div>
+				<div class="tbl-wrap">
+					<table class="tbl">
+						<caption></caption>
+						<colgroup>
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">점수</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">등급</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">최종성적</th>
+								<td>
+									sdf
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div class="cont-box-inner">
+			<div class="tbl-half">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>성적처리기준</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">중간고사</th>
+                                <th scope="col">기말고사</th>
+                                <th scope="col">과제</th>
+                                <th scope="col">출결</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td> ${scoreCritList[0].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[1].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[2].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[3].scoreCritRatio }% </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>성적상세내역</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">구분</th>
+                                <th scope="col">평가명</th>
+                                <th scope="col">점수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                                <td> 1명 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+				
+		
+		<div class="cont-box-inner">
+				<div class="title">
+					<h3>출결현황</h3>
+				</div>
+
+				<div class="tbl-wrap">
+					<table class="tbl">
+						<caption></caption>
+						<colgroup>
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">출석</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">지각</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">결석</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">조퇴</th>
+								<td>
+									sdf
+								</td>
+								<th scope="row">공결</th>
+								<td>
+									sdf
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div class="cont-box-inner">
+
+				<!--tbl-->
+				<div class="tbl-wrap">
+					<table class="tbl center">
+						<caption>description about table</caption>
+						<colgroup>
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">1주차</th>
+								<th scope="col">2주차</th>
+								<th scope="col">3주차</th>
+								<th scope="col">4주차</th>
+								<th scope="col">5주차</th>
+								<th scope="col">6주차</th>
+								<th scope="col">7주차</th>
+								<th scope="col">8주차</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+							</tr>
+						</tbody>
+					</table>
+					<table class="tbl center">
+						<caption>description about table</caption>
+						<colgroup>
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">9주차</th>
+								<th scope="col">10주차</th>
+								<th scope="col">11주차</th>
+								<th scope="col">12주차</th>
+								<th scope="col">13주차</th>
+								<th scope="col">14주차</th>
+								<th scope="col">15주차</th>
+								<th scope="col">16주차</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+								<td>1</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--end tbl-->
+				
+			</div>
+			
+		</div>
+		
+	<form:form id="searchForm" method="get" modelAttribute="simpleCondition">
+		<form:hidden path="searchType" name="searchType"/>
+		<form:hidden path="searchWord"/>
+	<input type="hidden" name="page" />
+	</form:form>
+</div>
+
+
+<script>
+	let listBody = $("#listBody");
+	
+	let pagingArea = $("#pagingArea").on('click', "a.paging", function(event){
+		event.preventDefault();
+		let page = $(this).data("page");
+		if(!page){return false;}
+		searchForm.find("[name=page]").val(page);
+		searchForm.submit();
+		return false;
+	});
+	
+	
+	let makeTrTag = function(lecture, index){
+		
+		let aTag = $("<a>")
+	    .attr("href", "${pageContext.request.contextPath}/prof/scoreProc/" + lecture.lectId)
+	    .text(lecture.lectId);
+		
+ 		return $("<tr>").append(
+				$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.rnum)
+				,$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.collVO.collNm)
+				,$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.majorVO.majorNm)
+				,$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.camYear)
+				,$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.stdId)
+				,$("<td id='" + lecture.stdId + "' class='std'>").html(lecture.userNm)
+		)
+	}
+	
+	
+	let searchForm = $('#searchForm').on('submit', function(event){
+		event.preventDefault();
+		
+		let url = this.action;
+		let method = this.method;
+		let queryString = $(this).serialize();
+	
+		//아작스 보내는 방식이 다양한데, 확장성 좋은 요걸 외움(파일 전송빼고 모든 곳에 사용가능)
+		$.ajax({
+			url : url,
+			method : method,
+			data :  queryString,
+			dataType:"json",
+			success : function(resp) {
+				listBody.empty();
+				pagingArea.empty();
+				searchForm[0].page.value="";
+				
+				let pagingVO = resp.pagingVO;
+				let dataList = pagingVO.dataList[0].myStudentList;
+				
+				let trTags = [];
+				if(dataList){
+					$.each(dataList, function(index, lecture){
+						trTags.push(makeTrTag(lecture, index));
+					});
+				}
+				else {
+					let tr = $("<tr>").html(
+								$("<td>").attr("colspan", "7").html("현재 수강생이 없습니다."));
+					trTags.push(tr);
+				}
+				listBody.html(trTags);
+				pagingArea.html(resp.pagingHTML)
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+		return false;
+	}).submit();
+	
+
+	$(document).ready(function() {
+		$('td.std').on('click', function() {
+
+			let stdId = $(this).attr('id');
+			let lectId = $('#lectId').val();
+			
+			$.ajax({
+				url : "${pageContext.request.contextPath}/prof/scoreProc/selectStd",
+				method : "post",
+				data : {"stdId" : stdId,
+						"lectId" : lectId},
+				dataType : "json",
+				success : function(resp) {
+					alert("돌아옴");
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			
+		});
+	});
+</script>

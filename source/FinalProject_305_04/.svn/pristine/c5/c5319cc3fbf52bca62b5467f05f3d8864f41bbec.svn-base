@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.student.scholarship.dao.ScholarshipDAO">
+
+	<!-- 장학금 수혜 (학생) -->
+
+	<!--전체 목록 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="int"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM SCH_HIST
+		WHERE STD_ID=#{stdId}
+	</select>
+
+	<!-- 장학금 수혜 내역 조회하는 SELECT문 -->
+<resultMap type="SchHistVO" id="SchHistMap" autoMapping="true">
+		<id property="schHistId" column="SCH_HIST_ID"/>
+	<collection property="semesterList" ofType="SemesterVO" autoMapping="true" >
+		<id property="semeId" column="SEME_ID"/>
+		<id property="seme" column="SEME"/>
+		<id property="semeYear" column="SEME_YEAR"/>
+	</collection>
+	<collection property="scholarshipList" ofType="ScholarshipVO" autoMapping="true" >
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+		<id property="schsNm" column="SCHS_NM"/>
+		<id property="schsAmount" column="SCHS_AMOUNT"/>
+	</collection>
+</resultMap>
+
+	<select id="selectScholarshipList" parameterType="PagingVO"
+		resultMap="SchHistMap">
+		WITH ORDEREDSCHOLARSHIP AS (
+			SELECT
+				B.COLL_NM,
+				B.MAJOR_NM,
+				B.STD_ID,
+				B.CAM_YEAR,
+				B.USER_NM,
+				A.FIN_SCORE,
+				D.SCHS_AMOUNT,
+				TO_CHAR(D.SCHS_AMOUNT, 'FM999,999,999,999'),
+				D.SCHS_NM,
+				D.SCHOLARSHIP_ID,
+				E.SEME_ID,
+				F.SEME_YEAR,
+				F.SEME,
+				E.LECT_ID,
+				A.CURLECT_ID
+			FROM CURR_LECT A INNER JOIN V_STU B ON (A.STD_ID = B.STD_ID)
+							INNER JOIN SCH_HIST C ON (A.STD_ID = C.STD_ID)
+							INNER JOIN SCHOLARSHIP D ON (D.SCHOLARSHIP_ID = C.SCHOLARSHIP_ID)
+							INNER JOIN LECTURE E ON (A.LECT_ID = E.LECT_ID)
+							INNER JOIN SEMESTER F ON (E.SEME_ID = F.SEME_ID)
+			WHERE STD_ID=#{detailCondition.stdId}
+		)
+		SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDSCHOLARSHIP.*
+					FROM ORDEREDSCHOLARSHIP
+			) A
+		) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+</mapper>

@@ -1,0 +1,86 @@
+package kr.or.ddit.prof.consult.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.prof.consult.service.ProfessorConsultService;
+import kr.or.ddit.vo.ConsultVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SearchVO;
+import kr.or.ddit.vo.UsrVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ *  학생 상담 컨트롤러(교수)
+ * @author 민경진
+ *
+ */
+@Slf4j
+@Controller
+@RequestMapping("/prof/consult")
+public class ProfessorConsultController {
+	
+	@Inject
+	private ProfessorConsultService service;
+	
+	/**
+	 * professor consult 속성 생성 메소드 - form에 바인딩할 빈 모델 객체 생성
+	 * @return
+	 */
+	@ModelAttribute("consult")
+	public ConsultVO professorConsult() {
+		return new ConsultVO();
+	}
+	
+	/**
+	 * professor consult 게시판 UI 출력 메소드
+	 * @return
+	 */
+	@GetMapping
+	public String consultUI(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+			) {
+		
+		PagingVO<UsrVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		
+		model.addAttribute("pagingVO", pagingVO);
+		
+		return "prof/consult/consult";
+	}
+	
+	/**
+	 * professor consult 학생 목록 출력 메소드
+	 * @return
+	 */
+	@ResponseBody
+	@GetMapping(value="/{id}", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public PagingVO<UsrVO> consultList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, @PathVariable String id
+			) {
+		
+		log.info("id==========================================={}", id);
+		
+		PagingVO<UsrVO> stdList = service.retreiveStdList(id);
+		
+		return stdList;
+	}
+}

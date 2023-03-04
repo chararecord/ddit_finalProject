@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+
+
+.box-container {display: flex;}
+        tr {
+            text-align: center;  
+        }
+        td {
+            display: table-cell;  
+            border : solid black 1px; 
+            margin: 10%;
+            /* padding: 10; */
+            width: 10%;
+            height: 30px;
+        }
+        table{
+            border-collapse: collapse;
+            border : solid black 1px;
+            margin: auto;
+            padding: 10%;
+        }
+        div{
+            margin: 1%;
+            padding: 5%;
+            vertical-align :middle;
+            text-align: center;  
+        }
+        .c1{
+            border-collapse: collapse;
+            border : solid black 1px;
+            width: 50%;
+        }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.graduation.dao.GraduationDAO">
+
+	<resultMap type="StudentVO" id="stdMap" autoMapping="true">
+		<id property="stdId" column="STD_ID" />
+		<association property="collVO" javaType="CollVO" autoMapping="true" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+		<association property="usrVO" javaType="UsrVO" autoMapping="true" />
+		<collection property="gradFulList" ofType="GradFulVO" autoMapping="true">
+			<id property="gradFulId" column="GRAD_FUL_ID"/>
+			<association property="gradReqVO" javaType="GradReqVO" autoMapping="true" />
+		</collection>
+<!-- 		<association property="mgradReqVO" javaType="MGradReqVO" autoMapping="true"> -->
+<!-- 			<id property="mgradReqId" column="MGRAD_REQ_ID"/> -->
+<!-- 			<collection property="gradReqList" ofType="GradReqVO" autoMapping="true" /> -->
+<!-- 		</association> -->
+	</resultMap>
+	
+	<select id="selectStudent" parameterType="String" resultMap="stdMap">
+		SELECT 
+			A.STD_ID
+			, A.USER_NM
+			, A.ENT_DATE
+			, A.MAJOR_REQ_CREDIT
+			, A.MAJOR_OPT_CREDIT
+			, A.GE_REQ_CREDIT
+			, A.GE_OPT_CREDIT
+			, A.MAJOR_ID
+			, A.MAJOR_NM
+			, A.COLL_ID
+			, A.COLL_NM
+			, A.SEME_ID
+			, A.SEME_YEAR
+			, A.CAM_YEAR
+			, A.MGRAD_REQ_ID
+            , B.GRAD_REQ_ID
+            , B.REQ_ITEM
+            , B.REQ_STAND
+            , C.GRAD_FUL_ID
+            , C.FUL_CHECK
+		FROM V_CREDIT A LEFT OUTER JOIN GRAD_REQ B ON A.MGRAD_REQ_ID = B.MGRAD_REQ_ID
+        LEFT OUTER JOIN GRAD_FUL C ON B.GRAD_REQ_ID = C.GRAD_REQ_ID AND B.MGRAD_REQ_ID = C.MGRAD_REQ_ID
+		WHERE A.STD_ID = #{stdId}
+	</select>
+	
+			
+	<select id="selectGradReqList" parameterType="String" resultType="GradReqVO">
+		SELECT 
+			MGRAD_REQ_ID 
+			, GRAD_REQ_ID 
+			, REQ_ITEM
+			, REQ_STAND 
+		FROM GRAD_REQ
+		WHERE MGRAD_REQ_ID = #{mgradReqId}
+		ORDER BY GRAD_REQ_ID
+	</select>
+	
+
+	
+
+	
+	
+
+</mapper>

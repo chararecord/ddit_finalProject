@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.emp.tuitionManage.dao.TuitionEmpDAO">
+	
+	
+	<!-- 코드프레그먼트 -->
+<!-- 	<sql id="searchFrag"> -->
+<!-- 	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)"> -->
+<!-- 	    		<choose> -->
+<!-- 	    			<when test="simpleCondition.searchType eq 'tit'"> -->
+<!-- 	    				INSTR(TIT, #{simpleCondition.searchWord}) > 0 -->
+<!-- 	    			</when> -->
+<!-- 	    			<when test="simpleCondition.searchType eq 'cont'"> -->
+<!-- 	    				INSTR(CONT, #{simpleCondition.searchWord}) > 0 -->
+<!-- 	    			</when> -->
+<!-- 					<otherwise> -->
+<!-- 	    				INSTR(TIT, #{simpleCondition.searchWord}) > 0 -->
+<!-- 	    				OR -->
+<!-- 	    				INSTR(CONT, #{simpleCondition.searchWord}) > 0 -->
+<!-- 					</otherwise> -->
+<!-- 	    		</choose> -->
+<!-- 	    	</if> -->
+<!-- 	</sql> -->
+
+
+
+<!-- 고지서 발송할 전체 재학생 수 조회 -->
+<select id="selectTotalRecord" parameterType="String" resultType="int">
+	SELECT COUNT(*)
+	FROM RECORD
+	WHERE SEME_ID = #{semeId}
+	AND REC_NM ='PRE'
+<!-- 	AND  -->
+<!-- 	<include refid="searchFrag" /> -->
+</select>
+
+<!-- 고지서 발송할 전체 재학생 목록 조회 (교직원) -->
+<resultMap type="TuitionVO" id="tuitionStdMap" autoMapping="true">
+	<id property="tuitionId" column="TUITION_ID"/>
+	<association property="tuitionPayVO" javaType="TuitionPayVO" autoMapping="true"> 
+		<id property="tutionPayId" column="TUTION_PAY_ID"/>
+	</association>
+	<association property="recordVO" javaType="RecordVO" autoMapping="true"> 
+		<id property="recoId" column="RECO_ID"/>
+	</association>
+	<association property="collVO" javaType="CollVO" autoMapping="true"> 
+		<id property="collId" column="COLL_ID"/>
+	</association>
+	<association property="majorVO" javaType="MajorVO" autoMapping="true"> 
+		<id property="majorId" column="MAJOR_ID"/>
+	</association>
+	<association property="semesterVO" javaType="SemesterVO" autoMapping="true"> 
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="usrVO" javaType="UsrVO" autoMapping="true"> 
+		<id property="userId" column="USER_ID"/>
+	</association>
+	<collection property="tuitionDetList" ofType="TuitionDetVO" autoMapping="true">
+		<id property="tuitionDetId" column="TUITION_DET_ID"></id>
+	</collection>
+</resultMap>
+
+<select id="selectTuitionStdList" parameterType ="PagingVO" resultMap="tuitionStdMap">
+WITH ORDEREDTUITION AS (
+			SELECT DISTINCT
+			      A.STD_ID
+			    , A.CAM_YEAR
+			    , A.USER_NM
+			    , C.SEME_ID
+			    , C.SEME_YEAR
+			    , C.SEME
+			    , A.COLL_NM
+			    , (SELECT G.MAJOR_NM FROM MAJOR G WHERE G.MAJOR_ID = A.MAJOR_NM) MAJOR_NM
+			    , A.REC_NM
+			    , FN_GETCOUNT(C.SEME_ID, A.STD_ID) CNT
+			FROM V_STU A INNER JOIN RECORD B ON(A.STD_ID = B.STD_ID)
+			            INNER JOIN SEMESTER C ON(B.SEME_ID = C.SEME_ID)
+			WHERE A.REC_NM ='PRE'
+			  AND C.SEME_ID =#{detailCondition.semeId}
+  )
+		SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDTUITION.*
+					FROM ORDEREDTUITION
+			) A
+		) B
+	WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+</select>
+
+
+<!--  등록금 고지서 발송(교직원) -->
+<resultMap id="insertTuitionSend" type="hashMap"></resultMap>
+
+<!-- parameterType 써야하나? -->
+<insert id="insertTuitionSend" statementType="CALLABLE">
+	{
+		CALL PROC_MAKE_TUITION_PAY(
+			#{semeId, mode=IN, jdbcType=VARCHAR, javaType=string}
+		)
+	}
+</insert>
+
+
+</mapper>

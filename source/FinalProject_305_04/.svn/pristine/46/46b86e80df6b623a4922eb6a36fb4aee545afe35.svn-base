@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.commons.dao.MenuDAO">
+
+	<select id="selectSearchMenuList" parameterType="String" resultType="MenuVO">
+		SELECT 
+			MENU_ID
+			, PARENT_ID
+			, MENU_NM
+			, MENU_URL
+			, MENU_KWD
+			, MENU_ROLE
+		FROM MENU
+		WHERE INSTR(MENU_NM, #{keyword}) > 0
+		OR INSTR(MENU_KWD, #{keyword}) > 0
+	</select>
+	
+	<select id="selectCommMenuList" resultType="MenuVO">
+		SELECT 
+			MENU_ID 
+			, PARENT_ID 
+			, MENU_NM 
+			, MENU_URL 
+			, MENU_KWD 
+			, MENU_ROLE 
+		FROM MENU
+		WHERE MENU_ID LIKE 'CM%'
+	</select>
+	
+	<resultMap type="MenuVO" id="stdMenuMap">
+		<result property="menuId" column="MN1ID"/>
+		<result property="menuNm" column="MN1NM"/>
+		<result property="menuUrl" column="MN1URL"/>
+		<collection property="children" ofType="MenuVO">
+<!-- 			<id property="menuId" column="MN1ID"/> -->
+			<result property="menuId" column="MN2ID"/>
+			<result property="menuNm" column="MN2NM"/>
+			<result property="menuUrl" column="MN2URL"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectStdMenuList" resultMap="stdMenuMap">
+		SELECT
+		    MN1.MENU_ID AS MN1ID
+		    , MN1.MENU_NM AS MN1NM
+		    , MN1.MENU_URL AS MN1URL
+		    , MN2.MENU_ID AS MN2ID
+		    , MN2.MENU_NM AS MN2NM
+		    , MN2.MENU_URL AS MN2URL
+		FROM MENU MN1
+		    LEFT JOIN MENU MN2
+		    ON MN1.MENU_ID = MN2.PARENT_ID
+		WHERE MN1.MENU_ID LIKE 'SM%'
+		ORDER BY MN1.MENU_ID, MN2.MENU_ID
+	</select>
+	
+	<select id="selectPrfMenuList" resultType="MenuVO">
+		SELECT 
+			MENU_ID 
+			, PARENT_ID 
+			, MENU_NM 
+			, MENU_URL 
+			, MENU_KWD 
+			, MENU_ROLE 
+		FROM MENU
+		WHERE MENU_ID LIKE 'PM%'
+	</select>
+	
+	<select id="selectEmpMenuList" resultType="MenuVO">
+		SELECT 
+			MENU_ID 
+			, PARENT_ID 
+			, MENU_NM 
+			, MENU_URL 
+			, MENU_KWD 
+			, MENU_ROLE 
+		FROM MENU
+		WHERE MENU_ID LIKE 'EM%'
+	</select>
+</mapper>

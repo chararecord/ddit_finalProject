@@ -1,0 +1,37 @@
+package kr.or.ddit.vo;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+/**
+ * 등록금 세부 내역 VO
+ * @author 이현주
+ * @Since 2023. 2. 15.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 15.     이현주       		생성
+ * 2023. 2. 17.		이현주			tuitionVO 추가
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Data
+@EqualsAndHashCode(of="tuitionDetId")
+@ToString
+public class TuitionDetVO {
+
+	@NotNull
+	private String tuitionDetId; // 세부내역 아이디
+	private String collId; // 단과대학 아이디
+	private String detailNm; // 세부내역명
+	private Integer detailCrit; // 세부내역항목
+
+	private TuitionVO tuitionVO; // 등록금고지서. 1:1관계
+	
+}

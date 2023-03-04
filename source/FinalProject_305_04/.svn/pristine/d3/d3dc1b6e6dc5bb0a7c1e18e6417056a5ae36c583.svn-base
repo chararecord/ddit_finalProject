@@ -1,0 +1,86 @@
+package kr.or.ddit.student.graduation.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.student.graduation.service.GraduationService;
+import kr.or.ddit.student.record.service.RecordService;
+import kr.or.ddit.vo.CollVO;
+import kr.or.ddit.vo.GradReqVO;
+import kr.or.ddit.vo.MGradReqVO;
+import kr.or.ddit.vo.MajorVO;
+import kr.or.ddit.vo.SemesterVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 졸업요건 컨트롤러
+ * @author 민경진
+ *
+ */
+@Slf4j
+@Controller
+public class GraduationController {
+	
+	@Inject
+	private GraduationService service;
+	@Inject
+	private RecordService recordService;
+	
+	
+	@RequestMapping("/student/graduation")
+	public String graduation() {
+		return "student/graduation/graduation";
+	}
+	
+	@GetMapping("/student/graduation/list")
+	public String graduationList(
+		Model model
+	) {
+		List<MGradReqVO> mGradReqList = service.retrieveMGradReqList();
+		model.addAttribute("mGradReqList", mGradReqList);
+		
+		List<CollVO> collegeList = recordService.retrieveCollegeList();
+		model.addAttribute("collegeList", collegeList);
+		
+		List<SemesterVO> semesterList = service.retrieveSemesterList();
+		model.addAttribute("semesterList", semesterList);
+		
+		return "student/graduation/graduationList";
+	}
+	
+	@ResponseBody
+	@GetMapping("/student/graduation/list/{mGradReqId}")
+	public MGradReqVO majorGradDetail(
+		@PathVariable String mGradReqId
+	) {
+		log.info("=====찍어보자{}", mGradReqId);
+		MGradReqVO majorReqVO = service.retrieveMGradReq(mGradReqId);
+		return majorReqVO;
+	}
+	
+	@ResponseBody
+	@PostMapping("/student/graduation/list/selectMajorList")
+	public List<MajorVO> selectMajorList(
+		@RequestBody CollVO collVO
+	) {
+		List<MajorVO> data = recordService.retrieveMajorList(collVO);
+		return data;
+	}
+	
+	
+	
+	
+	
+	
+}

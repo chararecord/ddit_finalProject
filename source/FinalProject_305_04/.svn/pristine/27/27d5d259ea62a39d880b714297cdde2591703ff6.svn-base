@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.priorSugang.dao.PriorSugangDAO">
+	
+	<!-- 수강신청 검색 조건 -->
+	<sql id="searchFrag">
+		<trim prefix=" WHERE " prefixOverrides="AND |OR " suffixOverrides="," >
+			NOT LECT_ID IN (SELECT LECT_ID FROM SUGANG_CART)
+			<if test="detailCondition neq null">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.collId)">
+					AND COLL_ID = #{detailCondition.collId}
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.majorId)">
+					AND MAJOR_ID = #{detailCondition.majorId}
+				</if>
+				<if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(detailCondition.camYears)">
+					AND CAM_YEAR in
+					<foreach item="camYear" collection="detailCondition.camYears" open="(" close=")" separator="," >
+						#{camYear}
+					</foreach>
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.estaSubs)">
+					AND ESTA_SUB in
+					<foreach item="estaSub" collection="detailCondition.estaSubs" open="(" close=")" separator="," >
+						#{estaSub}
+					</foreach>
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	<!-- 수강신청 검색에 따른 강의 목록 LIST SELECT문 -->
+	<resultMap type="LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lectId" column="LECT_ID" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+		<association property="profVO" javaType="ProfessorVO" autoMapping="true" />
+	</resultMap>
+	<select id="selectLectureList" parameterType="PagingVO" resultMap="lectureMap">
+		SELECT LECT_ID,
+		    (
+		        SELECT COMM_DESC
+		        FROM COMM
+		        WHERE COMM_ID = ESTA_SUB
+		    ) AS ESTA_SUB
+		    , MAJOR_NM, CAM_YEAR, LECT_NM, USER_NM, CREDIT, NUM_CLASS
+		FROM V_LECTUREINFO
+		<include refid="searchFrag" />
+		ORDER BY ESTA_SUB DESC
+	</select>
+	
+	<!-- 수강신청 장바구니 SELECT문 -->
+	<select id="selectCartList" parameterType="String" resultMap="lectureMap">
+		SELECT DISTINCT A.LECT_ID,
+	        (
+	            SELECT COMM_DESC
+	            FROM COMM
+	            WHERE COMM_ID = ESTA_SUB
+	        ) AS ESTA_SUB
+	        , B.MAJOR_NM, B.CAM_YEAR, B.LECT_NM, B.USER_NM, B.CREDIT, B.NUM_CLASS
+		FROM SUGANG_CART A INNER JOIN V_LECTUREINFO B ON (A.LECT_ID = B.LECT_ID)
+		WHERE STD_ID = #{stdId}
+		ORDER BY ESTA_SUB DESC
+	</select>
+	
+	<!-- 수강신청 장바구니 INSERT문 -->
+	<insert id="insertCart" parameterType="kr.or.ddit.vo.SugangCartVO">
+			INSERT INTO SUGANG_CART (
+				STD_ID
+				, LECT_ID
+			) VALUES (
+				#{stdId}
+				, #{lectId}			
+			)
+	</insert>
+	
+	<!-- 수강신청 장바구니 삭제 DELETE문 -->
+	<delete id="deleteCart" parameterType="kr.or.ddit.vo.SugangCartVO">
+		DELETE
+		FROM SUGANG_CART
+		WHERE LECT_ID = #{lectId}
+		AND STD_ID = #{stdId}
+	</delete>
+	
+	
+
+</mapper>

@@ -1,0 +1,84 @@
+package kr.or.ddit.vo;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import kr.or.ddit.validate.DeleteGroup;
+import kr.or.ddit.validate.InsertGroup;
+import kr.or.ddit.validate.UpdateGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+
+
+/**
+ * 
+ * @author 이선민
+ * @Since 2023. 2. 2.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 2.       이선민               생성
+ * 2023. 2. 6.       이선민               수정
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+
+@Data
+@ToString
+@EqualsAndHashCode(of="testId")
+@NoArgsConstructor
+public class TestVO implements Serializable {
+
+	//넘버링
+	private int rnum;  
+	private int rnum2;  
+	
+	//시험
+	private String testId;
+	private String examId;
+	private String lectId;
+	private String testNm;
+	@DateTimeFormat(pattern="yyyy-MM-dd")
+	private Date testRdate;
+	private String testStime;
+	private String testEtime;
+	private String testMeet;
+	@DateTimeFormat(pattern="yyyy-MM-dd")
+	private Date testDate;
+	
+	private String lectNm;
+	private String examType;
+	
+
+	//문제
+	private List<TestQueVO> queList; //has many 관계 (1:N)
+
+	//시험응시
+	private TestAllowVO testAllow; //has a 관계 - 거래처명
+	
+	//현재 수강중인강의
+	private CurrLectVO currLect; //has a 관계 수강중인 강의 하나에 시험 여러개
+	
+	//학생정보
+	private MyStudentVO myStudentVO; //학생 한명이 시험 여러개 
+	
+	//학기정보
+	private SemesterVO semeVO; //학기 하나당 시험 여러개 
+	
+
+	
+	
+}

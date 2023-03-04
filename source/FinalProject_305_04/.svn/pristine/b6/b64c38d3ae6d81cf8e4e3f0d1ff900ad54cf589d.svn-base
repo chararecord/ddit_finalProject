@@ -1,0 +1,144 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8" buffer="8kb"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>	
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+	
+<!doctype html>
+<html>
+	<head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <link rel="shortcut icon" href="${pageContext.request.contextPath}/resources/images/favicon.ico">
+		<title>학사정보시스템</title>
+		
+		<tiles:insertAttribute name="preScript" />
+		
+		<c:if test="${not empty message }">
+		<script>
+			alert("${message}");		
+		</script>
+		</c:if>
+		
+
+       
+		
+		
+		
+	</head>
+	<body class="sb-nav-fixed">
+	
+
+		<tiles:insertAttribute name="headerMenu" />
+		
+	
+		<div id="layoutSidenav">
+			<div id="layoutSidenav_nav">
+				<tiles:insertAttribute name="leftMenu" />
+			</div>		
+			
+			
+			<!-- Main Content Area start -->
+			<div id="layoutSidenav_content">
+         		<main>
+             		<div class="container-fluid">	
+						<tiles:insertAttribute name="content" />
+					</div>
+				</main>
+			</div>
+			<!-- Main Content Area end -->
+		</div>
+
+		<tiles:insertAttribute name="postScript" />
+	</body>
+</html>
+
+
+<script>
+
+// 메뉴 페이지의 즐겨찾기 별 상태(★) 설정
+$(document).ready(function(){
+	$.ajax({
+		url : "${pageContext.request.contextPath}/bookmark",
+		method : "get",
+		dataType : "json",
+		success : function(resp) {
+			console.log(resp);
+			console.log(resp.bookmarkVO.bmenuList);
+			
+			// DB의 즐겨찾기 메뉴에서 url만을 담을 배열 선언 
+			let bmenuUrl = [];
+			let bmenuList = resp.bookmarkVO.bmenuList;
+			if(bmenuList!=null && bmenuList.length > 0) {
+				for(let i = 0; i<bmenuList.length; i++) {
+					bmenuUrl.push(bmenuList[i].menuVO.menuUrl);
+// 					console.log("북마크", bmenuList[i].menuVO.menuUrl);
+// 					console.log("현재 주소", window.location.pathname);
+	 			}
+// 			console.log(bmenuUrl);
+			}
+			// 현재 페이지가 즐겨찾기 메뉴에 포함되어 있으면 
+			if(bmenuUrl.includes(window.location.pathname)) {
+				// 현재 페이지의 별을 ★로
+				$('.star').addClass('on');
+			} else {
+				// 그렇지 않으면 현재 페이지의 별을 ☆로
+				$('.star').removeClass('on');
+			}
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+});
+
+
+let encodedURL = '';
+
+// 즐겨찾기 등록/삭제하는 ajax
+let starAjax = function(){
+	$.ajax({
+		url : "${pageContext.request.contextPath}/bookmark",
+		method : "post",
+		contentType : "application/json;charset=UTF-8",
+		data : encodedURL,
+		dataType : "text",
+		success : function(resp) {
+			console.log(resp);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+}
+
+// 즐겨찾기 별 버튼 클릭했을 때 
+$(".star").click(function () {
+    let menuUrl = window.location.pathname;
+    encodedURL = encodeURI(menuUrl);
+	let data = {
+		menuUrl : menuUrl
+	}
+    console.log(menuUrl);
+	
+    if ($(this).hasClass('on')) {
+        $(this).removeClass('on');
+        // star이 되었을 때 delete
+    	starAjax();
+    } else {
+    	// star on이 되었을 때 insert
+        $(this).addClass('on');
+        starAjax();
+    }
+});
+	
+
+
+</script>

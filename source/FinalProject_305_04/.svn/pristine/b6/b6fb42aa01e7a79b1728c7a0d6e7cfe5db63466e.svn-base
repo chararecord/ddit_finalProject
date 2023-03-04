@@ -1,0 +1,72 @@
+package kr.or.ddit.campus.certificate.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.campus.certificate.service.CertHistoryService;
+import kr.or.ddit.campus.certificate.service.CertificateService;
+import kr.or.ddit.vo.CertHistoryVO;
+import kr.or.ddit.vo.UsrVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author 장은호
+ * @Since 2023. 2. 21.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 21.       장은호        		생성(certificateBox, certSuccess)
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Controller
+public class CertHistoryController {
+
+	@Inject
+	private CertHistoryService service;
+	@Inject
+	private CertificateService certService;
+	
+	
+	@GetMapping("/campus/certificateBox")
+	public String certificateBox(
+//		@PathVariable String userId
+		@AuthenticationPrincipal UsrVOWrapper principal
+		, Model model
+	) {
+//		UsrVO usrVO = certService.retrieveUserInfo(userId);
+		UsrVO usrVO = principal.getRealUser();
+		model.addAttribute("usrVO", usrVO);
+		
+		List<CertHistoryVO> certHistoryList = service.retrieveCertHistoryList(usrVO.getUserId());
+		model.addAttribute("certHistoryList", certHistoryList);
+		
+		return "campus/certificate/certificateBox";
+	}
+	
+	@ResponseBody
+	@PostMapping("/campus/certificateBox")
+	public int certSuccess(
+		@RequestBody CertHistoryVO certHistVO
+	) {
+		log.info("찍어보자{}", certHistVO);
+		int rowcnt = service.createCertHistory(certHistVO);
+		
+		return rowcnt;
+	}
+}

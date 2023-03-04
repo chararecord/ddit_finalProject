@@ -1,0 +1,87 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+${certList }
+
+<div class="cont">
+
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>증명서 발급 관리<button type="button" class="star"><span class="sr-only">즐겨찾기</span></button></h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i>
+			<strong>path1</strong> 
+			<strong>path2</strong> 
+			<strong>path3</strong>
+			<strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+		
+		
+		<!-- cont-box-inner -->
+		<div class="cont-box-inner">
+			<div class="title">
+				<h3>증명서 관리</h3>
+<!-- 				<span class="total"><em>1</em>건</span> -->
+				<div class="box-btn">
+					<button type="button" class="btn default">수정</button>
+					<button type="button" class="btn default">삭제</button>
+					<button type="button" class="btn purple">등록</button>
+				</div>
+			</div>
+			<!--tbl-->
+			<div class="tbl-wrap">
+				<table class="tbl center">
+					<caption>description about table</caption>
+					<colgroup>
+						<col style="width: 5%" />
+						<col style="width: 20%" />
+						<col style="width: 20%" />
+						<col style="width: 10%" />
+					</colgroup>
+					<thead>
+						<tr>
+							<th scope="col">선택</th>
+							<th scope="col">증명서</th>
+							<th scope="col">발급 대상</th>
+							<th scope="col">수수료</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:choose>
+							<c:when test="${not empty certList }">
+								<c:forEach items="${certList }" var="cert">
+									<tr>
+										<td>
+											<!-- 체크박스 -->
+											<div class="rc-wrap">
+												<input type="checkbox" id="checkbox6" name="radio-group">
+												<label for="checkbox6"><span class="sr-only">선택</span></label>
+											</div> <!-- // 체크박스 -->
+										</td>
+										<td>${cert.certNm }</td>
+										<td>${cert.commDesc }</td>
+										<td>${cert.certCharge }</td>
+									</tr>
+						</c:forEach>
+						</c:when>
+						<c:otherwise></c:otherwise>
+						</c:choose>
+					</tbody>
+
+				</table>
+			</div>
+			<!--end tbl-->
+		
+		
+		</div>
+		
+		
+	</div>
+</div>

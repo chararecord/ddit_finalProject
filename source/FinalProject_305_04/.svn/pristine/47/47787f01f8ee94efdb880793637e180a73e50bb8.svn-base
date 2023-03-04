@@ -1,0 +1,98 @@
+package kr.or.ddit.prof.scoreProc.service;
+
+import java.util.HashMap;
+import java.util.List;
+
+import kr.or.ddit.vo.AttendVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.ScoreCritVO;
+
+/**
+ * @author PC-17
+ * @Since 2023. 2. 27.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일           수정자            수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 27.       서범수			  생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface ScoreProcessService {
+	
+	
+	/**
+	 * 나의 강의 목록
+	 * @param pagingVO
+	 */
+	public void retrieveLectList(PagingVO<LectureVO> pagingVO);
+	
+	
+	public void setProfId(String profId);
+	
+	
+	public void retrieveProfStdList(PagingVO<MyLectureVO> pagingVO);
+	
+	
+	public void setLectID(String lectId);
+	
+	
+	/**
+	 * 해당 강의의 성적비율 조회
+	 * @param lectId
+	 * @return
+	 */
+	public List<ScoreCritVO> retrieveScoreCritList(String lectId);
+	
+	
+	/**
+	 * 해당 강의의 해당 수강생의 중간고사 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String retrieveMtScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 강의의 해당 수강생의 기말고사 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String retrieveFtScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 과제 평균점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String retrieveAsgnScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 출결 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String retrieveAttendScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 수강생의 출결정보 조회
+	 * @param map
+	 * @return
+	 */
+	public List<AttendVO> retrieveAttendList(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 수강생을 출결횟수 조회
+	 * @param map
+	 * @return
+	 */
+	public List<String> retrieveAttendCnt(HashMap<String, Object> map);
+}

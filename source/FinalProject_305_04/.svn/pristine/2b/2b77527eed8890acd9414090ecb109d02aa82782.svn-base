@@ -1,0 +1,210 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
+<div class="cont">
+
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>강의실관리<button type="button" class="star on"><span class="sr-only">즐겨찾기</span></button></h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i>
+			<strong>path1</strong> 
+			<strong>path2</strong> 
+			<strong>path3</strong>
+			<strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+		<div class="cont-box-inner">
+				<div class="title">
+					<div class="right-part">
+						<div class="search-form">
+							<select>
+								<option>전체</option>
+							</select>
+							<div class="input-group">
+								<label for="searchTxt" class="sr-only">검색어를 입력하세요</label> <input type="text" class="form-control text input with dropdown button" id="searchTxt" name="searchTxt" value="" placeholder="검색어를 입력하세요.">
+								<button class="btn btn-search primary" type="button">검색</button>
+							</div>
+						</div>
+						<div class="box-btn">
+							<button type="button" class="btn purple">등록</button>
+						</div>
+					</div>
+				</div>
+				<!--tbl-->
+			<div class="tbl-wrap">
+				<table class="tbl center">
+					<caption>description about table</caption>
+					<colgroup>
+						<col style="width: 10%">
+						<col style="width: 20%">
+						<col style="width: 10%">
+						<col style="width: 20%">
+					</colgroup>
+					<thead>
+						<tr>
+							<th scope="col">순서</th>
+							<th scope="col">기안자 소속</th>
+							<th scope="col">기안자</th>
+							<th scope="col">신청일자</th>
+							<th scope="col">배정</th>
+						</tr>
+					</thead>
+					<tbody id="listBody">
+						<tr>
+							<td>1</td>
+							<td>컴퓨터 융합학과</td>
+							<td>이규철</td>
+							<td>2022/12/02</td>
+							<td>
+								<button type="button" class="btn btn-s primary">삭제</button>
+								<button type="button" class="btn btn-s purple">수정</button>
+								<button type="button" class="btn primary">강의실 배정</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--end tbl-->
+
+			<!-- 페이지 네비게이션 -->
+			<div id="pagingArea">
+				<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
+			</div>
+			<!-- 페이지 네비게이션 끝 -->
+		</div>	
+	</div>
+</div>
+
+<script>
+	let listBody = $("#listBody");
+	
+	let pagingArea = $("#pagingArea").on('click', "a.paging", function(event){
+		event.preventDefault();
+		let page = $(this).data("page");
+		if(!page){return false;}
+		searchForm.find("[name=page]").val(page);
+		searchForm.submit();
+		return false;
+	});
+	
+	let makeTrTag = function(notice, index){
+		/* 날짜 format */
+		let wrDate = notice.wrDate;
+		let day = wrDate.split(' ');
+	// 	let time = day[1];
+	// 	console.log(time);
+	// 	time = day[1].split('.');
+	// 	console.log(time[0]);
+		
+		let aTag = $("<a>")
+					.attr("href", "${pageContext.request.contextPath}/campus/notice/" + notice.notiId)
+					.html(notice.tit);
+		
+		let checkBoxInput = $("<input>")
+							.attr({
+								type:"checkbox"
+								,id:"check_" +index
+								,name:"notiCheck"
+								,value:notice.notiId
+							}); 
+		let checkBoxLabel = $("<label>").append(
+								$("<span>").addClass("sr-only")
+							).attr('for', "check_" +index)
+		let f_attach = function(){
+			if(notice.attaCount >= 1){
+				let attaTag = $("<span>").addClass('material-symbols-outlined')
+							.css('font-size','15px')
+							.html('attach_file')
+				return attaTag;
+			}
+		}
+		let f_emp = function(){
+			let empId = notice.empId+""
+			if(empId.startsWith('1')){
+				return '관리자'
+			}
+		}
+	
+		return $("<tr>").append(
+				$("<td>").append(
+					checkBoxInput, 	checkBoxLabel	
+				)
+				,$("<td>").html(notice.rnum)
+				,$("<td>").html(aTag).css('text-align', 'left')
+				,$("<td>").html(f_attach())
+				,$("<td>").html(f_emp())
+				,$("<td>").html(day[0])
+				,$("<td>").html(notice.hit)
+		)
+	}
+	
+	
+	let searchForm = $('#searchForm').on('submit', function(event){
+		event.preventDefault();
+		
+		let url = this.action;
+		let method = this.method;
+		let queryString = $(this).serialize();
+	
+		//아작스 보내는 방식이 다양한데, 확장성 좋은 요걸 외움(파일 전송빼고 모든 곳에 사용가능)
+		$.ajax({
+			url : url,
+			method : method,
+			data :  queryString,
+			dataType:"json",
+			success : function(resp) {
+				listBody.empty();
+				pagingArea.empty();
+				searchForm[0].page.value="";
+				
+				let pagingVO = resp.pagingVO;
+				let dataList = pagingVO.dataList;
+				let trTags = [];
+				
+				if(dataList){
+					$.each(dataList, function(index, notice){
+						trTags.push(makeTrTag(notice, index));
+					});
+				}
+				else {
+					let tr = $("<tr>").html(
+								$("<td>").attr("colspan", "7").html("조건에 맞는 게시글이 없습니다."));
+					trTags.push(tr);
+				}
+				listBody.html(trTags);
+				pagingArea.html(resp.pagingHTML)
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+		return false;
+	}).submit();
+	
+	let searchUI = $("#searchUI").on('click', "#searchBtn", function(){
+		// :input[name] : name 속성을 갖고 있는 모든 input/select 대상
+		let inputs = searchUI.find(":input[name]");
+		$.each(inputs, function(index, input){
+			let name = this.name;
+			let value = $(this).val();
+			console.log(name, value);
+			searchForm.find("[name="+name+"]").val(value);
+		});
+		searchForm.submit();
+	});
+	
+	$(".insertBtn").on('click', function(event){
+		event.preventDefault();
+		let url = "${pageContext.request.contextPath}/campus/notice/form";
+		location.href = url;
+	});
+</script>
+	

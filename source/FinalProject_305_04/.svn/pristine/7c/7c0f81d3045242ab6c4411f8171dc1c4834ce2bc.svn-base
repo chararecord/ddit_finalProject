@@ -1,0 +1,376 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+<security:authentication property="principal" var="usrVOWrapper" />
+<security:authentication property="principal.realUser" var="authUser" />
+
+
+<div class="cont">
+
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>
+			시험
+			<button type="button" class="star">
+				<span class="sr-only">즐겨찾기</span>
+			</button>
+		</h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i> <strong>path1</strong>
+			<strong>path2</strong> <strong>path3</strong> <strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+
+	<!-- white-box -->
+	<div class="white-box">
+	
+	
+		<div class="tob-box">
+				<strong class="tit">퀴즈 제출자 안내사항 </strong>	
+				<ul>
+					<li><p>1) 반드시 기간을 먼저 설정한 후, 퀴즈를 등록하는 것을 권장합니다.</p>
+						<p>- 퀴즈기간 미설정시, 등록 직후 바로 시험에 응시 가능합니다.</p>
+						<p>- <span class="red-txt">기간을 설정하지 않고 문제를 등록하여 문제 유출이 되는 경우가 종종 발생합니다.</span></p>
+					</li>
+					<li>
+						<p>2) 퀴즈는 한 문항당 4지선다방식으로 등록할 수 있습니다.</p>
+						<p>- 정답란에는 1~4까지의 숫자만 입력이 가능합니다.</p>
+					</li>
+					<li>
+						<p>3) 퀴즈 생성 시 문제 개수는 최대 10문제로 설정할 수 있습니다.</p>
+						<p>- 하단의 +버튼과 문제의 -버튼을 통해 문항 수를 제어할 수 있습니다.</p>
+					</li>
+					<li>
+						<p>4) 퀴즈 문제 배점 및 자동 평가에 대한 안내</p>
+						<p> - 문제 갯수에따라 배점이 달라지며, 수강생이 제출을 완료하면 자동채점됩니다. 총점은 백분율로 계산하여 보여집니다.</p> 
+					</li>
+				</ul>
+		</div>
+	
+	
+
+
+		<form id="frm" action="${pageContext.request.contextPath }/prof/test/testForm" method="post">
+			<input type="hidden" name="examId" value="${testVO.examId }" />
+			<input type="hidden" name="lectId" value="${testVO.lectId }" /> 
+		
+		<!-- 학번, 학생명, 강의코드, 강의명, 중간기말구분 -->
+		<div class="tbl-wrap">
+			<table class="tbl">
+				<caption></caption>
+				<colgroup>
+					<col style="width: 150px;">
+					<col style="width: auto;">
+					<col style="width: 150px;">
+					<col style="width: auto;">
+				</colgroup>
+				<tbody>
+					<tr>
+						<th scope="row">강의명</th>
+						<td colspan="3">
+							<c:set var="lectrueList" value="${lectureVO}" />
+							<select id="selectLecture">
+								<option>===전체===</option>
+								
+								<c:choose>
+									<c:when test="${not empty lectrueList}">
+										<c:forEach items="${lectrueList }" var="lecture">
+											<option>${lecture.lectNm }</option>
+										</c:forEach>
+									</c:when>
+								</c:choose>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">시험제목</th>
+						<td><input type="text" name="testNm" class="w100" /></td>
+						<th scope="row">시험일</th>
+						<td><input type="date" name="testDate" class="w100" /></td>
+					</tr>
+					<tr>
+						<th scope="row">시험시작시간</th>
+						<td><input type="time" name="testStime" class="w100" /></td>
+						<th scope="row">시험종료시간</th>
+						<td><input type="time" name="testEtime" class="w100" /></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="cont-box-inner">
+			<ul class="question-wrap" id="test">
+				<li id="area1">
+				
+					<!--  rc-wrap-->
+					<div class="btn-toggle">
+						<button type="button" class="typeBtn objBtn on">객관식</button>
+						<button type="button" class="typeBtn sbjBtn">주관식</button>
+					</div>
+					<!--   // rc-wrap-->
+				
+					<div class="question">
+						<span class="num"><input type="number" class="inputNum" name="queList[0].testNum" value="1" /></span> 
+						<input type="text" name="queList[0].testQue" value="" class="testQue  w100 txtQuestion" placeholder="문제를 입력해주세요" />
+						<button onclick="f_remove(this)" class="btn primary btnMinus">X</button>
+					</div>
+					<div class="psgn-container">
+					</div>
+	
+				</li>
+			</ul>
+			<button type="button" onclick="f_add(this)" id="btnPlus" class="btn purple btnPlus">문제추가+</button>
+			
+			<div class="title">
+				<div class="box-btn">
+					<a href="" class="btn default">목록</a>
+					<a href="" class="btn red">취소</a>
+					<button type="submit" id="btnSubmit" class="btn purple">등록</button>
+				</div>
+			</div>
+		</div>
+		<security:csrfInput />
+		</form>
+	
+	
+	
+</div>
+</div>
+
+
+
+<script>
+	// 초기 객관식 지문 세팅 
+	typeBtnClick();
+	$(()=>{
+		$(".objBtn").trigger("click");
+	})
+	
+	
+	//+버튼 클릭시 문제 번호 1씩 자동증가 
+	$("#btnPlus").on("click", function(){
+		$(".inputNum").each(function(index, item){
+			$(this).attr('value',index+1);
+		});	
+	}); 
+	
+	//객관식 주관식 버튼 클릭 
+	//객관식 
+	function psgn_obj(thisObj) {
+		let cnt = 0;
+		//alert("체크")
+		//console.log("objObj", thisObj);
+		$(thisObj).parent().parent().children(".psgn-container").html("<ul class='psgn'>");
+
+		//$(".psgn-container").html("<ul class='psgn'>");
+	 	for (var i = 0; i < 4; i++) {
+			liTags = `<li class="items">
+						 <input type="radio" id="mun\${i+1}" name="mun1">
+						 <label for="mun\${i+1}"><span class="sr-only">선택</span></label>
+						 <input type="text" name="testPasg" class="w100 txtPasg" id="testPasg\${i}"  >
+					 </li> `
+			//$(".psgn").append(liTags);
+			$(thisObj).parent().parent().children(".psgn-container").children(".psgn").append(liTags);
+		}
+	}
+	//주관식
+	function psgn_sbj(thisObj) {
+		//console.log("subObj", thisObj);
+		
+		liTags = `<div class="textarea-wrap"><textarea class="w100"></textarea></div>`
+		//$(".psgn-container").html(liTags);
+		$(thisObj).parent().parent().children(".psgn-container").html(liTags);
+	}
+	//psgn_obj();	
+	
+	//객관식 주관식 클릭이벤트 
+	function typeBtnClick() {
+		$(".typeBtn").on("click", function(){
+
+			if(!$(this).hasClass("on")) {
+				$(this).addClass("on");
+				$(this).siblings().removeClass("on");
+			}
+
+			let objBtn = $(".objBtn");
+			let sbjBtn = $(".sbjBtn");
+			let liTags;
+			//지문 객관식일경우
+			if(objBtn.hasClass('on')) {
+				psgn_obj($(this));
+			} 
+			//지문 주관식일경우
+			if(sbjBtn.hasClass("on")) {
+				psgn_sbj($(this));
+			}
+		});
+	}
+	//typeBtnClick();
+
+	// + , - 문제 개수 추가 삭제 
+	const smTest = document.querySelector("#test");
+	const smArea = document.querySelector("#area1");
+	const psgnContainer = document.querySelector(".psgn-container");
+	let nameCnt = 2;
+	let idCnt = 2;
+	
+	
+	
+	function f_remove(p_this){// 안보이게 할 건지, 진짜로 지울건지
+		//console.log("확인",p_this.parentNode.parentNode);
+		smTest.removeChild(p_this.parentNode.parentNode); //remove 보다는 removeChild가 좋음(가독성도 좋음, 구조가 보이니까)
+		//smTest.removeChild(p_this.parentElement); //remove 보다는 removeChild가 좋음(가독성도 좋음, 구조가 보이니까)
+	}
+	
+	//문제 및 지문 추가
+	function f_add(p_this) {
+		
+		let another = smArea.cloneNode(true); //자식까지 전체 복사
+		//console.log("inputRadios", inputRadios);
+		//console.log("inputLabels", inputLabels);
+		
+		another.id = "area" + nameCnt;
+		
+		let inputRadios = another.querySelectorAll("input[type=radio]"); 
+		let inputLabels = another.querySelectorAll("label");
+		let inputTxt = another.querySelectorAll("input[type=text]");
+		
+		for (let i = 0;i < inputRadios.length; i++) {
+			inputTxt[i].value = '';
+			
+			inputRadios[i].name = "mun" + nameCnt;
+			inputRadios[i].id = "mun" + nameCnt + (i + 1);
+			//another.children[i].children[i].name = "mun" + nameCnt;
+			//inputLabels[i]["for"] = "mun" + nameCnt;
+			inputLabels[i].setAttribute("for", "mun" + nameCnt + (i + 1));
+			//console.log(inputLabels[i].getAttribute("for"));	
+		}
+		smTest.appendChild(another); //문서에 추가
+		nameCnt++;
+		
+		//객관식 주관식 클릭이벤트
+		typeBtnClick();
+		
+		//문제 name값 정리
+		$(".txtQuestion").each(function(index,item){
+			$(this).attr("name","queList["+index+"].testQue");
+		});
+		
+		//보기 name값 정리
+		// 0 1 2 3 => 0
+		// 4 5 6 7 => 1
+		// 8 9 10 11 => 2
+		$(".txtPasg").each(function(index,item){
+			//몫 구하기
+			let i = parseInt(index / 4);
+			//나머지 구하기
+			let j = index % 4;
+			
+			$(this).attr("name","queList["+i+"].pasgList["+j+"].testPasg");
+		});
+	}
+
+	
+	
+	
+	
+	
+// 	const 
+// 	$("#area"+i).filter("item")
+	 
+	//등록버튼 클릭시 
+	$("#btnSubmit").on("click", function() {
+		let testVO = {};
+	    testVO.queList = []; //문제 
+	    
+	   
+		//문제  + 번호 
+		$(".inputNum").each(function(index, item){
+			
+			console.log($(this).attr("id", "num"+index));
+			
+			let inputQue = $(this).parent().siblings().eq(0);
+			console.log(inputQue.attr("id","que"+index));
+			
+		    let queNum = $(item).val(); //문제번호
+		    let testQue = $("#que"+index).val(); //문제
+		    let tq = {
+		    	"testNum":queNum,	
+		    };
+			console.log("==QN",queNum);
+			console.log("==QQ",testQue);
+		    
+		    tq["testQue"]=testQue;
+		    testVO.queList.push(tq);
+		    
+		    //지문
+		    testVO.queList[index].pasgList = [];  
+		    
+		   
+		});	
+	    
+	    
+		
+	  	
+		$(".items").each(function(idx, item){
+			
+			
+			console.log(item);
+			
+			
+			//console.log($(".psgn").attr("id", "psgn"+idx));
+			//console.log($(item).find("input[name=testPasg]").val());
+			
+			let testPasg = $("#testPasg"+idx).val(); //지문 (11)
+// 			let tp = {
+// 					"testPasg" : testPasg
+// 			};
+			
+			tp["testPasg"] = testPasg; //지문 (11)
+			testVO.queList[idx].pasgList.push(tp);
+			console.log(testVO);
+		});
+		
+		//console.log(testVO);
+		
+	    testVO["testNm"]=$("input[name=testNm]").val();//시험 제목 
+	    testVO["testRdate"]=$("input[name=testDate]").val();//시험일
+	    testVO["testStime"]=$("input[name=testStime]").val();// 시험 시작시간
+	    testVO["testEtime"]=$("input[name=testEtime]").val();// 시험 종료시간 
+	    testVO["lectNm"]=$("#selectLecture option:selected").val();	//강의명
+	    testVO["examType"]=$(".typeBtn.on").text(); //고사구분
+
+	    $("#frm").submit();
+// 		$.ajax({
+// 			url:"${pageContext.request.contextPath }/prof/test/testForm",
+// 			type: "POST",
+// 			contentType: "application/json;charset=UTF-8",
+// 			data: JSON.stringify(testVO),
+// 			success: function(resp){
+// 				alert(resp);
+// 			},
+// 			error : function(jqXHR, status, error) {
+// 				console.log(jqXHR);
+// 				console.log(status);
+// 				console.log(error);
+// 			}
+// 		});
+		return false; 
+	});
+
+	
+	
+	
+	
+ 
+	
+
+</script>
