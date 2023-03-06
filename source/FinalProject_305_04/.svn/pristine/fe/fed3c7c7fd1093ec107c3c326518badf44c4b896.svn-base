@@ -1,0 +1,153 @@
+package kr.or.ddit.prof.scoreProc.dao;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.vo.AttendVO;
+import kr.or.ddit.vo.CurrLectVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.ScoreCritVO;
+
+/**
+ * @author PC-17
+ * @Since 2023. 2. 27.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일           수정자            수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 27.       서범수        생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface ScoreProcessDAO {
+	/**
+	 * 나의강의 목록 갯수조회
+	 * @param pagingVO
+	 * @return
+	 */
+	public int selectTotalRecord(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 나의 강의목록 조회
+	 * @param pagingVO
+	 * @return
+	 */
+	public List<LectureVO> selectLectList(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 나의 강의를 듣는 학생 수 조회
+	 * @param lectId
+	 * @return
+	 */
+	public int selectTotalStdRecord(String lectId);
+	
+	
+	/**
+	 * 나의 강의를 듣는 학생 목록 조회
+	 * @param lectId
+	 * @return
+	 */
+	public MyLectureVO selectProfStdList(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 강의의 성적비율 조회
+	 * @param lectId
+	 * @return
+	 */
+	public List<ScoreCritVO> selectScoreCritList(String lectId);
+	
+	
+	/**
+	 * 해당 강의의 해당 수강생의 중간고사 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String selectMtScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 강의의 해당 수강생의 기말고사 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String selectFtScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 과제 평균점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String selectAsgnAvgScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 출결 점수 조회
+	 * @param map
+	 * @return
+	 */
+	public String selectAttendScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 수강생의 출결정보 조회
+	 * @param map
+	 * @return
+	 */
+	public List<AttendVO> selectAttnedList(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 해당 수강생을 출결횟수 조회
+	 * @param map
+	 * @return
+	 */
+	public List<String> selectAttendCnt(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 수강중인 강의의 최종성적 수정
+	 * @param map
+	 * @return
+	 */
+	public int updateFinScore(HashMap<String, Object> map);
+	
+	
+	/**
+	 * 중간 성적부여 등록
+	 * @param map
+	 * @return
+	 */
+	public int insertMtScoreProc(HashMap<String, Object> map);
+	
+	/**
+	 * 기말 성적부여 등록
+	 * @param map
+	 * @return
+	 */
+	public int insertFtScoreProc(HashMap<String, Object> map);
+	
+	/**
+	 * 과제 성적부여 등록
+	 * @param map
+	 * @return
+	 */
+	public int insertAsgnScoreProc(HashMap<String, Object> map);
+	
+	/**
+	 * 출석 성적부여 등록
+	 * @param map
+	 * @return
+	 */
+	public int insertAtndScoreProc(HashMap<String, Object> map);
+	
+}

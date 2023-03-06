@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.score.dao.ScoreStdDao">
+	<select id="selectStdScoreList" parameterType="String" resultType="ScoreStdVO">
+		SELECT DISTINCT C.LECT_ID
+		      , C.LECT_NM
+		      , A.CRIT_FINAL_SCORE
+		      , D.SEME_YEAR
+		      , D.SEME
+		      , C.CAM_YEAR
+		      , (SELECT COMM_DESC FROM COMM WHERE COMM_ID = G.ESTA_SUB) AS ESTA_SUB
+		      , C.CREDIT
+		      , D.SEME_ID
+		  FROM SCORE_PROC A INNER JOIN CURR_LECT B ON (A.CURLECT_ID = B.CURLECT_ID)
+                 			INNER JOIN LECTURE C ON (B.LECT_ID = C.LECT_ID)
+			                INNER JOIN SEMESTER D ON (C.SEME_ID = D.SEME_ID)
+			                INNER JOIN SYLLA_APPR E ON (C.SYLLA_APPR_ID = E.SYLLA_APPR_ID)
+			                INNER JOIN SYLLABUS F ON (E.SYLLA_ID = F.SYLLA_ID)
+			                INNER JOIN SUB_MAJOR G ON (F.SUB_MAJOR_ID = G.SUB_MAJOR_ID)
+		 WHERE B.STD_ID = ${stdId}
+		 ORDER BY 4
+	</select>
+</mapper>

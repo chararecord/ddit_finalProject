@@ -1,0 +1,84 @@
+package kr.or.ddit.student.sugang.service;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.commons.dao.UsrDAO;
+import kr.or.ddit.student.priorSugang.dao.PriorSugangDAO;
+import kr.or.ddit.student.sugang.dao.SugangDAO;
+import kr.or.ddit.vo.CurrLectVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.StudentVO;
+import kr.or.ddit.vo.UsrVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author 민경진
+ * @Since 2023. 3. 3.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 3. 3.       민경진        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+public class SugangServiceImpl implements SugangService {
+	
+	@Inject
+	private SugangDAO dao;
+	
+	@Inject
+	private UsrDAO usrDAO;
+	
+	@Override
+	public List<LectureVO> retrieveSugangList(CurrLectVO currLectVO) {
+		List<LectureVO> sugangList = dao.selectSugangList(currLectVO);
+		return sugangList;
+	}
+
+	@Override
+	public int createSugangLect(CurrLectVO currLectVO) {
+		int sugangCnt = dao.selectSugang(currLectVO);
+		int rowcnt = 0;
+		
+		int totalCredit = dao.selectTotalCredit(currLectVO);							//수강신청가능학점
+		UsrVO usrVO = usrDAO.selectStd(currLectVO.getStdId());
+		int sugangCredit = Integer.parseInt(usrVO.getStudentVO().getSugangCredit());	//수강신청한학점
+		LectureVO lectureInfo = dao.selectSugangInfo(currLectVO);
+		int lectCredit = lectureInfo.getCredit();
+
+		// 중복체크 (select한 결과가 0이면 insert 되도록)
+		if(sugangCnt == 0) {
+			if((sugangCredit - (totalCredit + lectCredit)) >= 0) {
+				log.info("@@@@@@@@@@@@>>>>>========>>>>>========>>>>>>>{}", sugangCredit - (totalCredit + lectCredit));
+				rowcnt = dao.insertSugangLect(currLectVO);
+			}
+		} else {
+			throw new RuntimeException("이미 수강신청한 강의입니다.");
+		}
+		return rowcnt;
+	}
+
+	@Override
+	public int removeSugangLect(CurrLectVO currLectVO) {
+		int rowcnt = dao.deleteSugangLect(currLectVO);
+		return rowcnt;
+	}
+
+	@Override
+	public int retrieveTotalCredit(CurrLectVO currLectVO) {
+		int totalCredit = dao.selectTotalCredit(currLectVO);
+		return totalCredit;
+	}
+}

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.emp.scholarshipManage.dao.ScholarshipManageDAO">
+
+
+
+<!-- 장학금 수여할 학생 카운트  -->
+<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+select count(*)
+from(
+SELECT U.MAJOR_ID, U.CAM_YEAR, U.STD_ID, U.FIN_SCORE, U.FIN_AVG, U.MAJOR_NM, U.SEME_ID, U.SEME_YEAR, U.SEME
+     , DENSE_RANK() OVER(PARTITION BY U.MAJOR_ID, U.CAM_YEAR ORDER BY U.FIN_AVG DESC) RSLT
+FROM
+(
+    WITH T AS(
+        SELECT E.MAJOR_ID 
+             , (SELECT MAX(F.CAM_YEAR) FROM RECORD F WHERE F.STD_ID = A.STD_ID) CAM_YEAR
+             ,  (SELECT G.MAJOR_NM FROM V_STU G WHERE G.STD_ID = A.STD_ID) MAJOR_NM
+             , A.STD_ID
+             , NVL(A.FIN_SCORE,0) FIN_SCORE
+             , H.SEME_ID  
+             , H.SEME
+             , H.SEME_YEAR
+             
+        FROM   CURR_LECT A, LECTURE B, SYLLA_APPR C, SYLLABUS D, SUB_MAJOR E, SEMESTER H
+        WHERE  A.LECT_ID = B.LECT_ID
+        AND    B.SYLLA_APPR_ID = C.SYLLA_APPR_ID
+        AND    C.SYLLA_ID = D.SYLLA_ID
+        AND    D.SUB_MAJOR_ID = E.SUB_MAJOR_ID    
+        AND    H.SEME_ID = B.SEME_ID
+    )
+    SELECT T.MAJOR_ID
+         , T.CAM_YEAR
+         , T.STD_ID
+         , SUM(T.FIN_SCORE) FIN_SCORE
+         , AVG(T.FIN_SCORE) FIN_AVG
+         , T.MAJOR_NM
+         , T.SEME_ID
+         , T.SEME_YEAR
+         , T.SEME
+    FROM   T
+    GROUP BY T.MAJOR_ID
+         , T.CAM_YEAR
+         , T.STD_ID
+         , T.MAJOR_NM
+         , T.SEME_ID
+         , T.SEME_YEAR
+         , T.SEME
+) U
+)
+</select>
+
+<!-- 장학금 수여할 학생 목록 출력 -->
+<resultMap type="MyStudentVO" id="schStdList" autoMapping="true">
+	<id property="stdId" column="STD_ID"/>
+	<association property="majorVO" javaType="MajorVO" autoMapping="true">
+		<id property="majorId" column="MAJOR_ID"/>
+	</association>
+	<association property="usrVO" javaType="UsrVO" autoMapping="true">
+		<id property="userId" column="USER_ID"/>
+	</association>
+	<collection property="mylectureList" ofType="MyLectureVO" autoMapping="true">
+		<id property="lectId" column="LECT_ID" />
+	</collection>
+	<collection property="currlectList" ofType="CurrLectVO" autoMapping="true">
+		<id property="curlectId" column="CURLECT_ID" />
+	</collection>
+	<collection property="semesterList" ofType="SemesterVO" autoMapping="true">
+		<id property="semeId" column="SEME_ID"/>
+	</collection>
+	<collection property="schHistList" ofType="SchHistVO" autoMapping="true"> 
+		<id property="schHistId" column="SCH_HIST_ID"/>
+		<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true"/>
+	</collection>
+</resultMap>
+
+<select id="selectSchStdList" parameterType="PagingVO" resultMap="schStdList">
+
+SELECT U.MAJOR_ID, U.CAM_YEAR, U.STD_ID, U.FIN_SCORE, U.FIN_AVG, U.MAJOR_NM, U.SEME_ID, U.SEME_YEAR, U.SEME, U.USER_NM, U.SCHS_NM
+     , DENSE_RANK() OVER(PARTITION BY U.MAJOR_ID, U.CAM_YEAR ORDER BY U.FIN_AVG DESC) RSLT
+FROM
+(
+    WITH T AS(
+        SELECT E.MAJOR_ID 
+             , (SELECT MAX(F.CAM_YEAR) FROM RECORD F WHERE F.STD_ID = A.STD_ID) CAM_YEAR
+             ,  (SELECT G.MAJOR_NM FROM V_STU G WHERE G.STD_ID = A.STD_ID) MAJOR_NM
+             , A.STD_ID
+             , NVL(A.FIN_SCORE,0) FIN_SCORE
+             , H.SEME_ID  
+             , H.SEME
+             , H.SEME_YEAR
+             ,(SELECT G.USER_NM FROM V_STU G WHERE G.STD_ID = A.STD_ID) USER_NM
+             , (SELECT SCHS_NM FROM SCHOLARSHIP I WHERE I.SCHOLARSHIP_ID = J.SCHOLARSHIP_ID) SCHS_NM
+        FROM   CURR_LECT A, LECTURE B, SYLLA_APPR C, SYLLABUS D, SUB_MAJOR E, SEMESTER H, SCH_HIST J
+        WHERE  A.LECT_ID = B.LECT_ID
+        AND    B.SYLLA_APPR_ID = C.SYLLA_APPR_ID
+        AND    C.SYLLA_ID = D.SYLLA_ID
+        AND    D.SUB_MAJOR_ID = E.SUB_MAJOR_ID    
+        AND    H.SEME_ID = B.SEME_ID 
+        AND    J.SEME_ID = B.SEME_ID 
+    )
+    SELECT T.MAJOR_ID
+         , T.CAM_YEAR
+         , T.STD_ID
+         , SUM(T.FIN_SCORE) FIN_SCORE
+         , AVG(T.FIN_SCORE) FIN_AVG
+         , T.MAJOR_NM
+         , T.SEME_ID
+         , T.SEME_YEAR
+         , T.SEME
+         , T.USER_NM
+         , T.SCHS_NM
+    FROM   T
+    GROUP BY T.MAJOR_ID
+         , T.CAM_YEAR
+         , T.STD_ID
+         , T.MAJOR_NM
+         , T.SEME_ID
+         , T.SEME_YEAR
+         , T.SEME
+         , T.USER_NM
+         , T.SCHS_NM
+) U
+</select>
+
+<!-- 장학금 수여 insert  -->
+
+
+
+
+</mapper>
