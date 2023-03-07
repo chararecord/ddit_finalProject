@@ -1,0 +1,309 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui"%>
+
+<div class="cont">
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>
+			등록금 고지서 발송(교직원)
+			<button type="button" class="star">
+				<span class="sr-only">즐겨찾기</span>
+			</button>
+		</h2>
+		<!--cont-navi-->
+
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i> <strong>path1</strong>
+			<strong>path2</strong> <strong>path3</strong> <strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+		<div class="tob-box">
+			<!-- 				<strong class="tit">등록금 고지</strong> -->
+
+			<p>
+				등록금은 현재 재학중인 학생에게만 부여된다. <br> 등록금은 장학금이 자동적으로 차감된 금액이 부과되며, 만약
+				장학금액이 등록금액을 초과할 경우 등록금은 0원으로 처리된다.
+			</p>
+		</div>
+
+
+		<!-- cont-box-inner -->
+		<div class="cont-box-inner">
+			<div class="title">
+						<h3>등록금 납부 고지 대상자</h3>
+			</div>
+		</div>
+
+			<div class="title">
+		
+				<p class="highlight-txt">
+					총 <em class="red-txt">${pagingVO.totalRecord }</em>개의 고지서가 있습니다
+				</p>
+				<div class="box-btn">
+					<button id="sendBtn" type="button" class="btn purple">고지서 발송</button>
+				</div>
+			</div>
+
+			<!--tbl start-->
+			<div class="tbl-wrap">
+				<table class="tbl center">
+					<caption>등록금 납부 고지 대상</caption>
+					<colgroup>
+						<col style="width: 5%">
+						<col style="width: 5%">
+						<col style="width: 15%">
+						<col style="width: 20%">
+						<col style="width: 15%">
+						<col style="width: 5%">
+						<col style="width: 15%">
+						<col style="width: 15%">
+					</colgroup>
+					<thead>
+						<tr class="table-scrollable__fixed-y">
+							<th scope="col">
+							<input type="checkbox" id="cbx_chkAll" /> 
+							<label for="cbx_chkAll"> <span class="sr-only"></span></th>
+							<th scope="col">No</th>
+							<th scope="col">단과대학</th>
+							<th scope="col">학과</th>
+							<th scope="col">학번</th>
+							<th scope="col">학년</th>
+							<th scope="col">이름</th>
+							<th scope="col">고지현황</th>
+						</tr>
+					</thead>
+					
+					<tbody id=listBody>
+						<tr>
+							<c:set var="tuitionStdList" value="${pagingVO.dataList }" />
+							<c:choose>
+								<c:when test="${not empty tuitionStdList }">
+									<c:forEach items="${tuitionStdList }" var="stdList"
+										varStatus="i">
+										<tr class="chkGray">
+											<td><input type="checkbox" 
+												id="checkbox44444${i.index}"
+												name="radio-group${i.index}" 
+												data-stu-id="${stdList.tuitionPayVO.stdId}" 
+												class="cbox"> 
+												<label for="checkbox44444${i.index}">
+													<span class="sr-only"></span>
+											</label></td>
+											<td>${stdList.rnum }</td>
+											<td>${stdList.collVO.collNm}</td>
+											<td>${stdList.majorVO.majorNm }</td>
+											<td>${stdList.tuitionPayVO.stdId }</td>
+											<td>${stdList.recordVO.camYear }</td>
+											<td>${stdList.usrVO.userNm }</td>
+											<td id="stattusN${i.index}" class='aaa'>미발송</td>
+										</tr>
+									</c:forEach>
+								</c:when>
+								<c:otherwise>
+									<td colspan="8">조건에 맞는 게시글이 없습니다.</td>
+								</c:otherwise>
+							</c:choose>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--tbl end-->
+		</div>
+	</div>
+	<!-- end cont-box-inner -->
+</div>
+
+<form:form hiddent="true" id="searchForm" method="get" modelAttribute="simpleCondition">
+	<form:hidden path="searchType" name="searchType" />
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+<script type="text/javascript">
+	$(function(){
+		$("#cbx_chkAll").on("click",function() {
+			console.log("cbx_chkAll에 왔다");
+			
+			$(".cbox").prop('checked',function(){
+		        return !$(this).prop('checked');
+		    });
+			
+// 			if($("#cbx_chkAll").is(":checked")){
+// 				$("input[name=radio-group]").prop("checked", true);
+// 			} else {
+// 				$("input[name=radio-group]").prop("checked", false);
+// 			}
+		});
+	});
+</script>
+<script>
+	
+// 	체크박스 전체선택
+	$(function() {
+		$("input[name=radio-group]").click(function() {
+			var total = $("input[name=radio-group]").length;
+			var checked = $("input[name=radio-group]:checked").length;
+			
+			if(total != checked) {
+				$("#cbx_chkAll").prop("checked", false);
+			} else{
+				$("#cbx_chkAll").prop("checked", true); 
+			}
+		});
+	});
+	
+	//고지서 발송 버튼 클릭시 insert문 실행
+	$("#sendBtn").on("click",function(){
+		let semeId = "${param.semeId}";	//DA10003
+		
+		//<form></form>
+		let formdata = new FormData();
+		
+		let statusN = $(".chkGray").children("td").eq(7)
+		console.log(statusN);
+		$(".cbox").each(function(index,item){
+			//data-stu-id="20111394"
+			let stuId = $(this).data("stuId");
+			console.log("stuId : " + stuId);
+			//<input type="text" name="stuIdArr" ...
+			//<input type="text" name="stuIdArr" ...
+			//<input type="text" name="stuIdArr" ...
+			formdata.append("stuIdArr",stuId);
+// 			formdata.append("statusN",statusN);
+			
+		});
+		
+		//<input type="text" name="semeId" value="DA10003"...
+		formdata.append("semeId",semeId);
+		
+		console.log("formdata : " + formdata);
+		
+		if(confirm("발송하시겠습니까?") == true){
+			
+			//아작났어유..피씨다타써
+ 			$.ajax({
+ 				url:"<%=request.getContextPath()%>/emp/tuitionManage/tuitionSend",  
+ 				contentType:false,
+ 		        processData:false,
+  				data:formdata,
+  				type:"post",
+ 				success : function(resp) {
+ 					console.log("resp : " + resp);
+	//				'미발송'을 '발송'으로 바꾸기
+ 					$(".cbox").prop('checked',function(){
+ 				        return !$(this).prop('checked');
+ 					});
+ 					$("#cbx_chkAll").prop('checked',function(){
+ 				        return !$(this).prop('checked');
+ 					});
+ 					$(".chkGray").css("color","#A4A4A4");
+ 					
+//  					console.log(statusN.text());
+					$('.aaa').html("발송 완료");
+ 					
+ 				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			alert("발송 완료하였습니다");
+		}else{
+			alert("발송을 취소하였습니다.");
+		}
+	});
+// 	$("#sendBtn").on("click", function(event) {
+// 		// 만약 v체크가 하나라도 되있으면, 
+// 		if($("#checkbox44444").is(":checked")){
+// 		// 1. v체크된 insert문 실행
+		
+// 		let method = this.method;
+// 		let queryString = $(this).serialize();
+		
+// 		let data = { 
+// 				"stdId" : stdId,
+// 				"semeId" : semeId
+// 		}
+		
+// 		// 2. 발송하시겠습니까? 
+// 		if(confirm("발송하시겠습니까?") == true){
+// 			$.ajax({
+//			url : "<%=request.getContextPath()%>/emp/tuitionManage/tuitionSend", 
+// 			method : "post",
+// 			data : JSON.stringify(data),
+// 			dataType : "json",
+// 			success : function(resp) {
+// 				3. 실행된 insert문 
+//				'미발송'을 '발송'으로 바꾸기
+				// $('#statusN').text("발송 완료");
+// 			},
+// 			error : function(jqXHR, status, error) {
+// 				console.log(jqXHR);
+// 				console.log(status);
+// 				console.log(error);
+// 			}
+// 		});
+// 			alert("발송 완료하였습니다");
+// 		}else{
+// 			alert("발송을 취소하였습니다.");
+// 		}
+// 	}
+// });
+	
+	
+	
+	
+	
+	// 발송할 재학생 목록 출력
+		let listBody = $("#listBody");
+
+		let searchForm = $("#searchForm").on("submit", function(event) {
+			event.preventDefault;
+
+			let url = this.action;
+			let method = this.method;
+			let queryString = $(this).serialize();
+
+			$.ajax({
+				url : url,
+				method : method,
+				data : queryString,
+				dataType : "json",
+				success : function(resp) {
+					// listBody.empty();
+					searchForm[0].page.value = "";
+
+					let pagingVO = resp.pagingVO;
+					let dataList = pagingVO.dataList;
+
+// 					pagingArea.html(resp.pagingHTML);
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			return false;
+		}).submit();
+
+		let searchUI = $("#searchUI").on('click', "#searchBtn", function(){
+			// :input[name] : name 속성을 갖고 있는 모든 input/select 대상
+			let inputs = searchUI.find(":input[name]");
+			$.each(inputs, function(index, input){
+				let name = this.name;
+				let value = $(this).val();
+// 				console.log(name, value);
+				searchForm.find("[name="+name+"]").val(value);
+			});
+			searchForm.submit();
+		});
+	</script>

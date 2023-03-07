@@ -1,0 +1,92 @@
+package kr.or.ddit.mypage.service;
+
+import java.util.List;
+
+import kr.or.ddit.vo.CollVO;
+import kr.or.ddit.vo.CommVO;
+import kr.or.ddit.vo.MajorVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.ProfessorVO;
+import kr.or.ddit.vo.RecordVO;
+import kr.or.ddit.vo.SemesterVO;
+import kr.or.ddit.vo.StudentVO;
+
+public interface MypageService {
+
+	
+	/**
+	 * 게시글 단건 조회
+	 * @param notiId
+	 * @return
+	 */
+	public StudentVO retrieveStuMypageInfo(String stdId);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 업데이트하기
+	 * @param userId
+	 * @return
+	 */
+//	public String updateStuTotalStudentInfo(StudentVO userId);
+	
+	
+	
+	
+	
+	/**
+	 * 단과대학 셀렉트박스로 가져오기
+	 * @return
+	 */
+//	public List<CollVO> retrieveCollList();
+	
+	
+	/**
+	 * 학과 셀렉트박스
+	 * @param collVO
+	 * @return
+	 */
+//	public List<MajorVO> selectMajorList(CollVO collVO);
+	
+	/**
+	 * 교수 셀렉트박스
+	 * @param majorVO
+	 * @return
+	 */
+//	public List<ProfessorVO> selectProList(MajorVO majorVO);
+	
+	/**
+	 * 학기아이디 셀렉트박스로 가져오기
+	 * @return
+	 */
+//	public List<SemesterVO> selectSemeList();
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

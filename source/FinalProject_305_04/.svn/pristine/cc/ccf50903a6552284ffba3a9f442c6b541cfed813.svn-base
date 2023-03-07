@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.sugang.dao.SugangDAO">
+	
+	<!-- 수강신청 검색 조건 -->
+	<sql id="searchFrag">
+		<trim prefix=" WHERE " prefixOverrides="AND |OR " suffixOverrides="," >
+			NOT LECT_ID IN (SELECT LECT_ID FROM SUGANG_CART)
+			<if test="detailCondition neq null">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.collId)">
+					AND COLL_ID = #{detailCondition.collId}
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.majorId)">
+					AND MAJOR_ID = #{detailCondition.majorId}
+				</if>
+				<if test="@org.apache.commons.lang3.ObjectUtils@isNotEmpty(detailCondition.camYears)">
+					AND CAM_YEAR in
+					<foreach item="camYear" collection="detailCondition.camYears" open="(" close=")" separator="," >
+						#{camYear}
+					</foreach>
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.estaSubs)">
+					AND ESTA_SUB in
+					<foreach item="estaSub" collection="detailCondition.estaSubs" open="(" close=")" separator="," >
+						#{estaSub}
+					</foreach>
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	<!-- lectureMap -->
+	<resultMap type="LectureVO" id="lectureMap" autoMapping="true">
+		<id property="lectId" column="LECT_ID" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+		<association property="profVO" javaType="ProfessorVO" autoMapping="true" />
+	</resultMap>
+	
+	<!-- 수강신청 검색에 따른 강의 목록 LIST SELECT문 -->
+	<select id="selectSugangList" parameterType="CurrLectVO" resultMap="lectureMap">
+		SELECT CURLECT_ID, STD_ID, B.LECT_ID
+		        ,(
+		            SELECT COMM_DESC
+		            FROM COMM
+		            WHERE COMM_ID = ESTA_SUB
+		        ) AS ESTA_SUB
+		    , B.MAJOR_NM, B.CAM_YEAR, B.LECT_NM, B.USER_NM, B.CREDIT, B.NUM_CLASS
+		FROM CURR_LECT A INNER JOIN V_LECTUREINFO B ON (A.LECT_ID = B.LECT_ID)
+		WHERE STD_ID = #{stdId}
+	</select>
+	
+	<!-- 중복체크 위한 수강신청한 강의 확인 SELECT문 -->
+	<select id="selectSugang" parameterType="CurrLectVO" resultType="int">
+		SELECT COUNT(*)
+		FROM CURR_LECT
+		WHERE STD_ID = #{stdId}
+		AND LECT_ID = #{lectId}
+	</select>
+	
+	<!-- 수강신청 하려는 강의의 info SELECT문 -->
+	<select id="selectSugangInfo" parameterType="CurrLectVO" resultType="LectureVO">
+		SELECT *
+		FROM V_LECTUREINFO
+		WHERE LECT_ID = #{lectId}
+	</select>
+	
+	<!-- 수강신청 정원 체크 SELECT문 -->
+	<select id="selectNowStudent" parameterType="CurrLectVO" resultType="int">
+		SELECT COUNT(*)
+		FROM CURR_LECT
+		WHERE LECT_ID = #{lectId}
+	</select>
+	
+	<!-- 수강중인 강의의 학점 TOTAL SELECT문 -->
+	<select id="selectTotalCredit" parameterType="CurrLectVO" resultType="int">
+		SELECT NVL(SUM(B.CREDIT), 0)
+		FROM CURR_LECT A INNER JOIN LECTURE B ON (A.LECT_ID = B.LECT_ID)
+		WHERE STD_ID = #{stdId}
+	</select>
+	
+	<!-- 수강신청 INSERT문 -->
+	<insert id="insertSugangLect" parameterType="CurrLectVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="curlectId">
+			SELECT 'EA1'||LPAD(CURR_LECT_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CURR_LECT (
+		    CURLECT_ID
+		    , STD_ID
+		    , LECT_ID
+		) VALUES (
+			#{curlectId}
+			, #{stdId}
+			, #{lectId}
+		)
+	</insert>
+	
+	<!-- 수강신청 취소 DELETE문 -->
+	<delete id="deleteSugangLect" parameterType="CurrLectVO">
+		DELETE
+		FROM CURR_LECT
+		WHERE STD_ID = #{stdId}
+		AND LECT_ID = #{lectId}
+	</delete>
+</mapper>

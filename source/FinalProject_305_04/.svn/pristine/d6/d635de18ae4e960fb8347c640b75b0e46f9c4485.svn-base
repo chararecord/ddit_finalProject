@@ -1,0 +1,104 @@
+package kr.or.ddit.student.sugang.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.management.MXBean;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.commons.dao.UsrDAO;
+import kr.or.ddit.student.priorSugang.dao.PriorSugangDAO;
+import kr.or.ddit.student.sugang.dao.SugangDAO;
+import kr.or.ddit.vo.CurrLectVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.StudentVO;
+import kr.or.ddit.vo.UsrVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author 민경진
+ * @Since 2023. 3. 3.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 3. 3.       민경진        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+public class SugangServiceImpl implements SugangService {
+	
+	@Inject
+	private SugangDAO dao;
+	
+	@Inject
+	private PriorSugangDAO priorDAO;
+	
+	@Inject
+	private UsrDAO usrDAO;
+	
+	@Override
+	public List<LectureVO> retrieveSugangList(CurrLectVO currLectVO) {
+		List<LectureVO> sugangList = dao.selectSugangList(currLectVO);
+		return sugangList;
+	}
+
+	@Override
+	public Map<String, Object> createSugangLect(CurrLectVO currLectVO) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		int rowcnt = 0;
+		
+		int sugangCnt = dao.selectSugang(currLectVO);
+		int totalCredit = dao.selectTotalCredit(currLectVO);							// 수강신청가능학점
+		UsrVO usrVO = usrDAO.selectStd(currLectVO.getStdId());
+		int sugangCredit = Integer.parseInt(usrVO.getStudentVO().getSugangCredit());	// 수강신청한학점
+		LectureVO lectureInfo = dao.selectSugangInfo(currLectVO);						// 수강신청할 과목 학점
+		int lectCredit = lectureInfo.getCredit();
+		
+		int nowStudent = dao.selectNowStudent(currLectVO);
+		int maxStudent = lectureInfo.getNumClass();
+
+		// 중복체크 (select한 결과가 0이면 insert 되도록)
+		if(sugangCnt == 0) {
+			// 정원체크
+			if(maxStudent >= nowStudent) {
+				log.info("@@@@@@@@@@@@>>>>>========>>>>>========>>>>>>>{}", sugangCredit - (totalCredit + lectCredit));
+				rowcnt = dao.insertSugangLect(currLectVO);
+				
+				if(rowcnt > 0) {
+					List<LectureVO> sugangList = dao.selectSugangList(currLectVO);
+					List<LectureVO> cartList = priorDAO.selectCartList(currLectVO.getStdId());
+					map.put("sugangList", sugangList);
+					map.put("cartList", cartList);
+					map.put("totalCredit", totalCredit);
+					map.put("nowStudent", nowStudent);
+				}
+			}
+		} else {
+			throw new RuntimeException("이미 수강신청한 강의입니다.");
+		}
+		return map;
+	}
+
+	@Override
+	public int removeSugangLect(CurrLectVO currLectVO) {
+		int rowcnt = dao.deleteSugangLect(currLectVO);
+		return rowcnt;
+	}
+
+	@Override
+	public int retrieveTotalCredit(CurrLectVO currLectVO) {
+		int totalCredit = dao.selectTotalCredit(currLectVO);
+		return totalCredit;
+	}
+}

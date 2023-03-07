@@ -1,0 +1,710 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security"%>
+
+<security:authentication property="principal" var="usrVOWrapper" />
+<security:authentication property="principal.realUser" var="authUser" />
+
+<div class="cont">
+
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>수강신청<button type="button" class="star"><span class="sr-only">즐겨찾기</span></button></h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i>
+			<strong>수강관리</strong> 
+			<strong>수강신청</strong> 
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+	<div class="white-box">
+		<!-- 강의목록 -->
+		<div class="cont-box-inner">
+			<div class="tbl-wrap mb20">
+				<table class="search-tbl noline-tbl center">
+<!-- 					<table class="tbl center "> -->
+					<caption>검색</caption>
+						<colgroup>
+							<col style="width: 20%;">
+							<col style="width: 7%;">
+							<col style="width: 8%;">
+							<col style="width: 5%;">
+							<col style="width: 4%;">
+							<col style="width: 12%;">
+							<col style="width: 3%;">
+							<col style="width: 6%;">
+							<col style="width: 7%;">
+							<col style="width: 3%;">
+							<col style="width: 28%;">
+						</colgroup>
+					<tr>
+						<c:set var="user" value="${authUser}" />
+						<td colspan="2" class="right bold">${authUser.semesterVO.semeYear }-${authUser.semesterVO.seme }학기</td>
+						<td class="bold">${authUser.majorVO.majorNm }</td>
+						<td class="bold">${authUser.userNm }</td>
+						<td>님의</td>
+						<td>수강신청 가능 학점은</td>
+						<td id="sugangCredit" class="bold blu-txt">${authUser.studentVO.sugangCredit}</td>
+						<td>학점이며</td>
+						<td>남은 학점은</td>
+						<td id="restCredit" class="bold red-txt">${authUser.studentVO.sugangCredit}</td>
+						<td class="left">학점입니다.</td>
+					</tr>
+				</table>
+				<!-- 강의목록검색 -->
+				<form id="searchUI" method="get">
+<!-- 					<table class="search-tbl noline-tbl center mt10 mb20"> -->
+					<table class="search-tbl noline-tbl center mt10 mb20">
+						<caption>수강신청정보</caption>
+						<colgroup>
+							<col style="width: 8%;">
+							<col style="width: 5%;">
+							<col style="width: 10%;">
+							<col style="width: 3%;">
+							<col style="width: 10%;">
+							<col style="width: 3%;">
+							<col style="width: 12%;">
+							<col style="width: 5%;">
+							<col style="width: 22%;">
+							<col style="width: 8%;">
+						</colgroup>
+						<tr class="pb20">
+							<td></td>
+							<th>단과대학</th>
+							<td style="border-right: 1px solid #b2b2b2;">
+								<select name="collId">
+									<option value="">단과대학</option>
+									<c:choose>
+										<c:when test="${not empty collList}">
+											<c:forEach items="${collList}" var="coll">
+												<option value="${coll.collList.collId}">${coll.collList.collNm}</option>
+											</c:forEach>
+										</c:when>
+									</c:choose>
+								</select>
+							</td>
+							<th >학과</th>
+							<td  style="border-right: 1px solid #b2b2b2;">
+								<select name="majorId">
+									<option value="">학과</option>
+									<c:choose>
+										<c:when test="${not empty majorList}">
+											<c:forEach items="${majorList}" var="major">
+												<option value="${major.majorId}" class="${major.collId}">${major.majorNm}</option>
+											</c:forEach>
+										</c:when>
+									</c:choose>
+								</select>
+							</td>
+							<th>학년</th>
+							<td class="camYear"  style="border-right: 1px solid #b2b2b2;">
+								<div class="rc-wrap">
+									<div class="rc-inner">
+										<input type="checkbox" id="camyear1" name="camYears" value="1"/>
+										<label for="camyear1">1</label>
+									</div>
+									<div class="rc-inner">
+										<input type="checkbox" id="camyear2" name="camYears" value="2"/>
+										<label for="camyear2">2</label>
+									</div>
+									<div class="rc-inner">
+										<input type="checkbox" id="camyear3" name="camYears" value="3"/>
+										<label for="camyear3">3</label>
+									</div>
+									<div class="rc-inner">
+										<input type="checkbox" id="camyear4" name="camYears" value="4"/>
+										<label for="camyear4">4</label>
+									</div>
+								</div>
+							</td>
+							<th >이수구분</th>
+							<td class="estaSub">
+								<div class="rc-wrap">
+									<c:choose>
+										<c:when test="${not empty subjectList}">
+											<c:forEach items="${subjectList}" var="subject" varStatus="i">
+												<div class="rc-inner">
+													<input type="checkbox" id="${subject.commId }" name="estaSubs" value="${subject.commId }">
+													<label for="${subject.commId }">${subject.commDesc}</label>
+												</div>
+											</c:forEach>
+										</c:when>
+									</c:choose>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+			<div class="cont-box-inner">
+				<div class="title">
+					<h4>강의목록</h4>
+				</div>
+				<div class="table-scrollable table-scrollable__fixed-y">
+					<div class="table-responsive " style="max-height: 23vh;">
+						<table class="tbl center  tbl-hover">
+							<caption>강의목록 테이블</caption>
+							<colgroup>
+								<col style="width: 7%">
+								<col style="width: 9%">
+								<col style="width: 5%">
+								<col style="width: auto%">
+								<col style="width: 7%">
+								<col style="width: 6%">
+								<col style="width: 7%">
+								<col style="width: 10%">
+							</colgroup>
+							<thead>
+								<tr class="table-scrollable__fixed-y">
+									<th scope="col">이수구분</th>
+									<th scope="col">개설학과</th>
+									<th scope="col">학년</th>
+									<th scope="col">강의명</th>
+									<th scope="col">담당교수</th>
+									<th scope="col">학점</th>
+									<th scope="col">수강인원</th>
+									<th scope="col">-</th>
+								</tr>
+							</thead>
+							<tbody class="center sugangLectTbody">
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 장바구니 -->
+		<div class="cont-box-inner">
+			<div class="title">
+				<h4>수강신청 강의목록</h4>
+			</div>
+			<div class="table-scrollable table-scrollable__fixed-y">
+				<div class="table-responsive" style="max-height: 23vh;">
+					<table class="tbl center tbl-hover">
+						<caption>강의목록 테이블</caption>
+						<colgroup>
+							<col style="width: 7%">
+							<col style="width: 9%">
+							<col style="width: 5%">
+							<col style="width: auto%">
+							<col style="width: 7%">
+							<col style="width: 6%">
+							<col style="width: 7%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr class="table-scrollable__fixed-y">
+								<th scope="col">이수구분</th>
+								<th scope="col">개설학과</th>
+								<th scope="col">학년</th>
+								<th scope="col">강의명</th>
+								<th scope="col">담당교수</th>
+								<th scope="col">학점</th>
+								<th scope="col">수강인원</th>
+								<th scope="col">-</th>
+							</tr>
+						</thead>
+						<tbody class="center sugangTbody">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 장바구니 -->
+		<div class="cont-box-inner">
+			<div class="title">
+				<h4>장바구니</h4>
+			</div>
+			<div class="table-scrollable table-scrollable__fixed-y">
+				<div class="table-responsive" style="max-height: 23vh;">
+					<table class="tbl center tbl-hover">
+						<caption>강의목록 테이블</caption>
+						<colgroup>
+							<col style="width: 7%">
+							<col style="width: 9%">
+							<col style="width: 5%">
+							<col style="width: auto%">
+							<col style="width: 7%">
+							<col style="width: 6%">
+							<col style="width: 7%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr class="table-scrollable__fixed-y">
+								<th scope="col">이수구분</th>
+								<th scope="col">개설학과</th>
+								<th scope="col">학년</th>
+								<th scope="col">강의명</th>
+								<th scope="col">담당교수</th>
+								<th scope="col">학점</th>
+								<th scope="col">수강인원</th>
+								<th scope="col">-</th>
+							</tr>
+						</thead>
+						<tbody class="center sugangCartList">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+</div>
+<script>
+let searchColl = $("[name=collId]");
+let searchMajor = $("[name=majorId]");
+let okSugang = $(".ok-sugang");
+let noSugang = $(".no-sugang");
+let sugangLectTbody = $(".sugangLectTbody");
+let sugangCartList = $(".sugangCartList");
+let sugangTbody = $(".sugangTbody");
+let stdId = ${authUser.userId}
+
+/* 수강학점 - 현재까지 들은 학점 */
+let sugangCredit = $("#sugangCredit");
+let restCredit = $("#restCredit");
+
+
+/* 단과, 학과 선택 */
+searchColl.on("change", function(){
+	let collId = $(this).val();
+	searchMajor.find("option:gt(0)").hide();
+	searchMajor.find("option." + collId).show();
+	searchColl.find("option:eq()").hide();
+	searchMajor.find("option:eq()").hide();
+	searchColl.val(collId);
+});
+
+/* 검색 */
+// let searchform = $("#searchForm").on("submit", function(){
+// }).submit();
+
+/* 강의 목록 리스트 tag */
+let makeSugangLectListTag = function(lect, index){
+	
+	return $("<tr>").append(
+		$("<td>").html(lect.estaSub)
+		, $("<td>").html(lect.majorVO.majorNm)
+		, $("<td>").html(lect.camYear)
+		, $("<td>").html(lect.lectNm).addClass("left pl10")
+		, $("<td>").html(lect.profVO.userNm)
+		, $("<td>").html(lect.credit)
+		, $("<td>").html("0/"+lect.numClass)
+		, $("<td>").append(
+			$("<button>").addClass("status pass-sugang").html("수강신청")
+			.attr({
+				"data-lect-id":lect.lectId
+				, "data-std-id":stdId
+				, "data-credit":lect.credit
+				}))
+	);
+}
+
+/* 장바구니 리스트 tag */
+let makeCartListTag = function(lect, index){
+	
+	let stdId = ${authUser.userId}
+	
+	return $("<tr>").append(
+		$("<td>").html(lect.estaSub)
+		, $("<td>").html(lect.majorVO.majorNm)
+		, $("<td>").html(lect.camYear)
+		, $("<td>").html(lect.lectNm).addClass("left pl10")
+		, $("<td>").html(lect.profVO.userNm)
+		, $("<td>").html(lect.credit)
+		, $("<td>").html("0/"+lect.numClass)
+		, $("<td>").append(
+			$("<button>").addClass("status pass-sugang").html("수강신청")
+			.attr({
+				"data-lect-id":lect.lectId
+				, "data-std-id":stdId
+				, "data-credit":lect.credit
+				}))
+	);
+}
+
+/* 수강신청한 강의 리스트 tag */
+let makesugangListTag = function(lect, index){
+	
+	let stdId = ${authUser.userId}
+	
+	return $("<tr>").append(
+		$("<td>").html(lect.estaSub)
+		, $("<td>").html(lect.majorVO.majorNm)
+		, $("<td>").html(lect.camYear)
+		, $("<td>").html(lect.lectNm).addClass("left pl10")
+		, $("<td>").html(lect.profVO.userNm)
+		, $("<td class='clsTotalCredit'>").html(lect.credit)
+		, $("<td>").html("0/"+lect.numClass)
+		, $("<td>").append(
+			$("<button>").addClass("status no-sugang").html("수강취소")
+			.attr({
+				"data-lect-id":lect.lectId
+				, "data-std-id":stdId
+				, "data-credit":lect.credit
+				}))
+	);
+}
+
+/* 페이지 로딩 */
+$(document).ready(function(){
+	
+	let data = {
+		"stdId":stdId
+	}
+	
+	$.ajax({
+		url : "${pageContext.request.contextPath}/student/priorSugang",
+		method : "post",
+		data : JSON.stringify(data),
+		dataType : "json",
+		contentType : "application/json;charset=UTF-8;",
+		success : function(resp) {
+			
+			sugangLectTbody.empty();
+			sugangCartList.empty();
+			sugangTbody.empty();
+			
+			let cartList = resp.cartList;
+			let lectureList = resp.lectureList;
+			let sugangList = resp.sugangList;
+			
+			let sugangLectTrTags = [];
+			let cartTrTags = [];
+			let sugangTrTags = [];
+			
+			/* 강의목록, 장바구니, 수강신청강의 리스트 */
+			if(lectureList){
+				$.each(lectureList, function(idx, single){
+					sugangLectTrTags.push(makeSugangLectListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("조회된 강의가 없습니다."));
+				sugangLectTrTags.push(tr);
+			}
+			
+			if(cartList){
+				$.each(cartList, function(idx, single){
+					cartTrTags.push(makeCartListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("장바구니에 담긴 강의가 없습니다."));
+				cartTrTags.push(tr);
+			}
+			
+			console.log(sugangList)
+			if(sugangList){
+				$.each(sugangList, function(idx, single){
+					sugangTrTags.push(makesugangListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("수강신청한 강의가 없습니다."));
+				sugangTrTags.push(tr);
+			}
+			
+			sugangLectTbody.html(sugangLectTrTags);
+			sugangCartList.html(cartTrTags);
+			sugangTbody.html(sugangTrTags);
+			
+			/* 학점 */
+			let credit = ${authUser.studentVO.sugangCredit}
+			let totalCredit = null;
+			
+			if(sugangList.length>0){
+				totalCredit = sugangList[0].totalCredit;		// 수강신청한 학점
+			}else{
+				totalCredit = credit;
+			}
+			
+			// 학점 보정
+			let temp = 0;
+			$(".clsTotalCredit").each(function(index,data){
+				temp = Number(temp) + Number($(this).text());
+			});
+			totalCredit = temp;
+			
+			let rest = credit-totalCredit
+			console.log("totalCredit===", totalCredit)
+			console.log("rest===", rest)
+			
+			
+			if(rest >= 0){
+				sugangCredit.html("");
+				restCredit.html("");
+				sugangCredit.html(credit);
+				restCredit.html(rest);
+			}
+			
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+});
+
+/* 검색된 강의 List 불러오는 ajax */
+$("#searchUI").on("change", function(event){
+	event.preventDefault();
+	
+	let url = this.action;
+	let method = this.method;
+	let data = $(this).serialize();
+
+	$.ajax({
+		url : "${pageContext.request.contextPath}/student/priorSugang/search",
+		method : "get",
+		data : data,
+		dataType : "json",
+		success : function(resp) {
+			
+			sugangLectTbody.empty();
+			
+			let respData = resp;
+			let trTags = [];
+			
+			
+			if(respData){
+				$.each(respData, function(idx, single){
+					trTags.push(makeSugangListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("조회된 강의가 없습니다."));
+				trTags.push(tr);
+			}
+			
+			sugangLectTbody.html(trTags);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	return false;
+})
+
+/* 수강신청 버튼 클릭 */
+$(document).on("click", ".pass-sugang", function(){
+	
+	console.log("클릭!");
+	let me = $(this);
+	
+	let lectId = me.data("lectId");
+	let data = {
+		"stdId":stdId
+		, "lectId":lectId
+	}
+	
+	console.log("data ================> ", data);
+	
+	$.ajax({
+		url : "${pageContext.request.contextPath}/student/sugang",
+		method : "post",
+		data : JSON.stringify(data),
+		dataType : "json",
+		contentType : "application/json;charset=UTF-8;",
+		success : function(resp) {
+			console.log(">>>>>>>>>>>>", resp);
+			
+			let sugangList = resp.sugangList;
+			let cartList = resp.cartList;
+			
+			//--------------------------------------- 학 점 -------------------------------------------
+			let credit = ${authUser.studentVO.sugangCredit};		// 학생이 수강신청 할 수 있는 총 학점 = 18학점
+			let lectCredit = me.data("credit");						// 내가 선택한 강의의 학점 = 1, 2, 3학점 중 하나
+			let totalCredit = 0;
+			
+			// sugangList => 수강신청한 강의 list
+			if(sugangList){
+				totalCredit = sugangList[0].totalCredit;		// 현재까지 내가 수강신청한 강의의 총 학점
+			}else{
+				totalCredit = credit;
+			}
+			
+// 			// 학점 보정
+// 			let temp = 0;
+// 			$(".clsTotalCredit").each(function(index,data){
+// 				temp = Number(temp) + Number($(this).text());
+// 			});
+// 			totalCredit = temp;
+			
+			let rest = credit-(totalCredit);
+			console.log("credit : " + credit);
+			console.log("totalCredit : " + totalCredit);
+			console.log("lectCredit : " + lectCredit);
+			console.log("rest : " + rest);
+			
+			// totalCredit - 현재까지 내가 수강신청한 강의의 총 학점 = 17학점
+			// lectCredit - 내가 선택한 강의의 학점 = 2, 3학점 중 하나
+			// credit - 학생이 수강신청 할 수 있는 총 학점 = 18학점
+			
+			if((totalCredit) > credit){
+				console.log("안타ㅏㅏㅏㅏㅏㅏㅏㅏㅏ");
+				alert("수강신청 가능 학점을 초과하였습니다.");
+				return;
+			} else {
+				sugangCredit.html("");
+				restCredit.html("");
+				sugangCredit.html(credit);
+				restCredit.html(rest);
+			}
+			
+			//-------------------------------------- 수 강 신 청 ---------------------------------------
+			
+			
+			sugangTbody.empty();
+			sugangCartList.empty();
+			
+			let sugangTrTags = [];
+			let cartTrTags = [];
+			
+			if(sugangList){
+				$.each(sugangList, function(idx, single){
+					sugangTrTags.push(makesugangListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("수강신청한 강의가 없습니다."));
+				sugangTrTags.push(tr);
+			}
+			
+			if(cartList){
+				$.each(cartList, function(idx, single){
+					cartTrTags.push(makeCartListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("장바구니에 담긴 강의가 없습니다."));
+				cartTrTags.push(tr);
+			}
+			
+			sugangTbody.html(sugangTrTags);
+			sugangCartList.html(cartTrTags);
+			
+			me.removeClass("pass-sugang");
+			me.addClass("no-sugang").html("수강취소");
+			
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+});
+
+
+/* 수강신청취소 버튼 클릭 */
+$(document).on("click", ".no-sugang", function(){
+	
+	let me = $(this);
+	let lectId = me.data("lectId");
+	let data = {
+		"stdId":stdId
+		, "lectId":lectId
+	}
+	
+	$.ajax({
+		url : "${pageContext.request.contextPath}/student/sugang",
+		method : "delete",
+		data : JSON.stringify(data),
+		dataType : "json",
+		contentType : "application/json;charset=UTF-8;",
+		success : function(resp) {
+			
+			//-------------------------------------- 수 강 신 청 취 소 ---------------------------------------
+			
+			sugangTbody.empty();
+			sugangCartList.empty();
+			
+			let sugangList = resp.sugangList;
+			let cartList = resp.cartList;
+			
+			let sugangTrTags = [];
+			let cartTrTags = [];
+			
+			/* 수강신청 리스트 */
+			if(sugangList){
+				$.each(sugangList, function(idx, single){
+					sugangTrTags.push(makesugangListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("수강신청한 강의가 없습니다."));
+				sugangTrTags.push(tr);
+			}
+			
+			if(cartList){
+				$.each(cartList, function(idx, single){
+					cartTrTags.push(makeCartListTag(single, idx));
+				});
+			} else {
+				let tr = $("<tr>").html(
+					$("<td>").attr("colspan", "8").html("장바구니에 담긴 강의가 없습니다."));
+				cartTrTags.push(tr);
+			}
+			
+			sugangTbody.html(sugangTrTags);
+			sugangCartList.html(cartTrTags);
+			
+			me.removeClass("pass-sugang");
+			me.addClass("no-sugang").html("수강취소");
+			
+			//--------------------------------------- 학 점 -------------------------------------------
+			
+			let credit = ${authUser.studentVO.sugangCredit};		// 학생이 수강신청 할 수 있는 총 학점 = 18학점
+			let lectCredit = me.data("credit");						// 내가 선택한 강의의 학점 = 1, 2, 3학점 중 하나
+			
+			// sugangList => 수강신청한 강의 list
+			if(sugangList.length>0){
+				let totalCredit = sugangList[0].totalCredit;		// 현재까지 내가 수강신청한 강의의 총 학점
+			}else{
+				let totalCredit = lectCredit;
+			}
+			
+			// 학점 보정
+			let temp = 0;
+			$(".clsTotalCredit").each(function(index,data){
+				temp = Number(temp) + Number($(this).text());
+			});
+			
+			totalCredit = temp;
+			
+			console.log("credit : " + credit + ", totalCredit : " + totalCredit + ", lectCredit : " + lectCredit);
+			
+			// 수강신청 할 수 있는 총 학점 - (현재까지 수강신청한 학점 + 선택한 강의의 학점)
+			let rest = credit-(totalCredit);
+			
+			console.log("====", rest)
+			
+			sugangCredit.html("");
+			restCredit.html("");
+			sugangCredit.html(credit);
+			restCredit.html(rest);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+});
+
+
+</script>

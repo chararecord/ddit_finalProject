@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.emp.profInfo.dao.ProfInfoDao">
+
+
+	<!-- 코드프레그먼트 -->
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'userId'">
+	    				INSTR(USER_ID, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'userNm'">
+	    				INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+					<otherwise>
+	    				INSTR(USER_ID, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+
+
+
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM v_pro
+		<include refid="searchFrag" />		
+	</select>
+	
+	<resultMap type="ProfessorVO" id="profMap" autoMapping="true">
+		<id property="profId" column="PROF_ID"/>
+		<association property="collList" javaType="CollVO" autoMapping="true"/>
+		<association property="majorList" javaType="MajorVO" autoMapping="true"/>
+		<association property="laboList" javaType="LaboVO" autoMapping="true"/>
+		<association property="commList" javaType="CommVO" autoMapping="true"/>
+		<association property="buildingList" javaType="BuildingVO" autoMapping="true"/>
+		<collection property="recordList" ofType="RecordVO" autoMapping="true" >
+			<id property="recoId" column="RECO_ID"/>
+		</collection>
+		<collection property="attaFileList" ofType="AttaFileVO" autoMapping="true" />
+			
+	</resultMap>
+	
+	
+	
+	<!-- 게시글 리스트 조회 SELECT문 -->
+	<select id="selectProfInfoList" parameterType="PagingVO" resultMap="profMap">
+		WITH PROFINFO AS (
+		    SELECT A.USER_NM
+		           , B.PROF_ID
+		           , B.LEV_DATE
+		           , C.MAJOR_NM
+		           , D.COLL_NM
+		      FROM USR A INNER JOIN PROFESSOR B ON(A.USER_ID = B.PROF_ID)
+		                 INNER JOIN MAJOR C ON(B.MAJOR_ID = C.MAJOR_ID)
+		                 INNER JOIN COLL D ON(C.COLL_ID = D.COLL_ID)
+		      ORDER BY PROF_ID
+		)
+		SELECT B.*
+		FROM (
+		        SELECT ROWNUM RNUM2, A.*
+		        FROM (
+		            SELECT ROWNUM RNUM, PROFINFO.*
+		            FROM PROFINFO
+		            ORDER BY PROF_ID DESC
+		        )A
+		    ) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+
+
+
+	<select id="selectProfInfo" parameterType="String" resultMap="profMap">
+		SELECT A.USER_ID
+		        , A.USER_NM
+		        , A.USER_NM_EN
+		        , A.USER_PASS
+		        , A.USER_RRN1
+		        , A.USER_RRN2
+		        , A.USER_PHONE
+		        , A.USER_POST
+		        , A.USER_ADDR
+		        , A.USER_DETAIL_ADDR
+		        , A.USER_EMAIL
+		        , A.USER_BANK
+		        , A.USER_ACCT_HD
+		        , A.USER_ACCT_NO
+		        , A.USER_GENDER
+		        , A.USER_NTL
+		        , A.USER_BIR
+		        , A.USER_ROLE
+		        , B.PROF_ID
+		        , B.LABO_ID
+		        , B.MAJOR_ID
+		        , B.ENT_DATE
+		        , B.LEV_DATE
+		        , (SELECT G.COMM_DESC FROM COMM G WHERE G.COMM_ID = B.POS) POS
+		        , C.LABO_ID
+		        , C.BUILD_ID
+		        , C.LABO_TEL
+		        , C.BUILD_NUM
+		        , D.MAJOR_ID
+		        , D.COLL_ID
+		        , D.MAJOR_NM
+		        , D.MAJOR_TEL
+		        , D.DEAN
+		        , D.MAJOR_INFO
+		        , D.LIC_INFO_ID
+		        , E.COLL_ID
+		        , E.COLL_NM
+		        , E.COLL_INTRO
+		        , F.COMM_ID
+		        , F.COMM_DESC
+		        , F.COMM_GRP_ID
+		        , G.ATTA_ID
+		        , G.ATTA_FILENM
+		        , G.ATTA_SAVENM
+		        , G.ATTA_MIME
+		        , G.ATTA_FANCYSIZE
+		        , G.ATTA_DOWNLOAD
+		        , G.ATTA_PATH
+		        , G.ATTA_SN
+		        , G.ATTA_TASK		        
+		  FROM USR A INNER JOIN PROFESSOR B ON (A.USER_ID = B.PROF_ID)
+		             INNER JOIN LABO C ON (B.LABO_ID = C.LABO_ID)
+		             INNER JOIN MAJOR D ON (B.MAJOR_ID = D.MAJOR_ID)
+		             INNER JOIN COLL E ON (D.COLL_ID = E.COLL_ID)
+		             LEFT OUTER JOIN COMM F ON (C.BUILD_ID = F.COMM_ID)
+		             LEFT OUTER JOIN ATTA_FILE G ON (TO_CHAR(A.USER_ID) = G.ATTA_ID)
+		 WHERE B.PROF_ID = #{profId}
+	</select>
+
+
+
+
+
+	<insert id="insertUserProfInfo" parameterType="ProfessorVO">
+		INSERT INTO USR(
+		    USER_ID, 
+		    USER_NM,
+		    USER_NM_EN,
+		    USER_PASS,
+		    USER_GENDER,
+		    USER_RRN1,  
+		    USER_RRN2,
+		    USER_ROLE,
+		    USER_EMAIL,
+		    USER_BIR,
+		    USER_NTL,
+		    USER_PHONE,
+		    USER_POST,
+		    USER_ADDR,
+		    USER_DETAIL_ADDR,
+		    USER_BANK,
+		    USER_ACCT_HD,
+		    USER_ACCT_NO
+		)VALUES(
+		#{profId,jdbcType=VARCHAR}
+		, #{userNm,jdbcType=VARCHAR}
+		, #{userNmEn,jdbcType=VARCHAR}
+		, #{userPass,jdbcType=VARCHAR}
+		, #{userGender,jdbcType=VARCHAR}
+		, #{userRrn1,jdbcType=VARCHAR}
+		, #{userRrn2,jdbcType=VARCHAR}
+		, 'ROLE_PRF'
+		, #{userEmail,jdbcType=VARCHAR}
+		, #{userBir,jdbcType=VARCHAR}
+		, #{userNtl,jdbcType=VARCHAR}
+		, #{userPhone,jdbcType=VARCHAR}
+		, #{userPost,jdbcType=VARCHAR}
+		, #{userAddr,jdbcType=VARCHAR}
+		, #{userDetailAddr,jdbcType=VARCHAR}	
+		, #{userBank,jdbcType=VARCHAR}
+		, #{userAcctHd,jdbcType=VARCHAR}
+		, #{userAcctNo,jdbcType=VARCHAR}
+		)
+	</insert>
+
+
+	<insert id="insertProfProfInfo" parameterType="ProfessorVO">
+		INSERT INTO PROFESSOR(
+		    PROF_ID
+		    , LABO_ID
+		    , MAJOR_ID
+		    , ENT_DATE
+		    , LEV_DATE
+		    , POS
+		)VALUES(
+		    #{profId,jdbcType=VARCHAR}
+		    , #{laboId,jdbcType=VARCHAR}
+		    , #{majorId,jdbcType=VARCHAR}
+		    , #{entDate,jdbcType=VARCHAR}
+		    , #{levDate,jdbcType=VARCHAR}
+		    , #{pos,jdbcType=VARCHAR}
+		)							
+	</insert>
+	
+	
+	
+	
+	
+	<update id="updateProfProfInfo" parameterType="ProfessorVO">
+		UPDATE PROFESSOR
+		SET 
+		    PROF_ID  =  #{profId,jdbcType=VARCHAR}
+		    , LABO_ID  =  #{laboId,jdbcType=VARCHAR}
+		    , MAJOR_ID =  #{majorId,jdbcType=VARCHAR}
+		    , ENT_DATE =  #{entDate,jdbcType=VARCHAR}
+		    , LEV_DATE =  #{levDate,jdbcType=VARCHAR}
+		    , POS      =  #{pos,jdbcType=VARCHAR}
+		WHERE PROF_ID = #{profId}		
+	</update>
+	
+	
+	<update id="updateUserProfInfo" parameterType="ProfessorVO">
+		UPDATE USR
+		SET
+			USER_ID = #{profId,jdbcType=VARCHAR}
+			, USER_NM = #{userNm,jdbcType=VARCHAR}
+			, USER_NM_EN = #{userNmEn,jdbcType=VARCHAR}
+			, USER_PASS = #{userPass,jdbcType=VARCHAR}
+			, USER_GENDER = #{userGender,jdbcType=VARCHAR}
+			, USER_RRN1 = #{userRrn1,jdbcType=VARCHAR}
+			, USER_RRN2 = #{userRrn2,jdbcType=VARCHAR}
+			, USER_ROLE = 'ROLE_PRF'
+			, USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
+			, USER_BIR = #{userBir,jdbcType=VARCHAR}
+			, USER_NTL = #{userNtl,jdbcType=VARCHAR}
+			, USER_PHONE = #{userPhone,jdbcType=VARCHAR}
+			, USER_POST = #{userPost,jdbcType=VARCHAR}
+			, USER_ADDR = #{userAddr,jdbcType=VARCHAR}
+			, USER_DETAIL_ADDR = #{userDetailAddr,jdbcType=VARCHAR}
+			, USER_BANK = #{userBank,jdbcType=VARCHAR}
+			, USER_ACCT_HD = #{userAcctHd,jdbcType=VARCHAR}
+			, USER_ACCT_NO = #{userAcctNo,jdbcType=VARCHAR}
+		WHERE USER_ID = #{userId}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+<!-- 연구실 건물 선택하기 -->
+	<select id="selectBuilding" resultType="kr.or.ddit.vo.CommVO">
+		SELECT COMM_ID, COMM_DESC, COMM_GRP_ID
+		  FROM COMM
+		 WHERE COMM_GRP_ID = 'BUILDING'
+	</select>
+	
+	<select id="selectBuildingNum" resultType="LaboVO">
+		SELECT LABO_ID, BUILD_ID, LABO_TEL, BUILD_NUM
+		  FROM LABO
+		 WHERE BUILD_ID = #{commId}
+	</select>
+	
+	
+<!-- 단과 목록 가져오기 -->
+	<select id="selectCollList" resultType="kr.or.ddit.vo.CollVO">
+		SELECT COLL_ID, COLL_NM, COLL_INTRO
+ 		  FROM COLL 
+	</select>
+<!-- 단과 선택 후 학과 목록 가져오기 -->
+	<select id="selectMajorList" parameterType="kr.or.ddit.vo.CollVO" resultType="kr.or.ddit.vo.MajorVO">
+		SELECT MAJOR_ID, COLL_ID, MAJOR_NM, MAJOR_TEL, DEAN, MAJOR_INFO, LIC_INFO_ID
+		FROM MAJOR
+		WHERE COLL_ID = #{collId}
+	</select>
+
+
+	
+<!-- 직책 목록 가져오기 -->
+	<select id="selectPosList" resultType="kr.or.ddit.vo.CommVO">
+		SELECT COMM_ID, COMM_DESC, COMM_GRP_ID
+		  FROM COMM
+		 WHERE COMM_GRP_ID = 'POS'
+	</select>	
+	
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

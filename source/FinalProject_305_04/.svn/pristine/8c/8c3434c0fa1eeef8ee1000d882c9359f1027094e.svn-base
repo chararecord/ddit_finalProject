@@ -1,0 +1,78 @@
+package kr.or.ddit.student.sugang.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.vo.CurrLectVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SugangCartVO;
+
+/**
+ * @author 민경진
+ * @Since 2023. 3. 3.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 3. 3.       민경진        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Mapper
+public interface SugangDAO {
+	
+	/**
+	 * 수강신청한 강의 목록 조회
+	 * @param currLectVO
+	 * @return
+	 */
+	public List<LectureVO> selectSugangList(CurrLectVO currLectVO);
+	
+	/**
+	 * 수강신청한 강의 조회
+	 * @param currLectVO
+	 * @return
+	 */
+	public int selectSugang(CurrLectVO currLectVO);
+	
+	
+	/**
+	 * 수강신청 하려는 강의의 INFO 조회
+	 * @param currLectVO
+	 * @return
+	 */
+	public LectureVO selectSugangInfo(CurrLectVO currLectVO);
+	
+	/**
+	 * 수강중인 강의의 total 학점 조회
+	 * @param currLectVO
+	 * @return
+	 */
+	public int selectTotalCredit(CurrLectVO currLectVO);
+	
+	/**
+	 * 수강신청 정원 체크 조회
+	 * @param currLectVO
+	 * @return
+	 */
+	public int selectNowStudent(CurrLectVO currLectVO);
+	
+	/**
+	 * 수강신청
+	 * @param currLectVO
+	 * @return
+	 */
+	public int insertSugangLect(CurrLectVO currLectVO);
+	
+	/**
+	 * 수강신청취소
+	 * @param curlectId
+	 * @return
+	 */
+	public int deleteSugangLect(CurrLectVO currLectVO);
+
+}
