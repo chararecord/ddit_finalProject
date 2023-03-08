@@ -1,0 +1,154 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%-- <link rel="stylesheet" href="${pageContext.request.contextPath }/resources/css/itext.css" /> --%>
+<link rel="stylesheet" href= "${pageContext.request.contextPath }/resources/css/font.css"/>
+
+<div class="box-container" id="htmlStr">
+	<div class="c1">
+		<div>등록금 영수증</div>
+		<table class="tbl">
+		<tbody>
+			<c:set var="tuitionPay" value="${tuitionPayVO }" />
+			<c:choose>
+				<c:when test="${not empty tuitionPay }">
+						<!-- 두번째 -->
+						<tr>
+
+							<td>학번</td>
+							<td>${tuitionPay.stdId}</td>
+
+							<td>연도</td>
+							<td>${tuitionPay.semesterVO.semeYear }
+								${tuitionPay.semesterVO.seme }</td>
+						</tr>
+						<!-- 세번째 -->
+						<tr>
+							<td colspan="3">구분</td>
+							<td>금액(원)</td>
+
+						</tr>
+						<!-- 네번째 -->
+						<tr>
+							<td colspan="3">입학금</td>
+							<td>0</td>
+
+						</tr>
+
+						<!-- 다섯번째 -->
+						<tr>
+							<td colspan="3">수업료</td>
+							<td>${tuitionPay.tuitionVO.tuitionAmount }</td>
+						</tr>
+
+						<!-- 여섯번째 -->
+						<tr>
+							<td colspan="3">장학금액</td>
+							<td>${tuitionPay.scholarshipVO.schsAmount }</td>
+
+						</tr>
+
+						<!-- 일곱번째 -->
+						<tr>
+							<td colspan="3">실납부금액</td>
+							<td>${tuitionPay.amountPay }</td>
+
+						</tr>
+				</c:when>
+
+				<c:otherwise>
+					<td colspan="7">조건에 맞는 게시글이 없습니다.</td>
+				</c:otherwise>
+			</c:choose>
+		</tbody>
+
+
+		</table>
+
+
+	</div>
+
+<div>등록금 영수증</div>
+		<table class="tbl">
+			<c:set var="tuitionPay" value="${tuitionPayVO }" />
+			<c:choose>
+				<c:when test="${not empty tuitionPayVO }">
+						<!-- 두번째 -->
+						<tr>
+
+							<td>학번</td>
+							<td>${tuitionPayVO.stdId}</td>
+
+							<td>연도</td>
+							<td>${tuitionPayVO.semesterVO.semeYear }
+								${tuitionPayVO.semesterVO.seme }</td>
+						</tr>
+						<!-- 세번째 -->
+						<tr>
+							<td colspan="3">구분</td>
+							<td>금액(원)</td>
+
+						</tr>
+						<!-- 네번째 -->
+						<tr>
+							<td colspan="3">입학금</td>
+							<td>0</td>
+
+						</tr>
+
+						<!-- 다섯번째 -->
+						<tr>
+							<td colspan="3">수업료</td>
+							<td>${tuitionPayVO.tuitionVO.tuitionAmount }</td>
+						</tr>
+
+						<!-- 여섯번째 -->
+						<tr>
+							<td colspan="3">장학금액</td>
+							<td>${tuitionPayVO.scholarshipVO.schsAmount }</td>
+
+						</tr>
+
+						<!-- 일곱번째 -->
+						<tr>
+							<td colspan="3">실납부금액</td>
+							<td>${tuitionPayVO.amountPay }</td>
+
+						</tr>
+				</c:when>
+
+				<c:otherwise>
+					<td colspan="7">조건에 맞는 게시글이 없습니다.</td>
+				</c:otherwise>
+			</c:choose>
+
+		</table>
+
+		<div>대재대학교</div>
+
+	</div>
+
+<script>
+	let htmlStr = $("#htmlStr").html();
+
+	$(document).ready(function() {
+		let data = {
+			htmlStr : htmlStr
+		};
+
+		$.ajax({
+			url : "${pageContext.request.contextPath}/pdf/createPdf",
+			method : "post",
+			data : JSON.stringify(data),
+			contentType : 'application/json',
+			success : function(resp) {
+				alert("성공", resp);
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	});
+</script>

@@ -1,0 +1,145 @@
+package kr.or.ddit.commons;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.javassist.NotFoundException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.campus.notice.service.NoticeService;
+import kr.or.ddit.commons.service.MenuService;
+import kr.or.ddit.commons.service.UsrService;
+import kr.or.ddit.vo.MenuVO;
+import kr.or.ddit.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.UsrVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class IndexController {
+	
+	@Inject
+	private UsrService service;
+	@Inject
+	private MenuService menuService;
+	@Inject
+	private NoticeService noticeService;
+	
+   @RequestMapping("/")
+   public String index(
+		   @AuthenticationPrincipal UsrVOWrapper principal
+		   , Model model
+		   ) {
+	   
+	  UsrVO authUser = principal.getRealUser();
+	  log.info("principal============================", principal);
+	  log.info("authUser============================", authUser);
+	  
+	  UsrVO user = service.retrieveUser(authUser.getUserId());
+	  
+	  model.addAttribute("user", user);
+	  
+	// 공통메뉴
+	  List<MenuVO> commMenuList = menuService.retrieveCommMenuList();
+	  log.info("공통메뉴{}", commMenuList);
+	  model.addAttribute("commMenuList", commMenuList);
+	  
+      return "index";
+   }
+   
+    @GetMapping(value="/", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String menuList(
+    		@AuthenticationPrincipal UsrVOWrapper principal
+ 		   , Model model
+	) {
+    	
+    	// 공통메뉴
+  	  List<MenuVO> commMenuList = menuService.retrieveCommMenuList();
+  	  log.info("공통메뉴{}", commMenuList);
+  	  model.addAttribute("commMenuList", commMenuList);
+  	  
+  	  String userRole = principal.getRealUser().getUserRole();
+  	  List<MenuVO> userMenuList = new ArrayList<MenuVO>();
+  	  
+  	  // 학생일 때
+  	  if(userRole.equals("ROLE_STD")) {
+  		userMenuList = menuService.retrieveStdMenuList();
+  		log.info("학생메뉴{}", userMenuList);
+//  	  // 교수일 때
+//  	  } else if(userRole.equals("ROLE_PRF")) {
+//  		  List<MenuVO> prfMenuList = menuService.retrievePrfMenuList();
+//  	  // 교직원일 때
+//  	  } else if(userRole.equals("ROLE_EMP")) {
+//  		  List<MenuVO> empMenuList = menuService.retrieveEmpMenuList();
+  	  }
+  	  model.addAttribute("userMenuList", userMenuList);
+	   return "jsonView";
+   }
+   
+   @ResponseBody
+   @PostMapping(value="/notice", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+   public PagingVO<NoticeVO> noticeList(
+		   @RequestParam(value="page", required=false, defaultValue="1") int currentPage
+		   ) {
+	   log.info("인덱스 노티스 컨트롤러");
+	   
+	   PagingVO<NoticeVO> pagingVO = new PagingVO<>(5, 5);
+	   pagingVO.setCurrentPage(currentPage);
+	   
+	   noticeService.retrieveNoticeList(pagingVO);
+	   
+	   return pagingVO;
+   }
+   
+   @ResponseBody
+   @PostMapping(value="/news", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+   public List<String> newsList() throws NotFoundException {
+	   
+//	   URL url = new URL("www.naver.com");
+//	   BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+//	   StringBuffer sourceCode = new StringBuffer();
+//	   
+//	   String sourceLine = "";
+//	   while ((sourceLine = br.readLine()) != null) {
+//		   sourceCode.append(sourceLine + "\n");
+//	}
+	   List<String> title = new ArrayList<String>();
+
+	   try {
+		   String url = "https://search.naver.com/search.naver?sm=tab_hty.top&where=news&query=%ED%95%9C%EB%82%A8%EB%8C%80%ED%95%99%EA%B5%90";
+		   Document doc = Jsoup.connect(url).get();
+		   Elements elem = doc.select("div.news_wrap.api_ani_send");
+		   
+		   for (Element e : elem.select("a[title]")) {
+			   title.add(e.text());
+			   log.info(title.toString());
+		   }
+	   } catch (Exception e) {
+		   throw new NotFoundException("뉴스 주소를 가져올 수 없습니다.", e);
+	   }
+	   
+	   return title;
+	   
+   }
+}

@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.test.dao.TestProfDAO">
+
+	
+	
+	
+	<resultMap type="TestVO" id="testProfMap" autoMapping="true">
+		<id property="rnum" column="RNUM" />
+		<association property="semeVO" javaType="SemesterVO" autoMapping="true" />
+		<association property="currLect" javaType="CurrLectVO" autoMapping="true">
+			<id property="curlectId" column="CURLECT_ID"  />
+			<collection property="lectureList" ofType="LectureVO" autoMapping="true" />
+		</association>
+		<association property="myStudentVO" javaType="MyStudentVO" autoMapping="true" />
+	</resultMap>	
+
+
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*) FROM (
+		    SELECT B.PROF_ID
+		    FROM TEST_INFO A INNER JOIN V_LECTUREINFO B ON (A.LECT_ID = B.LECT_ID)
+		    WHERE B.PROF_ID =  #{detailCondition.profId}
+		) t
+	</select>
+
+
+
+
+	<!-- 교수 전체 시험 출제 목록  
+	pagingVO.detailCondition : TestVO
+	pagingVO.detailCondition.myStudentVO : MyStudentVO
+	-->
+	<select id="testProfTotalList" parameterType="PagingVO"  resultMap="testProfMap">
+		<!-- WITH ORDEREDPROFTEST AS (
+		    SELECT A.TEST_ID, A.EXAM_ID,  A.TEST_NM, 
+		    		TO_CHAR(A.TEST_RDATE, 'YYYY-MM-DD') AS TEST_RDATE, 
+		    		A.TEST_STIME, A.TEST_ETIME, A.TEST_MEET, 
+		    		TO_CHAR(A.TEST_DATE, 'YYYY-MM-DD') AS TEST_DATE
+		           , B.SEME_ID, B.EXAM_TYPE
+		           , C.SEME_YEAR, C.SEME
+		           , D.LECT_ID, D.LECT_NM
+		           , E.CURLECT_ID, E.STD_ID, E.FIN_SCORE
+		           , F.MAJOR_ID, F.PROF_ID, F.ENT_DATE
+		           , G.USER_ID, G.USER_NM
+		    FROM TEST_INFO A LEFT OUTER JOIN EXAM_CAL B ON (A.EXAM_ID = B.EXAM_ID)
+		                     LEFT OUTER JOIN SEMESTER C ON (B.SEME_ID = C.SEME_ID)
+		                     LEFT OUTER JOIN LECTURE D ON (A.LECT_ID = D.LECT_ID)
+		                     LEFT OUTER JOIN CURR_LECT E ON (D.LECT_ID = E.LECT_ID)
+		                     LEFT OUTER JOIN STUDENT F ON (E.STD_ID = F.STD_ID)
+		                     LEFT OUTER JOIN USR G ON (G.USER_ID = E.STD_ID)        
+		    WHERE F.PROF_ID = #{detailCondition.profId} 
+		)
+		SELECT  B.* FROM (
+		                    SELECT ROWNUM RNUM2, A.*
+		                    FROM (
+		                            SELECT ROWNUM RNUM, ORDEREDPROFTEST.*
+		                            FROM ORDEREDPROFTEST 
+		                    ) A
+		                ) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow} -->
+		
+		WITH orderedproftest AS (
+		   select a.test_id,
+		        a.exam_id,
+		        a.test_nm,
+		        TO_CHAR(a.test_rdate,'YYYY-MM-DD') AS test_rdate,
+		        a.test_stime,
+		        a.test_etime,
+		        a.test_meet,
+		        TO_CHAR(a.test_date,'YYYY-MM-DD') AS test_date,
+		        B.lect_id,
+		        B.lect_nm,
+		        B.PROF_ID,
+		        D.seme_id,
+		        C.exam_type,
+		        D.seme_year,
+		        D.seme
+		from TEST_INFO A INNER JOIN  V_LECTUREINFO B ON (A.LECT_ID = B.LECT_ID)
+		                 INNER JOIN EXAM_CAL C ON (C.EXAM_ID = A.EXAM_ID)
+		                 INNER JOIN SEMESTER D ON (D.SEME_ID = C.SEME_ID)
+		WHERE B.PROF_ID = #{detailCondition.profId} 
+		
+		) SELECT
+		    b.*
+		  FROM
+		    (
+		        SELECT
+		            ROWNUM rnum2,
+		            a.*
+		        FROM
+		            (
+		                SELECT
+		                    ROWNUM rnum,
+		                    orderedproftest.*
+		                FROM
+		                    orderedproftest
+		            ) a
+		    ) b
+		  	WHERE RNUM2 BETWEEN #{startRow} AND #{endRow} 
+		
+	</select>
+	
+	
+	<select id="selectTestInfo" parameterType="TestVO" resultMap="testProfMap">
+	 SELECT B.EXAM_ID, B.SEME_ID, B.EXAM_TYPE
+           , C.SEME_YEAR, C.SEME
+           , D.LECT_ID, D.LECT_NM
+           , E.CURLECT_ID, E.STD_ID, E.FIN_SCORE
+           , F.MAJOR_ID, F.PROF_ID, F.ENT_DATE
+           , G.USER_ID, G.USER_NM
+    FROM EXAM_CAL B INNER JOIN SEMESTER C ON (B.SEME_ID = C.SEME_ID)
+                     INNER JOIN LECTURE D ON (C.SEME_ID = D.SEME_ID)
+                     INNER JOIN CURR_LECT E ON (D.LECT_ID = E.LECT_ID)
+                     INNER JOIN STUDENT F ON (E.STD_ID = F.STD_ID)
+                     INNER JOIN USR G ON (G.USER_ID = E.STD_ID) 
+	</select>
+	
+	<!--  강의명 select 뷰  -->
+	<select id="selectLectureList" resultType="LectureVO" parameterType="String">
+		 SELECT *
+         FROM LECTURE A INNER JOIN V_LECTUREINFO B ON (A.LECT_ID = B.LECT_ID)
+         WHERE B.PROF_ID =  #{profId}
+	</select>
+	
+	
+	
+
+	<!-- 시험등록페이지   -->
+	<insert id="insertTest" parameterType="TestVO">
+		<!-- FG10642 -->
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testId">
+			SELECT 'FG1'||LPAD(TESTINFO_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+
+		INSERT INTO TEST_INFO (
+            TEST_ID,
+            EXAM_ID,
+            LECT_ID,
+            TEST_NM,
+            TEST_RDATE,
+            TEST_STIME,
+            TEST_ETIME,
+            TEST_MEET,
+            TEST_DATE
+        ) VALUES (
+              #{testId}
+			, #{examId,jdbcType=VARCHAR}
+			, #{lectId,jdbcType=VARCHAR}
+			, #{testNm,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{testStime,jdbcType=VARCHAR}
+			, #{testEtime,jdbcType=VARCHAR}
+			, #{testMeet,jdbcType=VARCHAR}
+			, #{testDate,jdbcType=DATE}
+        )       
+			 
+	</insert>
+	
+	<!-- TESTQUE_SEQ.NEXTVAL 값 가져오기 -->
+	<select id="getTestQueSeq" resultType="int">
+		SELECT TESTQUE_SEQ.NEXTVAL
+		FROM DUAL
+	</select>
+	
+	<select id="getTestPasgSeq" resultType="int">
+		SELECT TESTPASG_SEQ.NEXTVAL
+		FROM DUAL  
+	</select>
+	
+	<!-- 문제 insert  -->
+	<insert id="insertQue" parameterType="kr.or.ddit.vo.TestQueVO">
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testQueId">
+			SELECT 'FH1'||LPAD(TESTQUE_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+	
+		INSERT INTO TEST_QUE (
+	            TEST_QUE_ID,
+	            TEST_ID,
+	            TEST_NUM,
+	            TEST_QUE
+	        ) VALUES (
+	            #{testQueId}
+				, #{testId,jdbcType=VARCHAR}
+				, #{testNum,jdbcType=VARCHAR}
+				, #{testQue,jdbcType=VARCHAR}
+	    )  
+			
+	</insert>
+	
+	<!--  지문 insert -->
+	<insert id="insertPasg" parameterType="kr.or.ddit.vo.TestPasgVO">
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testPasgId">
+			SELECT 'FI1'||LPAD(TESTPASG_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+	
+		INSERT INTO TEST_PASG (
+			        TEST_PASG_ID,
+			        TEST_QUE_ID,
+			        TEST_PASG,
+			        ANSW_STATE,
+			        NOTE,
+			        QUE_TYPE
+			    ) VALUES (
+			       #{testPasgId}
+					, #{testQueId,jdbcType=VARCHAR}
+					, #{testPasg,jdbcType=VARCHAR}
+					, #{answState,jdbcType=VARCHAR}
+					, #{note,jdbcType=VARCHAR}
+					, #{queType,jdbcType=VARCHAR}
+			)
+	</insert>
+	
+	
+	<!-- 
+	
+	///////////////////////////////////////////////////////////////////////////////
+	
+	 -->
+		
+	<!-- 시험별 제출학생 목록 뷰   -->
+	<select id="selectSubmitStudentList" parameterType="PagingVO"  resultMap="testProfMap">
+		SELECT  A.TEST_ID, A.EXAM_ID, A.LECT_ID, A.TEST_NM,  TO_CHAR(A.TEST_DATE, 'YYYY-MM-DD') AS TEST_DATE
+            ,B.TEST_ALLOW_ID, B.TEST_ID, B.TEST_SCORE
+            ,C.LECT_NM
+            ,E.STD_ID
+            ,F.USER_NM
+		FROM TEST_INFO A INNER JOIN TEST_ALLOW B ON (A.TEST_ID = B.TEST_ID)
+		                 INNER JOIN LECTURE C ON (A.LECT_ID = C.LECT_ID)
+		                 INNER JOIN CURR_LECT D ON (C.LECT_ID = D.LECT_ID)
+		                 INNER JOIN STUDENT E ON (E.STD_ID = D.STD_ID)
+		                 INNER JOIN USR F ON (F.USER_ID = E.STD_ID)
+        WHERE A.TEST_ID = #{detailCondition.testId}
+	</select>
+	
+	
+	
+	<!-- 제출한 학생 단건 조회   -->
+	<select id="selectSubmitStudentView" parameterType="String" resultMap="testProfMap">      
+		SELECT  A.TEST_ID, A.EXAM_ID, A.LECT_ID, A.TEST_NM,  TO_CHAR(A.TEST_DATE, 'YYYY-MM-DD') AS TEST_DATE
+            ,B.TEST_ALLOW_ID, B.TEST_SCORE
+            ,C.LECT_NM
+            ,E.STD_ID
+            ,F.USER_NM
+		FROM TEST_INFO A INNER JOIN TEST_ALLOW B ON (A.TEST_ID = B.TEST_ID)
+		                 INNER JOIN LECTURE C ON (A.LECT_ID = C.LECT_ID)
+		                 INNER JOIN CURR_LECT D ON (C.LECT_ID = D.LECT_ID)
+		                 INNER JOIN STUDENT E ON (E.STD_ID = D.STD_ID)
+		                 INNER JOIN USR F ON (F.USER_ID = E.STD_ID)
+        WHERE A.TEST_ID = #{testId}
+        AND E.STD_ID = #{stdId}
+	</select>
+	
+	
+	<!--  점수 부여  -->
+	<update id="updateAssignScore" parameterType="TestAllowVO">
+		UPDATE TEST_ALLOW
+		SET
+			TEST_SCORE = ${testScore}
+		WEHRE TEST_ALLOW_ID = ${testAllowId}
+	</update>
+		
+	
+
+</mapper>

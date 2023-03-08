@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.test.dao.TestDAO">
+
+	
+
+	<resultMap type="TestVO" id="testMap" autoMapping="true">
+		<id property="testId" column="TEST_ID" />
+		<association property="currLect" javaType="CurrLectVO" autoMapping="true" />
+		<association property="testAllow" javaType="TestAllowVO" autoMapping="true"> 
+			<id property="testAllowId" column="TEST_ALLOW_ID" />
+			<collection property="testAnsList" ofType="TestAnsVO" autoMapping="true" />
+		</association>
+		<association property="myStudentVO" javaType="MyStudentVO" autoMapping="true" >
+			<id property="stdId" column="STD_ID"/>
+			<collection property="mylectureList" ofType="MyLectureVO" autoMapping="true">
+				<id property="lectId" column="LECT_ID"/>
+				<association property="userVO" javaType="UsrVO" autoMapping="true"></association>
+			</collection>
+		</association>
+		<collection property="queList" ofType="TestQueVO" autoMapping="true">
+			<id property="testQueId" column="TEST_QUE_ID" />
+			<collection property="pasgList" ofType="TestPasgVO" autoMapping="true"  /> 
+		</collection>
+	</resultMap>
+
+	
+	<!-- 목록 전체 게시글 개수 조회  -->
+	<!-- <select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM TEST_INFO
+		WHERE TEST_ID = #{detailCondition.testId}
+	</select> -->
+	
+
+	<!--  시험 목록 조회  -->
+	<!-- 현재 수강중인 강의 : 시험응시  => 1:n  -->
+	<select id="selectTestList" parameterType="PagingVO"  resultMap="testMap">
+	
+			<!--  WITH ORDEREDTEST AS (   
+				  SELECT A.CURLECT_ID, A.STD_ID, A.LECT_ID, A.FIN_SCORE
+				              , B.TEST_ID, B.EXAM_ID, B.TEST_NM, B.TEST_RDATE, B.TEST_STIME, B.TEST_ETIME, B.TEST_MEET, B.TEST_DATE
+				              , C.LECT_NM
+				              , D.TEST_ALLOW_ID, D.TEST_SCORE
+				            FROM CURR_LECT A RIGHT OUTER JOIN TEST_INFO B ON A.LECT_ID = B.LECT_ID
+				            LEFT OUTER JOIN TEST_ALLOW D ON D.TEST_ID = B.TEST_ID
+				            LEFT OUTER JOIN LECTURE C ON A.LECT_ID = C.LECT_ID    
+				            WHERE A.STD_ID =  #{detailCondition.stdId}
+				            AND C.SEME_ID = #{detailCondition.semeId}
+				)
+				SELECT A.*
+				FROM (
+				    SELECT ROWNUM RNUM, ORDEREDTEST.*
+				    FROM ORDEREDTEST
+				    ORDER BY RNUM DESC
+				) A -->
+				
+				 WITH ORDEREDTEST AS (   
+				  		SELECT A.CURLECT_ID, A.STD_ID, A.LECT_ID, A.FIN_SCORE
+				              , B.TEST_ID, B.EXAM_ID, B.TEST_NM
+				              , TO_CHAR(B.TEST_RDATE,'YYYY-MM-DD') AS TEST_RDATE 
+				              , B.TEST_STIME, B.TEST_ETIME, B.TEST_MEET 
+				              , TO_CHAR(B.TEST_DATE,'YYYY-MM-DD') AS TEST_DATE
+				              , C.LECT_NM
+				              , D.TEST_ALLOW_ID, D.TEST_SCORE
+                              , E.SEME_ID, E.SEME_YEAR, E.SEME
+				            FROM CURR_LECT A RIGHT OUTER JOIN TEST_INFO B ON A.LECT_ID = B.LECT_ID
+				            LEFT OUTER JOIN TEST_ALLOW D ON D.TEST_ID = B.TEST_ID
+				            LEFT OUTER JOIN LECTURE C ON A.LECT_ID = C.LECT_ID 
+                            LEFT OUTER JOIN SEMESTER E ON E.SEME_ID = C.SEME_ID
+				            WHERE A.STD_ID =  #{detailCondition.myStudentVO.stdId}
+				            AND C.SEME_ID = #{detailCondition.myStudentVO.semeId}
+				)
+				SELECT  B.* FROM (
+				    SELECT ROWNUM RNUM2, A.*
+				    FROM (
+				            SELECT ROWNUM RNUM, ORDEREDTEST.*
+				            FROM ORDEREDTEST 
+				    ) A
+				) B
+				WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+				
+
+	</select>
+
+	
+	
+	
+	
+	<!--  시험응시  insert -->
+	<insert id="insertTestAllow" parameterType="TestAllowVO">
+		<selectKey  order="BEFORE" resultType="String" keyProperty="testAllowId">
+			SELECT 'FK1'||LPAD(TEST_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL   	
+		</selectKey>
+
+		INSERT INTO TEST_ALLOW (
+		    test_allow_id,
+		    curlect_id,
+		    test_id,
+		    test_score
+		) VALUES (
+		    #{testAllowId}
+			, #{curlectId,jdbcType=VARCHAR}
+			, #{testId,jdbcType=VARCHAR}
+			, #{testScore,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	
+		
+	<!-- 시험상세조회  -->
+	<select id="selectTest" parameterType="string" resultMap="testMap">
+		
+ 
+		SELECT A.TEST_QUE_ID, A.TEST_ID, A.TEST_NUM, A.TEST_QUE , B.TEST_PASG_ID, B.TEST_PASG, B.ANSW_STATE, 
+		B.NOTE, B.QUE_TYPE , C.EXAM_ID, C.LECT_ID, C.TEST_NM, C.TEST_RDATE, C.TEST_STIME, C.TEST_ETIME, 
+		C.TEST_MEET, C.TEST_DATE , D.TEST_ALLOW_ID, D.CURLECT_ID, D.TEST_SCORE,
+        (SELECT Z.TEST_ANSW
+        FROM   TEST_ANS Z
+        WHERE  Z.TEST_QUE_ID = A.TEST_QUE_ID) TEST_ANSW 
+		FROM TEST_QUE A LEFT 
+		OUTER JOIN TEST_PASG B ON A.TEST_QUE_ID = B.TEST_QUE_ID LEFT OUTER JOIN TEST_INFO C ON C.TEST_ID 
+		= A.TEST_ID LEFT OUTER JOIN TEST_ALLOW D ON D.TEST_ID = A.TEST_ID 
+		WHERE D.TEST_ALLOW_ID = #{testAllowId} 
+		ORDER BY A.TEST_QUE_ID, B.TEST_PASG_ID
+ 
+	</select> 
+	
+	<!-- 시험상세 2번째 정보 
+		학번, 학생명, 강의코드, 강의명, 중간기말구분
+		1행 리턴
+	-->
+	<select id="selectTest2" parameterType="string" resultType="hashMap">
+		SELECT A.TEST_ALLOW_ID, A.CURLECT_ID, A.TEST_ID, A.TEST_SCORE
+		     , B.EXAM_ID, B.LECT_ID, B.TEST_NM, B.TEST_RDATE, B.TEST_STIME, B.TEST_ETIME, B.TEST_MEET, B.TEST_DATE
+		     , (SELECT C.LECT_NM FROM LECTURE C WHERE C.LECT_ID = B.LECT_ID) LECT_NM
+		     , D.STD_ID, D.FIN_SCORE, (SELECT E.USER_NM FROM USR E WHERE E.USER_ID = D.STD_ID) USER_NM
+		     , F.SEME_ID, F.EXAM_TYPE
+		FROM   TEST_ALLOW A, TEST_INFO B, CURR_LECT D, EXAM_CAL F
+		WHERE  A.TEST_ID = B.TEST_ID
+		AND    A.CURLECT_ID = D.CURLECT_ID
+		AND    B.EXAM_ID = F.EXAM_ID
+		AND    A.TEST_ALLOW_ID = #{testAllowId} 
+	</select>
+	
+	
+	
+	<!--  학생제출답안  insert   -->
+	<insert id="inserStudentAns" parameterType="TestAllowVO">
+		<foreach collection="testAnsList" item="item" separator=" " index="index" open="INSERT ALL" close="SELECT * FROM DUAL">
+		INTO TEST_ANS (
+		    TEST_ALLOW_ID, 
+		    TEST_QUE_ID, 
+		    TEST_ANSW
+		) VALUES(
+			#{item.testAllowId}
+			, #{item.testQueId,jdbcType=VARCHAR}
+			, #{item.testAnsw,jdbcType=VARCHAR}
+		) 
+		</foreach>
+	</insert>  
+	
+
+	<!-- 결과확인  -->
+	
+	<select id="testResult" parameterType="kr.or.ddit.vo.TestAnsVO" resultType="hashMap">
+		SELECT A.TEST_ALLOW_ID,  A.TEST_ANSW
+	          , B.TEST_PASG_ID, B.TEST_QUE_ID, B.TEST_PASG, B.ANSW_STATE, B.NOTE, B.QUE_TYPE
+		from TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		where TEST_ALLOW_ID = #{testAllowId}
+	</select>
+	
+	<!-- <select id="testResult" parameterType="kr.or.ddit.vo.TestAnsVO" resultType="hashMap">
+		SELECT A.TEST_ALLOW_ID,  A.TEST_ANSW
+	          , B.TEST_PASG_ID, B.TEST_QUE_ID, B.TEST_PASG, B.ANSW_STATE, B.NOTE, B.QUE_TYPE
+		from TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		where TEST_ALLOW_ID = #{testAllowId}
+	</select> -->
+	
+	
+	<!-- 전체 문제 갯수  -->
+	<select id="totalMuns" parameterType="TestAllowVO" resultType="int">
+	SELECT COUNT(TEST_ANSW)
+	FROM TEST_ANS
+	WHERE TEST_ALLOW_ID = #{testAllowId}
+	</select>
+	
+	<!-- 맞힌 갯수  -->
+	<select id="studentAns" parameterType="TestAllowVO" resultType="int">
+		WITH ANSWER AS (
+		    SELECT A.TEST_ALLOW_ID, B.TEST_PASG_ID
+		    FROM TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		    WHERE ANSW_STATE = 'Y'
+		    AND A.TEST_ALLOW_ID = #{testAllowId}
+		), MYANSWER AS (
+		SELECT DISTINCT A.TEST_ALLOW_ID, A.TEST_ANSW
+		FROM TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		WHERE A.TEST_ALLOW_ID = #{testAllowId}
+		)
+		SELECT COUNT(*)
+		FROM MYANSWER C INNER JOIN ANSWER D ON (C.TEST_ALLOW_ID = D.TEST_ALLOW_ID)
+		WHERE C.TEST_ANSW = D.TEST_PASG_ID
+	</select>
+	
+	
+	
+	
+	
+	<!-- 학생 제출 정답   / 원래 정답   -->
+	<select id="testAnsAnwer" parameterType="TestVO"  resultType="TestVO">
+		WITH ANSWER AS (
+		    SELECT A.TEST_ALLOW_ID, B.TEST_PASG_ID
+		    FROM TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		    WHERE ANSW_STATE = 'Y'
+		    AND A.TEST_ALLOW_ID = #{testAllow.testAllowId}
+		), MYANSWER AS (
+		SELECT DISTINCT A.TEST_ALLOW_ID, A.TEST_ANSW
+		FROM TEST_ANS A INNER JOIN TEST_PASG B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		WHERE A.TEST_ALLOW_ID = #{testAllow.testAllowId}
+		)
+		SELECT *
+		FROM MYANSWER C INNER JOIN ANSWER D ON (C.TEST_ALLOW_ID = D.TEST_ALLOW_ID)
+		WHERE C.TEST_ANSW = D.TEST_PASG_ID
+	</select>
+	<!-- 원래 정답 -->
+	<!-- <select id="testAnsAnwer" parameterType="TestVO"  resultType="hashMap">
+		select A.TEST_PASG_ID, A.TEST_QUE_ID, A.TEST_PASG, A.ANSW_STATE, A.NOTE, A.QUE_TYPE
+       				,C.TEST_ID
+		FROM TEST_PASG A INNER JOIN TEST_QUE B ON (A.TEST_QUE_ID = B.TEST_QUE_ID)
+		                 INNER JOIN TEST_INFO C ON (C.TEST_ID = B.TEST_ID)
+		WHERE C.TEST_ID = #{testId}
+	</select> -->
+	
+	
+	
+
+
+
+</mapper>

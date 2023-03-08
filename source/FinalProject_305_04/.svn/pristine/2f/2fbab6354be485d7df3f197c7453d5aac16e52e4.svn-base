@@ -1,0 +1,68 @@
+package kr.or.ddit.commons.controller;
+
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.ddit.commons.service.PdfService;
+import kr.or.ddit.student.tuition.service.TuitionService;
+import kr.or.ddit.vo.TuitionPayVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Controller
+@RequestMapping("/pdf")
+public class PdfController {
+	
+	private final PdfService pdfService;
+	private final TuitionService tuitionService;
+	
+	@GetMapping
+	public String pdfView(
+			@RequestParam("stdId") String stdId
+			, @RequestParam("semeId") String semeId
+			, Model model
+	) {
+		
+		
+		log.info("pdfView 진입");
+		TuitionPayVO tuitionPayVO = tuitionService.retrieveTuitionChecking(stdId, semeId);
+	     
+		model.addAttribute("tuitionPayVO", tuitionPayVO);
+		System.out.println("값좀보자" + tuitionPayVO);
+		
+		return "student/tuition/tuitionChecking";
+	}
+	
+	@PostMapping("/createPdf")
+	public ResponseEntity<String> createPdf(
+		String fileName
+		, String htmlStr
+		, HttpServletRequest request
+		, @RequestBody Map<String, String> map
+		) throws IOException{
+		
+		log.info("createPdf 진입");
+		fileName = "pdfTest";
+		htmlStr = map.get("htmlStr");
+		
+		this.pdfService.createHtmlPdf("test", htmlStr, request);
+		
+		ResponseEntity<String> entity = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
+		
+		return entity;
+	}
+}
