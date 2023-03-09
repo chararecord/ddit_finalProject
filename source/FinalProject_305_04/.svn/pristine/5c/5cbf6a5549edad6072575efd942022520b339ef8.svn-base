@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.commons.dao.UsrDAO">
+
+	<resultMap type="UsrVO" id="userMap" autoMapping="true">
+		<id property="userId" column="USER_ID" />
+		<association property="studentVO" javaType="StudentVO" autoMapping="true" />
+		<association property="professorVO" javaType="ProfessorVO" autoMapping="true" />
+		<association property="empVO" javaType="EmpVO" autoMapping="true" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+		<association property="deptVO" javaType="DeptVO" autoMapping="true" />
+		<association property="semesterVO" javaType="SemesterVO" autoMapping="true" />
+	</resultMap>
+	
+	<select id="selectUser" parameterType="String" resultMap="userMap">
+		SELECT
+		    USER_ID,
+		    USER_NM,
+		    USER_NM_EN,
+		    USER_PASS,
+		    USER_RRN1,
+		    USER_RRN2,
+		    USER_PHONE,
+		    USER_POST,
+		    USER_ADDR,
+		    USER_DETAIL_ADDR,
+		    USER_EMAIL,
+		    USER_BANK,
+		    USER_ACCT_HD,
+		    USER_ACCT_NO,
+		    USER_GENDER,
+		    USER_NTL,
+		    USER_BIR,
+		    USER_ROLE
+		FROM
+		    USR
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectEmp" parameterType="String" resultMap="userMap">
+		SELECT A.USER_ID, A.USER_NM, A.USER_NM_EN, A.USER_PASS, A.USER_RRN1, A.USER_RRN2, A.USER_PHONE, A.USER_EMAIL, A.USER_BIR, A.USER_ROLE
+		        , B.DEPT_ID, B.POS, B.ENT_DATE, B.LEV_DATE
+		        , C.DEPT_NM, C.DEPT_TEL, C.BUILD_ID, C.BUILD_NUM
+                , D.SEME_ID
+		FROM USR A INNER JOIN EMP B ON (A.USER_ID = B.EMP_ID)
+		            INNER JOIN DEPT C ON (B.DEPT_ID = C.DEPT_ID)
+                    INNER JOIN NEWS D ON (B.EMP_ID = D.EMP_ID)
+        WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectStd" parameterType="String" resultMap="userMap">
+		SELECT A.USER_ID, A.USER_NM, A.USER_NM_EN, A.USER_PASS, A.USER_RRN1, A.USER_RRN2, A.USER_PHONE, A.USER_EMAIL, A.USER_BIR, A.USER_ROLE
+		        , B.MAJOR_ID, B.PROF_ID, B.ENT_DATE, B.SUGANG_CREDIT
+		        , C.MAJOR_NM, C.MAJOR_TEL 
+                , E.SEME_ID, E.SEME_YEAR, E.SEME
+		FROM USR A INNER JOIN STUDENT B ON (A.USER_ID = B.STD_ID)
+		            INNER JOIN MAJOR C ON (B.MAJOR_ID = C.MAJOR_ID)
+                    INNER JOIN RECORD D ON (A.USER_ID = D.STD_ID)
+                    INNER JOIN SEMESTER E ON (D.SEME_ID = E.SEME_ID)
+        WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectProf" parameterType="String" resultMap="userMap">
+		SELECT
+			A.USER_ID, A.USER_NM, A.USER_NM_EN, A.USER_PASS, A.USER_RRN1, A.USER_RRN2, A.USER_PHONE, A.USER_EMAIL, A.USER_BIR, A.USER_ROLE
+	        , B.LABO_ID, B.MAJOR_ID, B.ENT_DATE, B.LEV_DATE, B.POS
+	        , C.MAJOR_ID, C.MAJOR_NM, C.MAJOR_TEL
+		FROM USR A INNER JOIN PROFESSOR B ON (A.USER_ID = B.PROF_ID)
+		            INNER JOIN MAJOR C ON (B.MAJOR_ID = C.MAJOR_ID)
+		WHERE USER_ID = #{userId}
+	</select>
+</mapper>
