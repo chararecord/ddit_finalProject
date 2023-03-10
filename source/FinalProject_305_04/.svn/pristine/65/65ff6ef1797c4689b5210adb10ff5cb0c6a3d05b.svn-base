@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.student.scholarship.dao.ScholarshipDAO">
+
+
+
+	<!-- 장학금 수혜 내역 조회하는 SELECT문 -->
+<resultMap type="SchHistVO" id="SchHistMap" autoMapping="true">
+		<id property="schHistId" column="SCH_HIST_ID"/>
+		<association property="semesterVO" javaType="SemesterVO" autoMapping="true">
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true">
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+	</association>
+</resultMap>
+
+	<select id="selectScholarshipList" parameterType="String"
+		resultMap="SchHistMap">
+			   
+        WITH ORDEREDSCHOLARSHIP AS (
+			SELECT
+				A.STD_ID,
+				B.SCHS_AMOUNT,
+				B.SCHS_NM,
+				B.SCHOLARSHIP_ID,
+				C.SEME_ID,
+				C.SEME_YEAR,
+				C.SEME
+			FROM SCH_HIST A INNER JOIN SCHOLARSHIP B ON (A.SCHOLARSHIP_ID = B.SCHOLARSHIP_ID)
+    					    INNER JOIN SEMESTER C ON (C.SEME_ID = A.SEME_ID)
+			WHERE A.STD_ID=#{stdId}
+            ORDER BY C.SEME_ID DESC
+		)
+		SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDSCHOLARSHIP.*
+					FROM ORDEREDSCHOLARSHIP
+			) A
+		) B
+	</select>
+
+</mapper>

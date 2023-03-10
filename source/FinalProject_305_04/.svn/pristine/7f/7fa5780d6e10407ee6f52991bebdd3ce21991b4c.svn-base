@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.assignment.dao.AssignmentStudentDAO">
+
+
+		
+	<!-- 과제 리스트 조회   -->
+<!-- 	 <resultMap type="CurrLectVO" id="currlectMap" autoMapping="true"> -->
+<!-- 		<id property="curlectId" column="CURLECT_ID" /> -->
+<!-- 		<collection property="assignmentList" ofType="AssignmentVO" autoMapping="true"> -->
+<!-- 			<id property="asgnId" column="ASGN_ID"/> -->
+<!-- 		</collection> -->
+<!-- 	</resultMap>   -->
+	<resultMap type="CurrLectVO" id="currlectMap">
+		<result property="rnum2" column="RNUM2" />
+		<result property="rnum" column="RNUM" />
+		<result property="curlectId" column="CURLECT_ID" /> 
+		<result property="stdId" column="STD_ID" /> 
+		<result property="finScore" column="FIN_SCORE" /> 
+		<collection property="lectureList" resultMap="lectureMap"></collection>
+		<collection property="assignmentList" resultMap="assignmentMap"></collection>
+	</resultMap>
+	
+	<resultMap type="LectureVO" id="lectureMap">
+		<result property="lectId" column="LECT_ID" /> 
+		<!-- <result property="syllaApprId" column="SYLLA_APPR_ID" />  -->
+		<result property="lectNm" column="LECT_NM" /> 
+		<result property="lectState" column="LECT_STATE" /> 
+		<result property="camYear" column="CAM_YEAR" /> 
+		<result property="numClass" column="NUM_CLASS" /> 
+		<result property="credit" column="CREDIT" /> 
+		<result property="lectHour" column="LECT_HOUR" /> 
+		<result property="textbook" column="TEXTBOOK" /> 
+		<result property="lectCom" column="LECT_COM" /> 
+		<result property="note" column="NOTE" /> 
+		<result property="onfLine" column="ONF_LINE" /> 
+		<result property="assignRoomId" column="ASSIGN_ROOM_ID" /> 
+	</resultMap>
+	
+	<resultMap type="AssignmentVO" id="assignmentMap">
+		<result property="asgnId" column="ASGN_ID" /> 
+		<result property="assignNm" column="ASSIGN_NM" /> 
+		<result property="assignRdate" column="ASSIGN_RDATE" /> 
+		<result property="assignDdate" column="ASSIGN_DDATE" /> 
+		<result property="assignCont" column="ASSIGN_CONT" /> 
+		<association property="assignmentSubmitVO" resultMap="assignmentSubmitMap"></association>		
+	</resultMap>
+	
+	<resultMap type="AssignmentSubmitVO" id="assignmentSubmitMap">
+		<result property="asgnSubmId" column="ASGN_SUBM_ID" /> 
+		<result property="assignSubSdate" column="ASSIGN_SUB_SDATE" /> 
+		<result property="assignSubCont" column="ASSIGN_SUB_CONT" /> 
+		<result property="assignScore" column="ASSIGN_SCORE" /> 
+	</resultMap>
+	
+	
+	
+	<!--
+	////////////////////////////////////////////////////////////////////
+	-->
+	
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM ASGN
+		WHERE LECT_ID = #{lectId}
+	</select> 
+	
+
+	<!-- 과제 전체 목록 조회   -->
+	<select id="selectAssignmentList" parameterType="PagingVO" resultMap="currlectMap">
+
+		
+		<!-- WITH ORDEREDASSIGNMENT AS (
+		    SELECT A.CURLECT_ID, A.STD_ID, A.FIN_SCORE 
+		          , B.LECT_ID, B.SYLLA_APPR_ID, B.LECT_NM, B.LECT_STATE, B.CAM_YEAR, B.NUM_CLASS, B.CREDIT, B.LECT_HOUR, B.TEXTBOOK, B.LECT_COM, B.NOTE, B.ONF_LINE, B.ASSIGN_ROOM_ID
+		          , C.ASGN_ID, C.ASSIGN_NM
+		          , TO_CHAR(C.ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE
+		          , TO_CHAR(C.ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE
+		          , C.ASSIGN_CONT
+		          ,D.ASGN_SUBM_ID, TO_CHAR(D.ASSIGN_SUB_SDATE, 'YYYY-MM-DD') AS ASSIGN_SUB_SDATE, D.ASSIGN_SUB_CONT, D.ASSIGN_SCORE
+		     FROM CURR_LECT A  INNER JOIN LECTURE B ON(A.LECT_ID = B.LECT_ID )
+		                   LEFT OUTER JOIN ASGN C ON(B.LECT_ID = C.LECT_ID)
+		                   LEFT OUTER JOIN ASGN_SUBM D ON(C.ASGN_ID = D.ASGN_ID)
+		    WHERE B.LECT_ID = #{detailCondition.lectId}
+		)
+		SELECT  B.* FROM (
+		    SELECT ROWNUM RNUM2, A.*
+		    FROM (
+		            SELECT ROWNUM RNUM, ORDEREDASSIGNMENT.*
+		            FROM ORDEREDASSIGNMENT 
+		    ) A
+		) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow} -->
+		
+		
+		WITH ORDEREDASSIGNMENT AS (
+		    SELECT B.LECT_ID, B.SYLLA_APPR_ID, B.LECT_NM, B.LECT_STATE, B.CAM_YEAR, B.NUM_CLASS, B.CREDIT, B.LECT_HOUR, B.TEXTBOOK, B.LECT_COM, B.NOTE, B.ONF_LINE, B.ASSIGN_ROOM_ID
+		          , C.ASGN_ID, C.ASSIGN_NM
+		          , TO_CHAR(C.ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE
+		          , TO_CHAR(C.ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE
+		          , C.ASSIGN_CONT
+		          ,D.ASGN_SUBM_ID, TO_CHAR(D.ASSIGN_SUB_SDATE, 'YYYY-MM-DD') AS ASSIGN_SUB_SDATE, D.ASSIGN_SUB_CONT, D.ASSIGN_SCORE
+		    FROM ASGN C  INNER JOIN LECTURE B ON(C.LECT_ID = B.LECT_ID )
+		                   LEFT OUTER JOIN ASGN_SUBM D ON(C.ASGN_ID = D.ASGN_ID)
+		    WHERE B.LECT_ID = #{detailCondition.lectId}
+		)
+		SELECT  B.* FROM (
+		    SELECT ROWNUM RNUM2, A.*
+		    FROM (
+		            SELECT ROWNUM RNUM, ORDEREDASSIGNMENT.*
+		            FROM ORDEREDASSIGNMENT 
+		    ) A
+		) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+		
+	</select>
+	
+	
+	<!--
+	////////////////////////////////////////////////////////////////////
+	-->
+	
+	
+	<!-- 과제 제출 전 상세조회   -->
+	<!-- 제출도 안했는데 asgn submit테이블 보여줄순 없음.. 일단 view에선 asgn 테이블만 보여주기!!   -->
+	<select id="selectAssignmentView"  parameterType="String" resultType="AssignmentVO">
+	
+		
+	SELECT A.ASGN_ID, A.LECT_ID, A.ASSIGN_NM, 
+		TO_CHAR(A.ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE, 
+		TO_CHAR(A.ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE, ASSIGN_CONT
+        , B.CURLECT_ID
+		FROM ASGN A INNER JOIN CURR_LECT B ON (A.LECT_ID = B.LECT_ID)
+		WHERE A.ASGN_ID = #{asgnId}
+	
+		<!-- SELECT ASGN_ID, LECT_ID, ASSIGN_NM, 
+		TO_CHAR(ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE, 
+		TO_CHAR(ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE, ASSIGN_CONT
+		FROM ASGN
+		WHERE ASGN_ID = #{asgnId} -->
+	</select>
+	
+	
+	<!-- 과제 제출하기 AssignmentSubmitVO insert  -->
+	<insert id="insertAssignmentSubmit" parameterType="AssignmentSubmitVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="asgnSubmId" >
+			SELECT 'DN1'||LPAD(ASSIGNMENT_SEQ.NEXTVAL, 4, '0') 
+			FROM DUAL
+		</selectKey>
+		INSERT INTO asgn_subm (
+		    asgn_subm_id,
+		    curlect_id,
+		    asgn_id,
+		    ASSIGN_SUB_SDATE,
+		    ASSIGN_SUB_CONT,
+		    assign_score
+		) VALUES (
+		    #{asgnSubmId}
+			, #{curlectId,jdbcType=VARCHAR}
+			, #{asgnId,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{assignSubCont,jdbcType=VARCHAR}
+			, 0
+		)
+	</insert>
+	
+	<!--
+	////////////////////////////////////////////////////////////////////
+	-->
+	
+
+	<!-- 과제 제출 후 상세조회   -->
+	<select id="selectAssignmentSubmitView" parameterType="AssignmentVO" resultMap="assignmentMap">
+		SELECT A.ASGN_ID, A.LECT_ID, A.ASSIGN_NM,  TO_CHAR(A.ASSIGN_RDATE, 'YYYY-MM-DD') AS ASSIGN_RDATE,  TO_CHAR(A.ASSIGN_DDATE, 'YYYY-MM-DD') AS ASSIGN_DDATE, A.ASSIGN_CONT
+			  , B.ASGN_SUBM_ID, B.CURLECT_ID,  TO_CHAR(B.ASSIGN_SUB_SDATE, 'YYYY-MM-DD') AS ASSIGN_SUB_SDATE, B.ASSIGN_SUB_CONT, B.ASSIGN_SCORE
+		FROM ASGN A INNER JOIN ASGN_SUBM B ON (A.ASGN_ID = B.ASGN_ID)
+		WHERE A.ASGN_ID = #{asgnId}
+	</select>
+	
+	
+	<!--  과제 수정  -->
+	<update id="updateAssignmentSubmit" parameterType="AssignmentSubmitVO">
+	
+			UPDATE ASGN_SUBM
+			SET 
+			    ASSIGN_SUB_CONT = #{assignSubCont,jdbcType=VARCHAR}
+			WHERE ASGN_ID = #{asgnId}
+	
+		<!-- , #{asgnSubmId,jdbcType=VARCHAR}
+		, #{curlectId,jdbcType=VARCHAR}
+		, #{asgnId,jdbcType=VARCHAR}
+		, #{assignSubSdate,jdbcType=DATE}
+		, #{assignSubCont,jdbcType=VARCHAR}
+		, #{assignScore,jdbcType=NUMERIC}
+	 	-->
+	</update>
+
+
+	<!--
+	////////////////////////////////////////////////////////////////////
+	-->
+	
+	<!-- 과제 삭제  -->
+	<delete id="deleteAssignmentSubmit" parameterType="String">
+		DELETE 
+		FROM ASGN_SUBM
+		WHERE ASGN_ID = #{asgnId,jdbcType=VARCHAR}
+	</delete>
+	
+
+	
+	<!--
+	////////////////////////////////////////////////////////////////////
+	-->
+	
+	
+	<!-- 채점 만료후 상세조회    -->
+
+
+
+
+
+</mapper>

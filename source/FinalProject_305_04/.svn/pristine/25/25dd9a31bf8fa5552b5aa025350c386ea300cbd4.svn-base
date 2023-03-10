@@ -1,0 +1,597 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
+<div class="cont">
+	
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>
+			성적
+			<button type="button" class="star on">
+				<span class="sr-only">즐겨찾기</span>
+			</button>
+		</h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i> 
+			<strong>성적</strong> <strong>누적성적 조회</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+			
+		<div class="cont-box-inner">
+			<div class="tbl-half">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>누적성적</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">년도</th>
+                                <th scope="col">학기</th>
+                                <th scope="col">학년</th>
+                                <th scope="col">이수구분</th>
+                                <th scope="col">강의명</th>
+                                <th scope="col">학점</th>
+                                <th scope="col">등급</th>
+                                <th scope="col">평점</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+   							<c:set var="stdScoreList" value="${stdScoreList}" />
+							<c:choose>
+								<c:when test="${not empty stdScoreList }">
+									<c:forEach items="${stdScoreList }" var="scores" >
+										<tr>
+											<td>${scores.semeYear }</td>
+											<td>${scores.seme }</td>
+											<td>${scores.camYear }</td>
+											<td>${scores.estaSub }</td>
+											<td>${scores.lectNm }</td>
+											<td class='${scores.semeId }'>${scores.credit }</td>
+											<td>
+												<c:if test="${scores.critFinalScore == 4.5}">
+													A+
+												</c:if>
+												<c:if test="${scores.critFinalScore == 4}">
+													A
+												</c:if>
+												<c:if test="${scores.critFinalScore == 3.5}">
+													B+
+												</c:if>
+												<c:if test="${scores.critFinalScore == 3}">
+													B
+												</c:if>
+												<c:if test="${scores.critFinalScore == 2.5}">
+													C+
+												</c:if>
+												<c:if test="${scores.critFinalScore == 2}">
+													C
+												</c:if>
+												<c:if test="${scores.critFinalScore == 1.5}">
+													D+
+												</c:if>
+												<c:if test="${scores.critFinalScore == 1}">
+													D
+												</c:if>
+												<c:if test="${scores.critFinalScore <= 0.5}">
+													F
+												</c:if>
+											</td>
+											<td id="${scores.semeId }">${scores.critFinalScore }</td>
+											
+										</tr>
+									</c:forEach>
+								</c:when>
+								<c:otherwise>
+									<td colspan="8">조회할 성적이 없습니다.</td>
+								</c:otherwise>
+							</c:choose>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>학기성적</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>	
+                                <th scope="col">년도</th>
+                                <th scope="col">학기</th>
+                                <th scope="col">신청</th>
+                                <th scope="col">취득</th>
+                                <th scope="col">평점</th>
+                            </tr>
+                        </thead>
+                        <tbody id='scoreList'>
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+			
+			<div style="width: 1560px; height: 760px;">
+			<!--차트가	 그려질 부분-->
+			<canvas id="myChart"></canvas>
+			</div>
+			
+		</div>
+		
+	</div>
+</div>
+
+<script>
+$(document).ready(function() {
+	let seme1701 = 0;
+	let credit1701 = 0;
+	$('#DA10001').each(function() {
+		seme1701 += parseInt($(this).text());
+	});
+	$('.DA10001').each(function(){
+		credit1701 += parseInt($(this).text());
+	})
+	
+	let seme1702 = 0;
+	let credit1702 = 0;
+	$('#DA10002').each(function() {
+		seme1702 += parseInt($(this).text());
+	});
+	$('.DA10002').each(function(){
+		credit1702 += parseInt($(this).text());
+	})
+	
+	let seme1801 = 0;
+	let credit1801 = 0;
+	$('#DA10003').each(function() {
+		seme1801 += parseInt($(this).text());
+	});
+	$('.DA10003').each(function(){
+		credit1801 += parseInt($(this).text());
+	})
+	
+	let seme1802 = 0;
+	let credit1802 = 0;
+	$('#DA10004').each(function() {
+		seme1802 += parseInt($(this).text());
+	});
+	$('.DA10004').each(function(){
+		credit1802 += parseInt($(this).text());
+	})
+	
+	let seme1901 = 0;
+	let credit1901 = 0;
+	$('#DA10005').each(function() {
+		seme1901 += parseInt($(this).text());
+	});
+	$('.DA10005').each(function(){
+		credit1901 += parseInt($(this).text());
+	})
+	
+	let seme1902 = 0;
+	let credit1902 = 0;
+	$('#DA10006').each(function() {
+		seme1902 += parseInt($(this).text());
+	});
+	$('.DA10006').each(function(){
+		credit1902 += parseInt($(this).text());
+	})
+	
+	let seme2001 = 0;
+	let credit2001 = 0;
+	$('#DA10007').each(function() {
+		seme2001 += parseInt($(this).text());
+	});
+	$('.DA10007').each(function(){
+		credit2001 += parseInt($(this).text());
+	})
+	
+	let seme2002 = 0;
+	let credit2002 = 0;
+	$('#DA10008').each(function() {
+		seme2002 += parseInt($(this).text());
+	});
+	$('.DA10008').each(function(){
+		credit2002 += parseInt($(this).text());
+	})
+	
+	let seme2101 = 0;
+	let credit2101 = 0;
+	$('#DA10009').each(function() {
+		seme2101 += parseInt($(this).text());
+	});
+	$('.DA10009').each(function(){
+		credit2101 += parseInt($(this).text());
+	})
+	
+	let seme2102 = 0;
+	let credit2102 = 0;
+	$('#DA10010').each(function() {
+		seme2102 += parseInt($(this).text());
+	});
+	$('.DA10010').each(function(){
+		credit2102 += parseInt($(this).text());
+	})
+	
+	let seme2201 = 0;
+	let credit2201 = 0;
+	$('#DA10011').each(function() {
+		seme2201 += parseInt($(this).text());
+	});
+	$('.DA10011').each(function(){
+		credit2201 += parseInt($(this).text());
+	})
+	
+	let seme2202 = 0;
+	let credit2202 = 0;
+	$('#DA10012').each(function() {
+		seme2202 += parseInt($(this).text());
+	});
+	$('.DA10012').each(function(){
+		credit2202 += parseInt($(this).text());
+	})
+	
+	let seme2301 = 0;
+	let credit2301 = 0;
+	$('#DA10013').each(function() {
+		seme2301 += parseInt($(this).text());
+	});
+	$('.DA10013').each(function(){
+		credit2301 += parseInt($(this).text());
+	})
+	
+	let seme2302 = 0;
+	let credit2302 = 0;
+	$('#DA10014').each(function() {
+		seme2302 += parseInt($(this).text());
+	});
+	$('.DA10014').each(function(){
+		credit2302 += parseInt($(this).text());
+	})
+
+	
+	if(seme1701 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2017</td>
+			<td>1</td>
+			<td>`+ credit1701 +`</td>
+			<td>`+ credit1701 +`</td>
+			<td>`+ seme1701 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme1702 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2017</td>
+			<td>2</td>
+			<td>`+ credit1702 +`</td>
+			<td>`+ credit1702 +`</td>
+			<td>`+ seme1702 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme1801 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2018</td>
+			<td>1</td>
+			<td>`+ credit1801 +`</td>
+			<td>`+ credit1801 +`</td>
+			<td>`+ seme1801 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme1802 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2018</td>
+			<td>2</td>
+			<td>`+ credit1802 +`</td>
+			<td>`+ credit1802 +`</td>
+			<td>`+ seme1802 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme1901 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2019</td>
+			<td>1</td>
+			<td>`+ credit1901 +`</td>
+			<td>`+ credit1901 +`</td>
+			<td>`+ seme1901 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme1902 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2019</td>
+			<td>2</td>
+			<td>`+ credit1902 +`</td>
+			<td>`+ credit1902 +`</td>
+			<td>`+ seme1902 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2001 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2020</td>
+			<td>1</td>
+			<td>`+ credit2001 +`</td>
+			<td>`+ credit2001 +`</td>
+			<td>`+ seme2001 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2002 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2020</td>
+			<td>2</td>
+			<td>`+ credit2002 +`</td>
+			<td>`+ credit2002 +`</td>
+			<td>`+ seme2002 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2101 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2021</td>
+			<td>1</td>
+			<td>`+ credit2101 +`</td>
+			<td>`+ credit2101 +`</td>
+			<td>`+ seme2101 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2102 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2021</td>
+			<td>2</td>
+			<td>`+ credit2102 +`</td>
+			<td>`+ credit2102 +`</td>
+			<td>`+ seme2102 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2201 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2022</td>
+			<td>1</td>
+			<td>`+ credit2201 +`</td>
+			<td>`+ credit2201 +`</td>
+			<td>`+ seme2201 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2202 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2022</td>
+			<td>2</td>
+			<td>`+ credit2202 +`</td>
+			<td>`+ credit2202 +`</td>
+			<td>`+ seme2202 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2301 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2023</td>
+			<td>1</td>
+			<td>`+ credit2301 +`</td>
+			<td>`+ credit2301 +`</td>
+			<td>`+ seme2301 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	if(seme2302 != 0){
+		$('#scoreList').html(
+		`
+		<tr>
+			<td>2023</td>
+			<td>2</td>
+			<td>`+ credit2302 +`</td>
+			<td>`+ credit2302 +`</td>
+			<td>`+ seme2302 +`</td>
+		</tr>		
+		`
+		);
+	}
+	
+	
+	  var context = document
+      	.getElementById('myChart')
+      	.getContext('2d');
+	  
+	  let data = [];
+	  let label = [];
+	  
+	  if (seme1701 !== 0) {
+		  data.push(seme1701);
+		  label.push('2017/1');
+		}
+
+		if (seme1702 !== 0) {
+		  data.push(seme1702);
+		  label.push('2017/2');
+		}
+
+		if (seme1801 !== 0) {
+		  data.push(seme1801);
+		  label.push('2018/1');
+		}
+
+		if (seme1802 !== 0) {
+		  data.push(seme1802);
+		  label.push('2018/2');
+		}
+
+		if (seme1901 !== 0) {
+		  data.push(seme1901);
+		  label.push('2019/1');
+		}
+
+		if (seme1902 !== 0) {
+		  data.push(seme1902);
+		  label.push('2019/2');
+		}
+
+		if (seme2001 !== 0) {
+		  data.push(seme2001);
+		  label.push('2020/1');
+		}
+
+		if (seme2002 !== 0) {
+		  data.push(seme2002);
+		  label.push('2020/2');
+		}
+
+		if (seme2101 !== 0) {
+		  data.push(seme2101);
+		  label.push('2021/1');
+		}
+
+		if (seme2102 !== 0) {
+		  data.push(seme2102);
+		  label.push('2021/2');
+		}
+
+		if (seme2201 !== 0) {
+		  data.push(seme2201);
+		  label.push('2022/1');
+		}
+
+		if (seme2202 !== 0) {
+		  data.push(seme2202);
+		  label.push('2022/2');
+		}
+
+		if (seme2301 !== 0) {
+		  data.push(seme2301);
+		  label.push('2023/2');
+		}
+
+		if (seme2302 !== 0) {
+		  data.push(seme2302);
+		  label.push('2023/2');
+		}
+	  
+	  
+	 console.log(data);
+	  
+	  
+	  var myChart = new Chart(context, {
+	      type: 'line', // 차트의 형태
+	      data: { // 차트에 들어갈 데이터
+	          labels: label,
+	          datasets: [
+	              { //데이터
+	                  label: '평점', //차트 제목
+	                  fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+	                  data: data,
+	                  backgroundColor: [
+	                      //색상
+	                      'rgba(255, 99, 132, 0.2)'
+	                  ],
+	                  borderColor: [
+	                      //경계선 색상
+	                      'rgba(255, 99, 132, 1)'
+	                  ],
+	                  borderWidth: 1 //경계선 굵기
+	              }
+	          ]
+	      },
+	      options: {
+	          scales: {
+	              yAxes: [
+	                  {
+	                      ticks: {
+	                          beginAtZero: true
+	                      }
+	                  }
+	              ]
+	          }
+	      }
+	  });
+	
+});
+	
+	
+</script>

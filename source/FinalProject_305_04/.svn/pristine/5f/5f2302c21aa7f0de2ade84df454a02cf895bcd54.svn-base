@@ -1,0 +1,51 @@
+package kr.or.ddit.commons.service;
+
+import kr.or.ddit.vo.BMenuVO;
+import kr.or.ddit.vo.BookmarkVO;
+import kr.or.ddit.vo.MenuVO;
+
+/**
+ * @author 장은호
+ * @Since 2023. 2. 22.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 22.       장은호        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface BookmarkService {
+	
+	/**
+	 * 사용자별 즐겨찾기 조회
+	 * @param userId
+	 * @return 해당 사용자의 즐겨찾기VO
+	 */
+	public BookmarkVO retrieveBookmarkVO(String userId);
+	
+	/**
+	 * 즐겨찾기 등록
+	 * @param bMenuVO
+	 * @return 성공 1, 실패 0
+	 */
+	public int createBMenu(BMenuVO bMenuVO);
+	
+	/**
+	 * 별을 누른 페이지의 정보를 조회
+	 * @param menuUrl
+	 * @return 해당 페이지의 메뉴 정보를 가지고 있는 MenuVO 
+	 */
+	public MenuVO retrieveMenuVO(String menuUrl, String menuRole);
+
+	/**
+	 * 해당 페이지를 즐겨찾기에서 삭제
+	 * @param bMenuId
+	 * @return 성공 1, 실패 0
+	 */
+	public int removeBMenu(String bmenuId);
+	
+	public BMenuVO retrieveBMenuVO(String userId, String menuUrl);
+}

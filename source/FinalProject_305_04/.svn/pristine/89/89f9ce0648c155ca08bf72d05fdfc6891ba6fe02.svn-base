@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.tuition.dao.TuitionDao">
+
+<!-- 등록금 납부 내역 조회(학생) -->
+
+<resultMap type="TuitionPayVO" id="tuitionMap" autoMapping="true">
+	<id property="tutionPayId" column="TUTION_PAY_ID"/>
+	<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true">
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+	</association>
+	<association property="semesterVO" javaType="SemesterVO" autoMapping="true">
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="tuitionVO" javaType="TuitionVO" autoMapping="true">
+		<id property="tuitionId" column="TUITION_ID"/>
+	</association>
+</resultMap>
+
+<select id="selectTuitionList" parameterType="String" resultMap="tuitionMap">
+	
+WITH ORDEREDTUITIONPAY AS (
+				SELECT
+	                 A.STD_ID
+	               , E.SEME_ID 
+	               , E.SEME_YEAR
+	               , E.SEME
+	               , B.TUITION_AMOUNT
+	               , D.SCHS_NM
+	               , D.SCHS_AMOUNT 
+	               , (B.TUITION_AMOUNT -D.SCHS_AMOUNT  ) as AMOUNT_PAY
+	               , A.PAY_STAT
+				FROM TUITION_PAY A LEFT OUTER JOIN TUITION B ON (A.TUITION_ID = B.TUITION_ID)
+	                                INNER JOIN SCH_HIST C ON (B.SCH_HIST_ID = C.SCH_HIST_ID)
+	                                INNER JOIN SCHOLARSHIP D ON (C.SCHOLARSHIP_ID = D.SCHOLARSHIP_ID)
+	                                INNER JOIN SEMESTER E ON (B.SEME_ID = E.SEME_ID)
+				WHERE A.STD_ID=#{stdId}
+                ORDER BY E.SEME_ID DESC
+			)
+				SELECT B.* FROM (
+				SELECT ROWNUM RNUM2, A.*
+				FROM (
+						SELECT ROWNUM RNUM, ORDEREDTUITIONPAY.*
+						FROM ORDEREDTUITIONPAY
+				) A
+			) B
+</select>
+
+<!-- 등록금 미납 고지서 조회(학생) -->
+<resultMap type="TuitionPayVO" id="tuitionBillMap" autoMapping="true">
+	<id property="tutionPayId" column="TUTION_PAY_ID"/>
+	<association property="tuitionVO" javaType="TuitionVO" autoMapping="true" >
+		<id property="tuitionId" column="TUITION_ID"/>
+	</association>
+	<association property="semesterVO" javaType="SemesterVO" autoMapping="true" >
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true" >
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+	</association>
+</resultMap>
+
+<select id="selectTuitionBill" parameterType="TuitionPayVO" resultMap="tuitionBillMap">
+ WITH ORDEREDTUITIONPAY AS (
+			SELECT
+                 A.STD_ID
+               , E.SEME_ID 
+               , E.SEME_YEAR
+               , E.SEME
+               , B.TUITION_AMOUNT
+               , D.SCHS_NM
+               , D.SCHS_AMOUNT 
+               , (B.TUITION_AMOUNT -D.SCHS_AMOUNT  ) as AMOUNT_PAY
+               , A.PAY_STAT
+			FROM TUITION_PAY A LEFT OUTER JOIN TUITION B ON (A.TUITION_ID = B.TUITION_ID)
+                                INNER JOIN SCH_HIST C ON (B.SCH_HIST_ID = C.SCH_HIST_ID)
+                                INNER JOIN SCHOLARSHIP D ON (C.SCHOLARSHIP_ID = D.SCHOLARSHIP_ID)
+                                INNER JOIN SEMESTER E ON (B.SEME_ID = E.SEME_ID)
+			WHERE A.STD_ID= #{stdId}
+            AND E.SEME_ID = #{semeId}
+            AND A.PAY_STAT='미납'
+         
+		)
+			SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDTUITIONPAY.*
+					FROM ORDEREDTUITIONPAY
+			) A
+		) B
+</select>
+
+
+<!-- 등록금 완납 영수증 -->
+<resultMap type="TuitionPayVO" id="tuitionCheckingMap" autoMapping="true">
+	<id property="tutionPayId" column="TUTION_PAY_ID"/>
+	<association property="tuitionVO" javaType="TuitionVO" autoMapping="true" >
+		<id property="tuitionId" column="TUITION_ID"/>
+	</association>
+	<association property="semesterVO" javaType="SemesterVO" autoMapping="true" >
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="scholarshipVO" javaType="ScholarshipVO" autoMapping="true" >
+		<id property="scholarshipId" column="SCHOLARSHIP_ID"/>
+	</association>
+</resultMap>
+
+<select id="selectTuitionChecking" parameterType="TuitionPayVO" resultMap="tuitionCheckingMap">
+     WITH ORDEREDTUITIONPAY AS (
+			SELECT
+                 A.STD_ID
+               , E.SEME_ID 
+               , E.SEME_YEAR
+               , E.SEME
+               , B.TUITION_AMOUNT
+               , D.SCHS_NM
+               , D.SCHS_AMOUNT 
+               , (B.TUITION_AMOUNT -D.SCHS_AMOUNT  ) as AMOUNT_PAY
+               , A.PAY_STAT
+			FROM TUITION_PAY A LEFT OUTER JOIN TUITION B ON (A.TUITION_ID = B.TUITION_ID)
+                                INNER JOIN SCH_HIST C ON (B.SCH_HIST_ID = C.SCH_HIST_ID)
+                                INNER JOIN SCHOLARSHIP D ON (C.SCHOLARSHIP_ID = D.SCHOLARSHIP_ID)
+                                INNER JOIN SEMESTER E ON (B.SEME_ID = E.SEME_ID)
+			WHERE A.STD_ID= #{stdId}
+            AND E.SEME_ID = #{semeId}
+            AND A.PAY_STAT='기납'
+         
+		)
+			SELECT B.* FROM (
+			SELECT ROWNUM RNUM2, A.*
+			FROM (
+					SELECT ROWNUM RNUM, ORDEREDTUITIONPAY.*
+					FROM ORDEREDTUITIONPAY
+			) A
+		) B
+</select>
+
+</mapper>

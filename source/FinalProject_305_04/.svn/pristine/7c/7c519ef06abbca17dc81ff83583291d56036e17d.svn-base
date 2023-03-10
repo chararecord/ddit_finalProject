@@ -1,0 +1,492 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
+
+
+<%-- ${pagingVO.dataList } --%>
+<!-- <hr> -->
+<%-- ${pagingVO.dataList[0] } --%>
+
+
+<div class="cont">
+
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>졸업요건 관리<button type="button" class="star"><span class="sr-only">즐겨찾기</span></button></h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i>
+			<strong>path1</strong> 
+			<strong>path2</strong> 
+			<strong>path3</strong>
+			<strong>path4</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+			
+		<!--  cont-box-inner -->
+			<div class="cont-box-inner">
+
+				<div class="title">
+					<div>
+						<p class="highlight-txt">
+							총<em class="red-txt"> ${pagingVO.totalRecord } </em>명의 학생이 있습니다
+						</p>
+<!-- 						<button type="button" class="btn btn-s purple" id="gradStdList">졸업예정자</button> -->
+						</div>
+					<div class="right-part">
+						<div class="search-form">
+							<form:form id="searchUI" modelAttribute="simpleCondition" onsubmit="return false;">
+								<form:select path="searchType">
+									<option value>전체</option>
+									<form:option value="userNm" label="이름" />
+									<form:option value="userId" label="학번" />
+								</form:select>
+								<div class="input-group">
+									<form:input path="searchWord"/>
+									<input id="searchBtn" class="btn btn-search primary" type="button" value="검색" />
+								</div>
+								<div class="box-btn">
+<!-- 									<button type="button" class="btn purple">메시지 발송</button> -->
+								</div>
+							</form:form>
+						</div>
+					</div>
+				</div>
+				<!--tbl-->
+				<div class="tbl-wrap">
+					<table class="tbl center">
+						<caption>학생 목록 테이블</caption>
+						<colgroup>
+							<col style="width: 5%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">선택</th>
+								<th scope="col">성명</th>
+								<th scope="col">학번</th>
+								<th scope="col">단과대학</th>
+								<th scope="col">학과</th>
+								<th scope="col">졸업요건충족</th>
+								<th scope="col">졸업예정구분</th>
+							</tr>
+						</thead>
+						<tbody id="listBody">
+						
+							<tr>
+								<c:set var="studentList" value="${pagingVO.dataList }"/>
+							</tr>
+
+						</tbody>
+					</table>
+				</div>
+				<!--end tbl-->
+
+
+				<!-- 페이지 네비게이션 -->
+				<div id="pagingArea">
+					<ui:pagination pagingVO="${pagingVO }" type="bootstrap"/>
+				</div>
+				<!-- //페이지 네비게이션 -->
+			</div>
+			<!-- //  cont-box-inner -->	
+	</div>
+
+
+
+<!-- 학생별 졸업요건충족현황 상세 조회 Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">졸업요건 충족현항</h1>
+        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+      </div>
+      <div class="modal-body">
+		<div class="tbl-wrap">
+			<div class="modal-view">
+					<table class="tbl noline-tbl">
+						<colgroup>
+							<col style="width:25%">
+							<col style="width:25%">
+							<col style="width:25%">
+							<col style="width:25%">
+						</colgroup>
+						<tbody>
+							<tr>
+								<td>
+									<label class="form-label">이름</label>
+									<input id="userNm" class="form-control" readonly />
+								</td>
+								<td>
+									<label class="form-label">학번</label>
+									<input id="stdId" class="form-control" readonly />
+								</td>
+								<td>
+									<label class="form-label">단과대학</label>
+									<input id="collNm" class="form-control" readonly />
+								</td>
+								<td>
+									<label class="form-label">학과</label>
+									<input id="majorNm" class="form-control" readonly />
+								</td>
+							</tr>
+						</tbody>
+						</table>
+						<table class="tbl">
+						<tbody id="gradFulBody">
+							<tr>
+								<th>이수구분</th>
+								<th>기준학점</th>
+								<th>취득학점</th>
+								<th>잔여학점</th>
+							</tr>
+							<tr id="total">
+								<td class="center">총이수학점</td>
+								<td class="center"></td>
+								<td class="center"></td>
+								<td class="center"></td>
+							</tr>
+							<tr id="mj01">
+								<td class="center">전공필수학점</td>
+								<td class="center"></td>
+								<td class="center"></td>
+								<td class="center"></td>
+							</tr>
+							<tr id="mj02">
+								<td class="center">전공선택학점</td>
+								<td class="center"></td>
+								<td class="center"></td>
+								<td class="center"></td>
+							</tr>
+							<tr id="ge01">
+								<td class="center">교양필수학점</td>
+								<td class="center"></td>
+								<td class="center"></td>
+								<td class="center"></td>
+							</tr>
+							<tr id="ge02">
+								<td class="center">교양선택학점</td>
+								<td class="center"></td>
+								<td class="center"></td>
+								<td class="center"></td>
+							</tr>
+							<tr id="lastTr">
+								<th colspan="2">이수구분</th>
+								<th colspan="2">이수여부</th>
+							</tr>
+						</tbody>
+					</table>
+			</div>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn default" data-bs-dismiss="modal" id="closeBtn">닫기</button>
+        <button type="button" class="btn purple" id="submitBtn">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 학생별 졸업요건충족현황 상세 조회 End Modal -->
+
+</div>
+
+<form:form id="searchForm" method="get" modelAttribute="simpleCondition">
+	<form:hidden path="searchType" name="searchType"/>
+	<form:hidden path="searchWord" />
+	<input type="hidden" name="page" />
+</form:form>
+
+
+
+<script>
+
+
+let listBody = $("#listBody");
+
+// 페이징
+let pagingArea = $("#pagingArea").on('click', "a.paging", function(event){
+	event.preventDefault();
+	let page = $(this).data("page");
+	if(!page){return false;}
+	searchForm.find("[name=page]").val(page);
+	searchForm.submit();
+	return false;
+}); 
+
+let makeTrTag = function(student, index) {
+	
+	let checkBoxInput = $('<input>').attr({
+							type: "checkbox"
+							, id: "check_" + index
+							, name: "studentCheck"
+							, value: student.stdId
+	});
+	
+	let checkBoxLabel = $('<label>').append(
+							$('<span>').addClass('sr-only')
+						).attr('for', 'check_' + index);
+	
+	return $('<tr>').append(
+					$('<td>').append(checkBoxInput, checkBoxLabel)
+						// ,$('<td>').html(student.rnum)
+						,$('<td>').html(
+								$('<a>').html(student.userNm)
+									.attr({
+										'data-std-id': student.stdId
+										, 'data-bs-toggle':'modal'
+										, 'data-bs-target':'#detailModal'}))
+						,$('<td>').html(student.stdId)
+						,$('<td>').html(student.collVO.collNm)
+						,$('<td>').html(student.majorVO.majorNm)
+						,$('<td>').html(student.allAcquired == true ? '<button type="button" class="btn btn-s purple">충족완료</button>' : '<button type="button" class="btn btn-s default">미완료</button>' )
+						,$('<td>').html(student.camYear == 4 ? '<button type="button" class="btn btn-s purple">졸업예정</button>' : '<button type="button" class="btn btn-s default">해당없음</button>')
+	)
+}
+
+let searchForm = $('#searchForm').on('submit', function(event){
+event.preventDefault();
+
+let url = this.action;
+let method = this.method;
+let queryString = $(this).serialize();
+
+	$.ajax({
+		url : url,
+		method : method,
+		data : queryString,
+		dataType : "json",
+		success : function(resp) {
+			console.log(resp);
+			listBody.empty();
+			pagingArea.empty();
+			searchForm[0].page.value = "";
+
+			let pagingVO = resp.pagingVO;
+			let dataList = pagingVO.dataList;
+			let trTags = [];
+
+			if(dataList) {
+				$.each(dataList, function(index, student){
+					trTags.push(makeTrTag(student, index));
+				});
+			} else {
+				let tr = $('<tr>').html(
+									$('<td>').attr('colspan', '6').html('조건에 맞는 학생이 없습니다.'));
+				trTags.push(tr);
+			}
+			listBody.html(trTags);
+			pagingArea.html(resp.pagingHTML);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	})
+	return false;
+}).submit();
+
+let searchUI = $("#searchUI").on('click', "#searchBtn", function(){
+// :input[name] : name 속성을 갖고 있는 모든 input/select 대상
+let inputs = searchUI.find(":input[name]");
+$.each(inputs, function(index, input){
+	let name = this.name;
+	let value = $(this).val();
+	console.log(name, value);
+	searchForm.find("[name="+name+"]").val(value);
+});
+searchForm.submit();
+});
+
+
+//////////////////////////////////////////////////////////////////////
+
+let total = $('#total');
+let mj01 = $('#mj01');
+let mj02 = $('#mj02');
+let ge01 = $('#ge01');
+let ge02 = $('#ge02');
+
+
+// 학생 이름 클릭 -> 모달창에 학생 정보 띄우기
+$('#listBody').on('click', 'a', function(){
+	// console.log($(this).data('stdId'));
+	let stdId = $(this).data('stdId');
+	let data = {
+		"stdId" : stdId
+	}
+	
+	$.ajax({
+		url : "${pageContext.request.contextPath}/emp/graduationManage/" + stdId,
+		method : "get",
+		dataType : "text",
+		success : function(resp) {
+// 			console.log(resp);
+			let student = JSON.parse(resp).studentVO;
+// 			console.log(student);
+			$('#userNm').attr('value', student.userNm);
+			$('#stdId').attr('value', student.stdId);
+			$('#collNm').attr('value', student.collVO.collNm);
+			$('#majorNm').attr('value', student.majorVO.majorNm);
+
+			let gradFulList = student.gradFulList;
+// 			console.log(gradFulList);
+// 			console.log('배열 크기', gradFulList.length);
+			
+			// 총이수학점 => 기준학점 - 충족학점 = 잔여학점
+			total.children('td:eq(1)').html(gradFulList[0].gradReqVO.reqStand);
+			total.children('td:eq(2)').html(student.totalCredit);
+			total.children('td:eq(3)').html(gradFulList[0].gradReqVO.reqStand-student.totalCredit);
+			
+			// 전공필수학점 => 기준학점 - 충족학점 = 잔여학점
+			mj01.children('td:eq(1)').html(gradFulList[1].gradReqVO.reqStand);
+			mj01.children('td:eq(2)').html(student.majorReqCredit);
+			mj01.children('td:eq(3)').html(gradFulList[1].gradReqVO.reqStand-student.majorReqCredit);
+			
+			// 전공선택학점 => 기준학점 - 충족학점 = 잔여학점
+			mj02.children('td:eq(1)').html(gradFulList[2].gradReqVO.reqStand);
+			mj02.children('td:eq(2)').html(student.majorOptCredit);
+			mj02.children('td:eq(3)').html(gradFulList[2].gradReqVO.reqStand-student.majorOptCredit);
+			
+			// 교양필수학점 => 기준학점 - 충족학점 = 잔여학점
+			ge01.children('td:eq(1)').html(gradFulList[3].gradReqVO.reqStand);
+			ge01.children('td:eq(2)').html(student.geReqCredit);
+			ge01.children('td:eq(3)').html(gradFulList[3].gradReqVO.reqStand-student.geReqCredit);
+			
+			// 교양선택학점 => 기준학점 - 충족학점 = 잔여학점
+			ge02.children('td:eq(1)').html(gradFulList[4].gradReqVO.reqStand);          
+			ge02.children('td:eq(2)').html(student.geOptCredit);
+			ge02.children('td:eq(3)').html(gradFulList[4].gradReqVO.reqStand-student.geOptCredit);
+			
+			// 학점 이외의 졸업요건만 배열(otherGradFul)에 담기 -> 학점 아래 영역에 붙여줘야 함
+			let otherGradFul = [];
+			for(let i = 5; i<gradFulList.length; i++) {
+				otherGradFul.push(gradFulList[i]);
+// 				console.log(otherGradFul);
+			}
+			
+			// 학점 이외의 졸업요건 영역 지우기
+			$('#lastTr').nextAll().remove();
+			let gradTags = [];
+			
+			// 학점 이외의 졸업요건(배열 otherGradFul)을 tr 태그로 만들기
+			if(otherGradFul) {
+				$.each(otherGradFul, function(index, value){
+					let gradTag = $('<tr>').append(
+							$('<td>').html(value.gradReqVO.reqItem).attr({'class':'center', 'colspan':'2'})	
+							, $('<td>').attr({'class':'center', 'colspan':'2'}).append(
+									$('<div>').attr('class', 'rc-wrap').append(
+										$('<div>').attr('class', 'rc-inner').append(
+											$('<input>').attr({'type':'radio', 'id':'radio_Y'+index, 'name':value.gradFulId, 'value':'Y', 'data-grad-ful-id':value.gradFulId})
+											, $('<label>').attr('for', 'radio_Y'+index).html('충족')
+										), 	$('<div>').attr('class', 'rc-inner').append(
+												$('<input>').attr({'type':'radio', 'id':'radio_N'+index, 'name':value.gradFulId, 'value':'N', 'data-grad-ful-id':value.gradFulId})
+												, $('<label>').attr('for', 'radio_N'+index).html('미충족')
+										)
+									)
+								)
+					);
+					
+					gradTags.push(gradTag);
+				});
+			} else {
+				let tr = $('<tr>').html(
+							$('<td>').attr('colspan', '2')
+								.html('해당 조건 없음.')
+				);
+				gradTags.push(tr);
+			}
+			$('#gradFulBody').append(gradTags);
+			
+			// 학점 이외의 졸업요건 이수여부에 따라 radio 체크 상태 설정하기
+			$.each(otherGradFul, function(index, value){
+				if(value.fulCheck == 'Y') {
+					$('#radio_Y'+index).prop('checked', true);
+				} else {
+					$('#radio_N'+index).prop('checked', true);
+				}
+			});
+		},	// success 끝
+		
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});  // ajax 끝
+});
+
+
+let newFuls = [];
+$(document).on('change', 'input[type=radio]', function(){
+let stdId = $('#stdId').val();
+
+	newFuls.push({
+		'gradFulId' : $(this).data('gradFulId')
+		, 'stdId' : stdId
+		, 'fulCheck' : $(this).val()
+	})
+// 	console.log('newnew', newFuls);
+	
+	// 닫기 버튼 누르면 newFuls 배열 초기화
+	$('#closeBtn').on('click', function(){
+		newFuls = [];
+	})
+});
+
+// 저장 버튼 click하면 ajax 실행
+$('#submitBtn').on('click', function(){
+	$.ajax({
+		url : "${pageContext.request.contextPath}/emp/graduationManage",
+		method : "post",
+		data : JSON.stringify(newFuls),
+		contentType : "application/json;charset=UTF-8",
+		success : function(resp) {
+			console.log(resp);
+			alert('저장되었습니다.');
+			$('#detailModal').modal('hide');
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+});
+
+
+// 졸업예정자 보기
+$('#gradStdList').on('click', function(){
+	$.ajax({
+		url : "${pageContext.request.contextPath}/emp/gradList",
+		method : "get",
+		data : {},
+		dataType : "",
+		success : function(resp) {
+			console.log(resp);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+});
+
+
+</script>
+
+

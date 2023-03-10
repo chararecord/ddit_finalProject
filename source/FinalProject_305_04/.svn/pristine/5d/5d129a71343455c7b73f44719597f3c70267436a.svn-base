@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.campus.calendar.dao.CalendarDAO">
+
+	<!-- 코드프레그먼트 -->
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'calendarTitle'">
+	    				INSTR(CALENDAR_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+					<otherwise>
+	    				INSTR(CALENDAR_TITLE, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+
+
+	<resultMap type="CalendarVO" id="calendarMap" autoMapping="true">
+		<id property="calendarNo" column="CALENDAR_NO"/>
+	</resultMap>
+
+	
+	<!-- 학사일정 표 보기 -->
+	<select id="selectCalendarList" parameterType="PagingVO" resultMap="calendarMap">
+		WITH CALINFO AS (
+		    SELECT A.CALENDAR_NO
+                   , A.SEME_ID
+                   , A.CALENDAR_START
+                   , A.CALENDAR_END
+                   , A.CALENDAR_TITLE
+                   , A.CALENDAR_MEMO
+                   , B.SEME_YEAR
+              FROM CAM_CAL A, SEMESTER B
+             WHERE A.SEME_ID = B.SEME_ID 
+		     ORDER BY CALENDAR_NO
+		)
+		SELECT B.*
+		FROM (
+		        SELECT ROWNUM RNUM2, A.*
+		        FROM (
+		            SELECT ROWNUM RNUM, CALINFO.*
+		            FROM CALINFO
+		            ORDER BY CALENDAR_NO DESC
+		        )A
+		    ) B
+		WHERE RNUM2 BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	
+
+	<!-- 게시판 내 전체 게시글 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM CAM_CAL
+		<include refid="searchFrag" />	
+	</select>
+
+	
+	
+<!-- 달력출력하기 -->
+	<select id="calendarList" resultMap="calendarMap">
+		SELECT CALENDAR_NO, SEME_ID, CALENDAR_START, CALENDAR_END, CALENDAR_TITLE, CALENDAR_MEMO 
+		  FROM CAM_CAL
+	</select>
+	
+	<!-- 학사일정 추가 -->
+	<insert id="insertCalendar" parameterType="kr.or.ddit.vo.CalendarVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="calendarNo">
+		SELECT 'FN1'||LPAD(NOTI_SEQ.NEXTVAL, 4, '0')
+			FROM DUAL
+		</selectKey>	
+		INSERT INTO CAM_CAL (
+			  CALENDAR_NO
+			, SEME_ID
+			, CALENDAR_START
+			, CALENDAR_END
+			, CALENDAR_TITLE
+			, CALENDAR_MEMO
+		) VALUES(
+			#{calendarNo,jdbcType=VARCHAR}
+			, 'DA10014'
+			, #{calendarStart,jdbcType=VARCHAR}
+			, #{calendarEnd,jdbcType=VARCHAR}
+			, #{calendarTitle,jdbcType=VARCHAR}
+			, #{calendarMemo,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+
+
+	<select id="selectSemeNm" resultType="kr.or.ddit.vo.SemesterVO">
+		SELECT SEME_ID, SEME_YEAR, SEME
+  			FROM SEMESTER
+	</select>
+
+
+<!-- 일정 클릭시 내용 셀렉트 -->
+	<select id="selectCalView" parameterType="String" resultMap="calendarMap">
+	    SELECT   A.CALENDAR_NO
+               , A.SEME_ID
+               , A.CALENDAR_START
+               , A.CALENDAR_END
+               , A.CALENDAR_TITLE
+               , A.CALENDAR_MEMO
+               , B.SEME_YEAR
+             FROM CAM_CAL A, SEMESTER B
+            WHERE A.SEME_ID = B.SEME_ID
+              AND A.CALENDAR_NO = #{calendarNo}
+	</select>
+
+
+<!-- 일정 클릭 후 수정 -->
+	<update id="updateCalView" parameterType="kr.or.ddit.vo.CalendarVO">
+		UPDATE CAM_CAL
+		   SET 
+		        CALENDAR_NO      = #{calendarNo,jdbcType=VARCHAR}
+		        , SEME_ID        = #{semeId,jdbcType=VARCHAR}
+		        , CALENDAR_START = #{calendarStart,jdbcType=VARCHAR}
+		        , CALENDAR_END   = #{calendarEnd,jdbcType=VARCHAR}
+		        , CALENDAR_TITLE = #{calendarTitle,jdbcType=VARCHAR}
+		        , CALENDAR_MEMO  = #{calendarMemo,jdbcType=VARCHAR}
+		 WHERE CALENDAR_NO = #{calendarNo}
+	</update>
+
+
+
+<!-- 일정 삭제하기 -->
+	<delete id="deleteCalView" parameterType="String">
+		DELETE FROM CAM_CAL
+		 WHERE CALENDAR_NO = #{calendarNo} 
+	</delete>
+
+
+
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

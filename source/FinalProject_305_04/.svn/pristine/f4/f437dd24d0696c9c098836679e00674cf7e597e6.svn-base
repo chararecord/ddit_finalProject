@@ -1,0 +1,172 @@
+package kr.or.ddit.commons.controller;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.commons.service.PdfService;
+import kr.or.ddit.student.tuition.service.TuitionService;
+import kr.or.ddit.vo.TuitionPayVO;
+import kr.or.ddit.vo.UsrVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Controller
+@RequestMapping("/pdf")
+public class PdfController {
+	
+	private final PdfService pdfService;
+	private final TuitionService tuitionService;
+	
+	@GetMapping
+	public String pdfView(
+			@RequestParam("stdId") String stdId
+			, @RequestParam("semeId") String semeId
+			, Model model
+	) {
+		
+		log.info("pdfView 진입");
+		
+		
+		TuitionPayVO tuitionPayVO = tuitionService.retrieveTuitionChecking(stdId, semeId);
+	     
+		model.addAttribute("tuitionPayVO", tuitionPayVO);
+		model.addAttribute("stdId", stdId);
+		
+		return "student/tuition/tuitionChecking";
+	}
+	
+	@GetMapping("/pdfView2")
+	public String pdfView2(
+			@RequestParam("stdId") String stdId
+			, @RequestParam("semeId") String semeId
+			, Model model
+	) {
+		
+		log.info("pdfView 진입");
+		
+		
+		TuitionPayVO tuitionPayVO = tuitionService.retrieveTuitionBill(stdId, semeId);
+	    System.out.println("tuitionPayVO" + tuitionPayVO);
+		
+		model.addAttribute("tuitionPayVO", tuitionPayVO);
+		model.addAttribute("stdId", stdId);
+		
+		return "student/tuition/tuitionChecking2";
+	}
+	
+	
+	@PostMapping("/createPdf")
+	public ResponseEntity<String> createPdf(
+		String fileName
+		, String htmlStr
+		, HttpServletRequest request
+		, @RequestBody Map<String, String> map
+		) throws IOException{
+		
+		log.info("createPdf 진입");
+		fileName = "pdfTest";
+		htmlStr = map.get("htmlStr");
+		
+		this.pdfService.createHtmlPdf("test2", htmlStr, request);
+		
+		ResponseEntity<String> entity = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
+		
+		return entity;
+	}
+	
+	@PostMapping("/createPdf2")
+	public ResponseEntity<String> createPdf2(
+		String fileName
+		, String htmlStr
+		, HttpServletRequest request
+		, @RequestBody Map<String, String> map
+		) throws IOException{
+		
+		log.info("createPdf 진입");
+		fileName = "pdfTest";
+		htmlStr = map.get("htmlStr");
+		
+		this.pdfService.createHtmlPdf2("test3", htmlStr, request);
+		
+		ResponseEntity<String> entity = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
+		
+		return entity;
+	}
+	
+	
+	@ResponseBody
+	@GetMapping("/showPdf")
+	public void showPdf(
+		HttpServletResponse resp
+	) throws IOException {
+		File file = new File("D://pdf/test2.pdf");
+		FileInputStream fis = null;
+		OutputStream os = null;
+		resp.setContentType("application/pdf");
+		try {
+			fis = new FileInputStream(file);
+			os = resp.getOutputStream();
+			int read = -1;
+			while((read = fis.read()) != -1) {
+				os.write(read);
+				os.flush();
+			}
+		} finally {
+			if (fis != null) {
+				fis.close();
+			}
+			if (os != null) {
+				os.close();
+			}
+		}
+	}
+	
+	
+	@ResponseBody
+	@GetMapping("/showPdf2")
+	public void showPdf2(
+		HttpServletResponse resp
+	) throws IOException {
+		File file = new File("D://pdf/test3.pdf");
+		FileInputStream fis = null;
+		OutputStream os = null;
+		resp.setContentType("application/pdf");
+		try {
+			fis = new FileInputStream(file);
+			os = resp.getOutputStream();
+			int read = -1;
+			while((read = fis.read()) != -1) {
+				os.write(read);
+				os.flush();
+			}
+		} finally {
+			if (fis != null) {
+				fis.close();
+			}
+			if (os != null) {
+				os.close();
+			}
+		}
+	}
+}

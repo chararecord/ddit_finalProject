@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.consult.dao.ProfessorConsultDAO">
+
+	<!-- 검색 -->
+	<sql id="searchFrag">
+<!-- 		<where> -->
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchType eq 'userNm'">
+	    				INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'consTitle'">
+	    				INSTR(CONS_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchType eq 'consCont'">
+	    				INSTR(CONS_CONT, #{simpleCondition.searchWord}) > 0
+	    			</when>
+					<otherwise>
+	    				INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(CONS_TITLE, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(CONS_CONT, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+	    		</choose>
+	    	</if>
+<!-- 		</where> -->
+	</sql>
+	
+	<!-- 학생의 수를 조회하는 SELECT문 -->
+	<select id="selectTotalStd" parameterType="String" resultType="int">
+		WITH STDLIST AS
+		(
+		    SELECT A.STD_ID, B.USER_NM, C.MAJOR_NM
+		    FROM STUDENT A INNER JOIN USR B ON (A.STD_ID = B.USER_ID)
+		                    INNER JOIN MAJOR C ON (A.MAJOR_ID = C.MAJOR_ID)
+		    WHERE A.PROF_ID = #{profId}
+		    ORDER BY STD_ID
+		)
+		SELECT COUNT(*)
+		FROM STDLIST
+	</select>
+	
+	<!-- 상담 내역 개수 조회하는 SELECT문 -->
+	<select id="selectTotalRecord" parameterType="ConsultVO" resultType="int">
+		SELECT COUNT(*)
+		FROM CONSULT
+		WHERE STD_ID = #{stdId}
+		AND PROF_ID = #{profId}
+		AND NOT CONS_STATE IN 6
+	</select>
+	
+	<resultMap type="ConsultVO" id="consultMap" autoMapping="true">
+		<id property="consId" column="CONS_ID"/>
+		<association property="userVO" javaType="UsrVO" autoMapping="true">
+			<association property="studentVO" javaType="StudentVO" autoMapping="true" />
+		</association>
+	</resultMap>
+	
+	<!-- 상담 내역 리스트 조회 SELECT문 -->
+	<select id="selectConsultList" parameterType="hashMap" resultMap="consultMap" >
+		SELECT RSLT.*
+		FROM
+		(
+		    WITH STDINFO AS
+		    (
+		        SELECT A.STD_ID, B.USER_NM AS STDNAME
+		        FROM CONSULT A INNER JOIN USR B ON (B.USER_ID = A.STD_ID)
+		    ), PROFINFO AS
+		    (
+		        SELECT C.PROF_ID, D.USER_NM AS PROFNAME
+		        FROM CONSULT C INNER JOIN USR D ON (D.USER_ID = C.PROF_ID)
+		    ), CONSULTS AS
+		    (
+		        SELECT STD_ID, PROF_ID, CONS_ID, CONS_CAT, CONS_TITLE, CONS_CONT, CONS_APP_DATE, CONS_DATE
+                        , CONS_TIME, CONS_STATE, CONS_MEET, CONS_REASON
+		        FROM CONSULT
+		        WHERE PROF_ID = #{consult.profId}
+		        AND STD_ID = #{consult.stdId}
+		        AND NOT CONS_STATE IN 6
+		        <include refid="searchFrag" />
+		        ORDER BY CONS_ID
+		    )
+		    SELECT DENSE_RANK() OVER(ORDER BY I.RNUM DESC) RNUM2, I.*
+		    FROM (
+		        SELECT DENSE_RANK() OVER(ORDER BY H.CONS_ID ASC) RNUM, H.*
+		        FROM (
+		            SELECT DISTINCT E.CONS_ID, E.STD_ID, E.PROF_ID,
+                        (
+                            SELECT COMM_DESC
+                            FROM COMM
+                            WHERE COMM.COMM_ID = E.CONS_CAT
+                        ) AS CONS_CAT
+                        ,
+                        (
+                            SELECT COMM_DESC
+                            FROM COMM
+                            WHERE COMM.COMM_ID = E.CONS_MEET
+                        ) AS CONS_MEET
+                        , E.CONS_STATE, E.CONS_TITLE, E.CONS_CONT, E.CONS_APP_DATE, E.CONS_DATE, E.CONS_TIME, E.CONS_REASON
+                        , F.STDNAME, G.PROFNAME
+		            FROM CONSULTS E INNER JOIN STDINFO F ON (F.STD_ID = E.STD_ID)
+		                            INNER JOIN PROFINFO G ON (G.PROF_ID = E.PROF_ID)
+		            WHERE G.PROF_ID = #{consult.profId}
+		            AND F.STD_ID = #{consult.stdId}
+		            ORDER BY CONS_ID DESC
+		        ) H
+		    ) I
+		) RSLT
+		WHERE RSLT.RNUM2 BETWEEN #{paging.startRow} AND #{paging.endRow}
+	</select>
+	
+	<!-- 학생 목록을 조회하는 SELECT문 -->
+	<resultMap type="UsrVO" id="usrMap" autoMapping="true">
+		<id property="userId" column="USER_ID" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+	</resultMap>
+	<select id="selectStdList" parameterType="String" resultMap="usrMap">
+		WITH STDLIST AS
+		(
+		    SELECT B.USER_ID, B.USER_NM, C.MAJOR_NM
+		    FROM STUDENT A INNER JOIN USR B ON (A.STD_ID = B.USER_ID)
+		                    INNER JOIN MAJOR C ON (A.MAJOR_ID = C.MAJOR_ID)
+		    WHERE A.PROF_ID = #{profId}
+		    ORDER BY B.USER_ID
+		)
+		SELECT ROWNUM RNUM, STDLIST.*
+                , (
+                    SELECT COUNT(*)
+                    FROM CONSULT
+                    WHERE STD_ID = STDLIST.USER_ID 
+                ) CONS_CNT
+		FROM STDLIST
+	</select>
+	
+	<!-- 학생 상담 승인 반려로 수정 -->
+	<update id="updateConsultStatus" parameterType="ConsultVO">
+		UPDATE CONSULT
+		SET
+		CONS_STATE = #{consState}
+		WHERE CONS_ID = #{consId}
+	</update>
+</mapper>

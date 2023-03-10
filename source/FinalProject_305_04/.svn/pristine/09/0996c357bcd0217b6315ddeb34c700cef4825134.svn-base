@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.emp.graduationManage.dao.GraduationManageDAO">
+	
+	<sql id="searchFrag">
+		<where>
+			<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+				<choose>
+					<when test="simpleCondition.searchType eq 'userNm'">
+						INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'userId'">
+						INSTR(STD_ID, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(USER_NM, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(STD_ID, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 졸업하지 않은 전체 학생 수 조회 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM V_GRAD_STD
+		<include refid="searchFrag" />
+	</select>
+	
+	<resultMap type="StudentVO" id="stdMap" autoMapping="true">
+		<id property="stdId" column="STD_ID" />
+		<association property="collVO" javaType="CollVO" autoMapping="true" />
+		<association property="majorVO" javaType="MajorVO" autoMapping="true" />
+		<association property="recordVO" javaType="RecordVO" autoMapping="true" />
+	</resultMap>
+	
+	<select id="selectStudentList" parameterType="PagingVO" resultMap="stdMap">
+		SELECT A.*
+		FROM (
+		    SELECT 
+		        ROWNUM RNUM
+		        , STD_ID
+		        , MAJOR_ID
+		        , PROF_ID
+		        , ENT_DATE
+		        , GRAD_DATE
+		        , USER_NM
+		        , MAJOR_NM
+		        , COLL_NM
+		        , REC_NM
+		        , CAM_YEAR
+		        , REC_UPDATE
+		    FROM V_GRAD_STD 
+		    <include refid="searchFrag" />
+		) A
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+	<!-- 졸업요건 충족 수정 -->
+	<update id="updateGradFul" parameterType="GradFulVO">
+		UPDATE GRAD_FUL
+		SET FUL_CHECK = #{fulCheck,jdbcType=VARCHAR}
+		WHERE GRAD_FUL_ID = #{gradFulId,jdbcType=VARCHAR}
+	</update>
+</mapper>
