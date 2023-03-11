@@ -1,0 +1,106 @@
+package kr.or.ddit.student.sugang.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.student.priorSugang.service.PriorSugangService;
+import kr.or.ddit.student.sugang.service.SugangService;
+import kr.or.ddit.vo.CurrLectVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author 민경진
+ * @Since 2023. 3. 3.
+ * <pre>
+ *
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일                    수정자                        수정내용
+ * --------        --------    -----------------------
+ * 2023. 3. 3.       민경진        		생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Controller
+@RequestMapping("/student/sugang")
+public class SugangController {
+	
+	@Inject
+	private SugangService service;
+	
+	@Inject
+	private PriorSugangService priorService;
+
+	/**
+	 * 수강신청 게시판 UI 출력
+	 * @return "student/sugang/sugang"
+	 */
+	@GetMapping
+	public String sugangUI() {
+		return "student/sugang/sugang";
+	}
+	
+	/**
+	 * 수강신청
+	 * @param currLectVO
+	 * @return sugangList
+	 */
+	@ResponseBody
+	@PostMapping
+	public Map<String, Object> insertSugang(
+			@RequestBody CurrLectVO currLectVO
+			) {
+		
+		Map<String, Object> map = service.createSugangLect(currLectVO);
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		List<LectureVO> lectureList = priorService.retrieveLectureList(pagingVO, currLectVO.getStdId());
+		map.put("lectureList", lectureList);
+		
+		return map;
+	}
+	
+	/**
+	 * 수강신청 취소
+	 * @return sugangList
+	 */
+	@ResponseBody
+	@DeleteMapping
+	public Map<String, Object> deleteSugang(
+			@RequestBody CurrLectVO currLectVO
+			){
+		Map<String, Object> map = new HashMap<String, Object>();
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		
+		int rowcnt = service.removeSugangLect(currLectVO);
+		if(rowcnt > 0) {
+			List<LectureVO> sugangList = service.retrieveSugangList(currLectVO);
+			List<LectureVO> cartList = priorService.retrieveCartList(currLectVO.getStdId());
+			List<LectureVO> lectureList = priorService.retrieveLectureList(pagingVO, currLectVO.getStdId());
+			int totalCredit = service.retrieveTotalCredit(currLectVO);
+			sugangList.forEach(sugang -> {
+				sugang.setTotalCredit(totalCredit);
+			});
+			map.put("sugangList", sugangList);
+			map.put("cartList", cartList);
+			map.put("lectureList", lectureList);
+		}
+		return map;
+	}
+}

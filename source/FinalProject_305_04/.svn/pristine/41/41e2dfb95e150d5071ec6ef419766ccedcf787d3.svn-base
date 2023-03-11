@@ -1,0 +1,245 @@
+package kr.or.ddit.prof.test.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.prof.test.dao.TestProfDAO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.MyStudentVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.TestPasgVO;
+import kr.or.ddit.vo.TestQueVO;
+import kr.or.ddit.vo.TestVO;
+import lombok.extern.slf4j.Slf4j;
+import oracle.net.aso.d;
+
+
+@Slf4j
+@Service
+public class TestProfServiceImple implements TestProfService {
+
+	// dao주입
+	@Inject
+	private TestProfDAO dao;
+
+	
+	/**
+	 * 출제한 전체 시험 목록 조회
+	 */
+	@Override
+	public void retrieveTestList(PagingVO<TestVO> pagingVO, String profId) {
+		int totalRecord = dao.selectTotalRecord(profId);
+		pagingVO.setTotalRecord(totalRecord);
+		//pagingVO : PagingVO(totalRecord=12, screenSize=10, blockSize=5, currentPage=1, totalPage=2, 
+		//startRow=1, endRow=10, startPage=1, endPage=2, dataList=null
+		//, simpleCondition=SearchVO(searchType=, searchWord=), detailCondition=null)		
+				
+		//detailCondition.profId
+		List<TestVO> testList = dao.testProfTotalList(pagingVO);
+		pagingVO.setDataList(testList);
+		log.info("pagingVO : " + pagingVO);
+	}
+
+
+	/**
+	 * 시험 정보 뷰 
+	 */
+	@Override
+	public List<TestVO> retrieveTest(TestVO testVO) {
+		
+		List<TestVO> test = dao.selectTestInfo(testVO);
+		//log.info("List<TestVO> 이거!!!!!!!!! {}",test);
+		
+		//examId, lectId 가져오기 
+		for (int i = 0; i < test.size(); i++) {
+			testVO.setExamId(test.get(i).getExamId());
+			testVO.setLectId(test.get(i).getLectId());
+			
+			log.info("testVOgetExamId {}" , test.get(i).getExamId());
+			log.info("testVOgetLectId {}" , test.get(i).getLectId());
+		}
+		
+		/*if(test == null) {
+			throw new RuntimeException(String.format("%s는 없는 시험",testVO));
+		}*/
+		return test;
+		
+	}
+
+	
+	
+	/**
+	 * 강의명 select 뷰
+	 */
+	@Override
+	public List<LectureVO> retrieveLecture(String profId) {
+		return dao.selectLectureList(profId);
+	}
+
+
+	
+	
+
+	/**
+	 * 시험등록페이지 insert
+	 */
+	@Override
+	public String createTotalTest(TestVO testVO) {
+		
+		log.info("serviceImple : " + testVO);
+		
+		
+		int temp = 10000;
+		int temp2 = 10000;
+		String result = "";
+		
+		//[1]
+		int result_1 = dao.insertTest(testVO);
+		log.info("result_1 : " + result_1);
+		
+		List<TestQueVO> queListTemp = testVO.getQueList();
+		log.info("queListTemp : " + queListTemp);
+		List<TestQueVO> queList = new ArrayList<TestQueVO>();
+		
+		//3문제의 각 답
+		//1,2,4
+		String testAnsw = testVO.getTestAnsw();
+		String[] testAnswArr = testAnsw.split(",");
+		log.info("testAnswArr.length : " + testAnswArr.length);
+		
+		//[2]
+		int testNum = 1;
+		int ansNum = 0;
+		for(TestQueVO testQueVO : queListTemp) {
+				
+				//[2]
+				testQueVO.setTestId(testVO.getTestId());
+				testQueVO.setTestNum(testNum + "");
+				
+				int result_2 = dao.insertQue(testQueVO);
+				log.info("result_2 : " + result_2);
+				
+				//[3]
+				//지문시작 
+				List<TestPasgVO> pasgListTemp = testQueVO.getPasgList();
+				List<TestPasgVO> pasgList = new ArrayList<TestPasgVO>();
+				
+				int tmp = 1; //보기번호
+				for(TestPasgVO testPasgVO : pasgListTemp) {
+					testPasgVO.setTestQueId(testQueVO.getTestQueId());
+					testPasgVO.setQueType(testVO.getQueType());
+					log.info("testAnswArr["+ansNum+"] : " + testAnswArr[ansNum]);
+					log.info("setQueType : " + testPasgVO);
+					
+					testPasgVO.setAnswState("N"); //default : N (전부 N) 
+					
+					if(Integer.parseInt(testAnswArr[ansNum])==tmp) { //tmp 보기 번호와 넘겨받은 값이 일치하면 Y로 변경
+						testPasgVO.setAnswState("Y");
+					}
+					tmp++;
+					
+					
+					dao.insertPasg(testPasgVO);
+					
+					pasgList.add(testPasgVO);
+				}
+				
+				log.info("pasgList (" + testNum + ") : "  + pasgList);
+				
+				
+				testNum++;
+				ansNum++;
+				
+		}//end outer for
+		
+		
+		return "OK";
+	}
+
+
+	
+	
+	/**
+	 * 시험별 제출학생 목록 뷰
+	 */
+	@Override
+	public void retrieveTestSubmitStudent(
+		PagingVO<TestVO> pagingVO, String testId
+	) {
+		List<TestVO> testSubmit = dao.selectSubmitStudentList(pagingVO);
+		
+		pagingVO.setDataList(testSubmit);
+	}
+
+
+	
+	/**
+	 * 제출한 학생 단건 조회
+	 */
+	@Override
+	public TestVO retrieveSubmitStudent(String testId, String stdId) {
+		return this.dao.selectSubmitStudentView(testId, stdId);
+	}
+
+
+	
+	
+	/**
+	 * 출제한 시험 상세조회 
+	 */
+	@Override
+	public TestVO selectTestView(String testId) {
+		return this.dao.testView(testId);
+	}
+
+	/**
+	 * 출제한 "문제 "상세조회
+	 */
+	@Override
+	public List<TestVO> selectTestQue(String testId) {
+		return this.dao.selectTestQue(testId);
+	}
+
+	/**
+	 * 출제한 "지문 "상세조회
+	 */
+	@Override
+	public List<TestQueVO> selectTestPasg(String testQueId) {
+		return this.dao.selectTestPasg(testQueId);
+	}
+
+
+	
+	
+	/**
+	 * 
+	 * 시험 제출 삭제
+	 * 
+	 */
+	@Override
+	public int removeTestView(String testId) {
+		int rowcnt = dao.deleteTestView(testId);
+		return rowcnt;
+	}
+
+	
+	
+	
+
+	
+	
+	
+	
+
+
+
+
+	
+	
+	
+}

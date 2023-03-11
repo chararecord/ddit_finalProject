@@ -1,0 +1,275 @@
+package kr.or.ddit.commons;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.javassist.NotFoundException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.campus.calendar.service.CalendarService;
+import kr.or.ddit.campus.notice.service.NoticeService;
+import kr.or.ddit.commons.service.MenuService;
+import kr.or.ddit.commons.service.UsrService;
+import kr.or.ddit.ui.PaginationRenderer;
+import kr.or.ddit.vo.CalendarVO;
+import kr.or.ddit.vo.MenuVO;
+import kr.or.ddit.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SearchVO;
+import kr.or.ddit.vo.SemesterVO;
+import kr.or.ddit.vo.UsrVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+public class IndexController {
+	
+	@Inject
+	private UsrService service;
+	@Inject
+	private MenuService menuService;
+	@Inject
+	private NoticeService noticeService;
+	@Inject
+	private CalendarService calendarService;
+	
+	
+   @RequestMapping("/")
+   public String index(
+		   @AuthenticationPrincipal UsrVOWrapper principal,
+		   HttpServletRequest request
+		   , Model model
+		   ) {
+	   
+	  UsrVO authUser = principal.getRealUser();
+	  log.info("principal============================", principal);
+	  log.info("authUser============================", authUser);
+	  
+	  UsrVO user = service.retrieveUser(authUser.getUserId());
+	  
+	  List<CalendarVO> calendar = null;
+	  calendar = calendarService.calendarList(calendar);
+	  log.info("calendar 넘어오나(index메소드) : " + calendar);
+	  request.setAttribute("calendarList", calendar);
+	  
+	  model.addAttribute("user", user);
+	  
+	// 공통메뉴
+	  List<MenuVO> commMenuList = menuService.retrieveCommMenuList();
+	  log.info("공통메뉴{}", commMenuList);
+	  model.addAttribute("commMenuList", commMenuList);
+	  
+      return "index";
+   }
+   
+    @GetMapping(value="/", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String menuList(
+    		@AuthenticationPrincipal UsrVOWrapper principal
+ 		   , Model model
+	) {
+    	
+    	// 공통메뉴
+  	  List<MenuVO> commMenuList = menuService.retrieveCommMenuList();
+  	  log.info("공통메뉴{}", commMenuList);
+  	  model.addAttribute("commMenuList", commMenuList);
+  	  
+  	  String userRole = principal.getRealUser().getUserRole();
+  	  List<MenuVO> userMenuList = new ArrayList<MenuVO>();
+  	  
+  	  // 학생일 때
+  	  if(userRole.equals("ROLE_STD")) {
+  		userMenuList = menuService.retrieveStdMenuList();
+  		log.info("학생메뉴{}", userMenuList);
+//  	  // 교수일 때
+//  	  } else if(userRole.equals("ROLE_PRF")) {
+//  		  List<MenuVO> prfMenuList = menuService.retrievePrfMenuList();
+//  	  // 교직원일 때
+//  	  } else if(userRole.equals("ROLE_EMP")) {
+//  		  List<MenuVO> empMenuList = menuService.retrieveEmpMenuList();
+  	  }
+  	  model.addAttribute("userMenuList", userMenuList);
+	   return "jsonView";
+   }
+   
+   @ResponseBody
+   @PostMapping(value="/notice", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+   public PagingVO<NoticeVO> noticeList(
+		   @RequestParam(value="page", required=false, defaultValue="1") int currentPage
+		   ) {
+	   log.info("인덱스 노티스 컨트롤러");
+	   
+	   PagingVO<NoticeVO> pagingVO = new PagingVO<>(5, 5);
+	   pagingVO.setCurrentPage(currentPage);
+	   
+	   noticeService.retrieveNoticeList(pagingVO);
+	   
+	   return pagingVO;
+   }
+   
+   @ResponseBody
+   @PostMapping(value="/news", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+   public Map<String, Object> newsList() throws NotFoundException {
+	   
+//	   URL url = new URL("www.naver.com");
+//	   BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+//	   StringBuffer sourceCode = new StringBuffer();
+//	   
+//	   String sourceLine = "";
+//	   while ((sourceLine = br.readLine()) != null) {
+//		   sourceCode.append(sourceLine + "\n");
+//	}
+	   Map<String, Object> map = new HashMap<String, Object>();
+	   
+	   List<String> title = new ArrayList<String>();
+	   List<String> press = new ArrayList<String>();
+	   List<String> date = new ArrayList<String>();
+
+	   try {
+		   String url = "https://search.naver.com/search.naver?sm=tab_hty.top&where=news&query=%ED%95%9C%EB%82%A8%EB%8C%80%ED%95%99%EA%B5%90";
+		   Document doc = Jsoup.connect(url).get();
+		   Elements news = doc.select("div.news_wrap.api_ani_send");
+		   
+		   for (Element e : news.select("a[title]")) {
+			   title.add(e.text());
+		   }
+		   
+		   for (Element e : news.select("a.press")) {
+			   press.add(e.text());
+		   }
+		   
+		   for (Element e : news.select("span.info")) {
+			   date.add(e.text());
+		   }
+		   
+		   map.put("title", title);
+		   map.put("press", press);
+		   map.put("date", date);
+		   
+<<<<<<< .mine
+||||||| .r311493
+=======
+		   
+>>>>>>> .r311520
+	   } catch (Exception e) {
+		   throw new NotFoundException("뉴스 주소를 가져올 수 없습니다.", e);
+	   }
+	   
+	   return map;
+   }
+   
+   
+//------------------------------------------------------------------------------------
+//학사일정 달력
+   
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+	
+	
+	//리스트 띄우기
+	@RequestMapping("calendar")
+	public String calendarList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage 
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+	) {
+		PagingVO<CalendarVO> pagingVO = new PagingVO<>(10,5);
+		pagingVO.setCurrentPage(currentPage);
+		
+		calendarService.retrieveCalendarList(pagingVO);
+		
+		model.addAttribute("pagingVO", pagingVO);
+		System.out.println("pagingVO 넘어오나" + pagingVO);
+		return "style/index";
+	}
+	
+	
+	@GetMapping(value="calendar", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public String calendarListData(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			,@ModelAttribute("simpleCondition") SearchVO searchVO
+			,Model model
+	){
+		PagingVO<CalendarVO> pagingVO = new PagingVO<>(10,5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		calendarService.retrieveCalendarList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		
+		return "jsonView";
+		
+	}
+	
+	
+	
+	//달력 디비 내용 출력하기
+	@RequestMapping(value = "/calendar", method = RequestMethod.GET)
+	public ModelAndView getCalendarList(ModelAndView mv, HttpServletRequest request
+			, @RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, Model model) {
+		log.info("getCalendarList에 왔다");
+		
+		String viewpage = "/style/index";
+		List<CalendarVO> calendar = null;
+		
+		
+		try {
+			calendar = calendarService.calendarList(calendar);
+			log.info("calendar 넘어오나 : " + calendar);
+			
+			
+			PagingVO<CalendarVO> pagingVO = new PagingVO<>(10,5);
+			pagingVO.setCurrentPage(currentPage);
+			
+			calendarService.retrieveCalendarList(pagingVO);
+			log.info("pagingVO 넘어오나 : " + calendar);
+			model.addAttribute("pagingVO", pagingVO);
+			model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+			request.setAttribute("calendarList", calendar);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		mv.setViewName(viewpage);
+		return mv;
+	}
+
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+}

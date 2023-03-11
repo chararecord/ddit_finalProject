@@ -1,0 +1,220 @@
+package kr.or.ddit.prof.scoreProc.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.prof.scoreProc.service.ScoreProcessService;
+import kr.or.ddit.ui.PaginationRenderer;
+import kr.or.ddit.vo.AttendVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.MyLectureVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.ScoreCritVO;
+import kr.or.ddit.vo.SearchVO;
+import kr.or.ddit.vo.UsrVO;
+import kr.or.ddit.vo.UsrVOWrapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author PC-17
+ * @Since 2023. 2. 6.
+ * <pre>
+ * 성적처리 컨트롤러
+ * ======[[개정이력(Modification Information)]]======
+ *   수정일          수정자             수정내용
+ * --------          --------    -----------------------
+ * 2023. 2. 6.       서범수        성적처리 컨트롤러 생성
+ *
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+@Slf4j
+@Controller
+@RequestMapping("/prof/scoreProc")
+@RequiredArgsConstructor
+public class ScoreProcController {
+	
+	@Autowired
+	private final ScoreProcessService service;
+	
+	@ModelAttribute("lecture")
+	public LectureVO lecture() {
+		return new LectureVO();
+	}
+	
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+	
+	
+	@GetMapping
+	public String scoreProcessUI(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, @AuthenticationPrincipal UsrVOWrapper principal
+			, Model model
+		) {
+		
+		log.info("scoreProcessUI 진입");
+		UsrVO realUser = principal.getRealUser();
+		String profId = realUser.getUserId();
+		service.setProfId(profId);
+		
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveLectList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		System.out.println("pagingVO값은?" + pagingVO);
+		
+		
+		return "prof/scoreProcess/scoreProcess";
+	}
+	
+	
+	@GetMapping(produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public String scoreProcessData(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, @AuthenticationPrincipal UsrVOWrapper principal
+			, Model model	
+		) {
+		
+		log.info("scoreProcessData 진입");
+		UsrVO realUser = principal.getRealUser();
+		String profId = realUser.getUserId();
+		service.setProfId(profId);
+		
+		
+		PagingVO<LectureVO> pagingVO = new PagingVO<>(10, 5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveLectList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		
+		return "jsonView";
+	}
+	
+	
+	
+	@GetMapping("/{lectId}")
+	public String scoreStdList(
+		@PathVariable String lectId
+		, @AuthenticationPrincipal UsrVOWrapper principal
+		, Model model
+		) {
+		
+		log.info("scoreStdList 진입");
+		
+		
+		List<ScoreCritVO> scoreCritList = service.retrieveScoreCritList(lectId);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("lectId", lectId);
+		MyLectureVO lectStdList = service.retrieveProfStdList((HashMap<String, Object>) map);
+//		System.out.println("lectStdList = ?" + lectStdList);
+		
+		model.addAttribute("lectStdList", lectStdList);
+		model.addAttribute("scoreCritList", scoreCritList);
+		
+		return "prof/scoreProcess/scoreStdView";
+	}
+
+	
+	@RequestMapping("/selectStd")
+	@ResponseBody
+	public Map<String, Object> selectStdScore(
+		@RequestParam String lectId
+		, @RequestParam String stdId
+		, Model model
+		) {
+		
+		log.info("selectStd 진입");
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		System.out.println("lectId =" + lectId);
+		System.out.println("stdId =" + stdId);
+		map.put("lectId", lectId);
+		map.put("stdId", stdId);
+		
+		String mtScore = service.retrieveMtScore((HashMap<String, Object>) map);
+		String ftScore = service.retrieveFtScore((HashMap<String, Object>) map);
+		String asgnScore = service.retrieveAsgnScore((HashMap<String, Object>) map);
+		String atndScore = service.retrieveAttendScore((HashMap<String, Object>) map);
+		List<AttendVO> atndList = service.retrieveAttendList((HashMap<String, Object>) map);
+		List<String> attendCnt = service.retrieveAttendCnt((HashMap<String, Object>) map);
+//		System.out.println("attendCnt=" + attendCnt);
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap.put("mtScore", mtScore);
+		resultMap.put("ftScore", ftScore);
+		resultMap.put("asgnScore", asgnScore);
+		resultMap.put("atndScore", atndScore);
+		resultMap.put("atndList", atndList);
+		resultMap.put("attendCnt", attendCnt);
+		
+		
+		return resultMap;
+		
+	}
+	
+	
+	@RequestMapping("/insertScore")
+	@ResponseBody
+	public Map<String, Object> insertScore(
+		@RequestParam String lectId
+		, @RequestParam String stdId
+		, @RequestParam String atndScore
+		, @RequestParam String mtScore
+		, @RequestParam String ftScore
+		, @RequestParam String asgnScore
+		, @RequestParam String finScore
+		, Model model
+		){
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("finScore", finScore);
+		map.put("lectId", lectId);
+		map.put("stdId", stdId);
+		map.put("mtScore", mtScore);
+		map.put("ftScore", ftScore);
+		map.put("asgnScore", asgnScore);
+		map.put("atndScore", atndScore);
+		
+		service.modifyFinScore((HashMap<String, Object>) map);
+		
+		List<ScoreCritVO> scoreCritList = service.retrieveScoreCritList(lectId);
+		map.put("scoreCritList", scoreCritList); // 중/기/과/출
+		
+		service.createMtScoreProc((HashMap<String, Object>) map);
+		service.createFtScoreProc((HashMap<String, Object>) map);
+		service.createAsgnScoreProc((HashMap<String, Object>) map);
+		service.createAtndScoreProc((HashMap<String, Object>) map);
+		
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("message", "등록됨");
+		
+		return resultMap;
+	}
+	
+}

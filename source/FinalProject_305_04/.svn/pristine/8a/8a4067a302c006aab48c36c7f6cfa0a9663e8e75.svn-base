@@ -1,0 +1,526 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.ddit.or.kr/class305" prefix="ui" %>
+
+<div class="cont">
+	
+	<!-- cont-title -->
+	<div class="cont-title">
+		<h2>
+			성적
+			<button type="button" class="star on">
+				<span class="sr-only">즐겨찾기</span>
+			</button>
+		</h2>
+		<!--cont-navi-->
+		<div class="cont-navi">
+			<span>home</span> <i class="bi bi-house-door-fill"></i> 
+			<strong>성적</strong> <strong>강의목록</strong> <strong>성적등록</strong>
+		</div>
+		<!--end cont-navi-->
+	</div>
+	<!-- end cont-title -->
+
+	<div class="white-box">
+		<div class="tbl-half">
+			<div class="tbl-wrap tob-box">
+				<strong class="tit">성적등록 안내사항 </strong>
+				<p>성적기준은 다음과 같습니다.</p>
+				<table class = "tbl center" style="background: #fff; width: 400px;">
+                    <colgroup>
+                        <col style="width: 20%">
+                        <col style="width: 20%">
+                        <col style="width: 20%">
+                    </colgroup>
+					<tr>
+						<th scope="col">등급</th>
+						<th scope="col">점수</th>
+						<th scope="col">학점</th>
+					</tr>
+					<tr>
+						<td>A+</td>
+						<td>100~95</td>
+						<td>4.5~4.0</td>
+					</tr>
+					<tr>
+						<td>A</td>
+						<td>95~90</td>
+						<td>4.0~3.5</td>
+					</tr>
+					<tr>
+						<td>B+</td>
+						<td>90~85</td>
+						<td>3.5~3.0</td>
+					</tr>
+					<tr>
+						<td>B</td>
+						<td>85~80</td>
+						<td>3.0~2.5</td>
+					</tr>
+					<tr>
+						<td>C+</td>
+						<td>80~75</td>
+						<td>2.5~2.0</td>
+					</tr>
+					<tr>
+						<td>C</td>
+						<td>75~70</td>
+						<td>2.0~1.5</td>
+					</tr>
+					<tr>
+						<td>D+</td>
+						<td>70~65</td>
+						<td>1.5~1.0</td>
+					</tr>
+					<tr>
+						<td>D+</td>
+						<td>65~60</td>
+						<td>1.5~1.0</td>
+					</tr>
+					<tr>
+						<td>F</td>
+						<td>60~</td>
+						<td>1.0~</td>
+					</tr>
+				</table>
+				<br>
+				<strong class="red-txt"> ※ 결석이 4회 이상이면 해당 강의는 'F' 처리됩니다. </strong><br>
+				<strong class="red-txt"> ※ 지각 3회당 결석 1회로 처리됩니다. </strong>
+			</div>
+			<div class="cont-box-inner">
+				<div class="title">
+					<h3>수강생 목록</h3>
+					<input type="hidden" value="${lectStdList.lectId}" id="lectId"/>
+				</div>
+				<!--tbl-->
+				<div class="tbl-wrap table-scrollable">
+					<div class="table-responsive">
+						<table class="tbl tbl-hover center">
+						<thead>
+							<tr class="table-scrollable__fixed-y">
+								<th scope="col">학번</th>
+								<th scope="col">단과대학</th>
+								<th scope="col">학과</th>
+								<th scope="col">학년</th>
+								<th scope="col">이름</th>
+							</tr>
+						</thead>
+							<tbody>
+							<tr>
+								<c:set var="myStudentList" value="${lectStdList.myStudentList}" />
+								<c:choose>
+									<c:when test="${not empty myStudentList }">
+										<c:forEach items="${myStudentList }" var="myStudentVO" >
+											<tr>
+												<td id=${myStudentVO.stdId } class="std">${myStudentVO.stdId }</td>
+												<td id=${myStudentVO.stdId } class="std">${myStudentVO.collVO.collNm }</td>
+												<td id=${myStudentVO.stdId } class="std">${myStudentVO.majorVO.majorNm }</td>
+												<td id=${myStudentVO.stdId } class="std">${myStudentVO.camYear }</td>
+												<td id=${myStudentVO.stdId } class="std">${myStudentVO.userNm }</td>
+											</tr>
+										</c:forEach>
+									</c:when>
+									<c:otherwise>
+										<td colspan="5">수강생이 없습니다.</td>
+									</c:otherwise>
+								</c:choose>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+			<!--end tbl-->
+			
+			<div class="cont-box-inner">
+				<div class="title">
+				<h3>성적 등록</h3>
+				<div class="box-btn">
+					<button type="button" class="btn purple" id="submitBtn">등록</button>
+				</div>
+			</div>
+				<div class="tbl-wrap">
+					<table class="tbl">
+						<caption></caption>
+						<colgroup>
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">점수</th>
+                                <td id=score></td>
+								<th scope="row">등급</th>
+                                <td id=grade></td>
+								<th scope="row">최종성적</th>
+                                <td id="fnGrade">
+                                	<select id="selFinscore">
+                                		<option>4.5</option>
+                                		<option>4.0</option>
+                                		<option>3.5</option>
+                                		<option>3.0</option>
+                                		<option>2.5</option>
+                                		<option>2.0</option>
+                                		<option>1.5</option>
+                                		<option>1.0</option>
+                                		<option>0.5</option>
+                                	</select>
+                                </td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		
+		<div class="cont-box-inner">
+			<div class="tbl-half">
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>성적처리기준</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <caption></caption>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">중간고사</th>
+                                <th scope="col">기말고사</th>
+                                <th scope="col">과제</th>
+                                <th scope="col">출결</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td> ${scoreCritList[0].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[1].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[2].scoreCritRatio }% </td>
+                                <td> ${scoreCritList[3].scoreCritRatio }% </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+				<div class="tbl-wrap">
+                    <div class="title">
+                        <h4>성적상세내역</h4>
+                    </div>
+
+                    <table class="tbl">
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                            <col style="width: 20%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">구분</th>
+                                <th scope="col">평가명</th>
+                                <th scope="col">점수</th>
+                            </tr>
+                        </thead>
+                        <tbody id='scoreList'>
+                        	
+                        </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+				
+		
+		<div class="cont-box-inner">
+				<div class="title">
+					<h3>출결현황</h3>
+				</div>
+
+				<div class="tbl-wrap">
+					<table class="tbl">
+						<caption></caption>
+						<colgroup>
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+							<col style="width: 150px;">
+							<col style="width: auto;">
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">출석</th>
+								<td id=atndCnt></td>
+								<th scope="row">지각</th>
+								<td id=lateCnt></td>
+								<th scope="row">결석</th>
+								<td id=absnCnt></td>
+								<th scope="row">조퇴</th>
+								<td id=earCnt></td>
+								<th scope="row">공결</th>
+								<td id=depaCnt></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div class="cont-box-inner">
+
+				<!--tbl-->
+				<div class="tbl-wrap">
+					<table class="tbl center">
+						<caption>description about table</caption>
+						<colgroup>
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">1주차</th>
+								<th scope="col">2주차</th>
+								<th scope="col">3주차</th>
+								<th scope="col">4주차</th>
+								<th scope="col">5주차</th>
+								<th scope="col">6주차</th>
+								<th scope="col">7주차</th>
+								<th scope="col">8주차</th>
+							</tr>
+						</thead>
+						<tbody id="weekF">
+							<tr>
+								<td id='week0'></td>
+								<td id='week1'></td>
+								<td id='week2'></td>
+								<td id='week3'></td>
+								<td id='week4'></td>
+								<td id='week5'></td>
+								<td id='week6'></td>
+								<td id='week7'></td>
+							</tr>
+						</tbody>
+					</table>
+					<table class="tbl center">
+						<caption>description about table</caption>
+						<colgroup>
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+							<col style="width: 10%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">9주차</th>
+								<th scope="col">10주차</th>
+								<th scope="col">11주차</th>
+								<th scope="col">12주차</th>
+								<th scope="col">13주차</th>
+								<th scope="col">14주차</th>
+								<th scope="col">15주차</th>
+								<th scope="col">16주차</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr id='weekL'>
+								<td id='week8'></td>
+								<td id='week9'></td>
+								<td id='week10'></td>
+								<td id='week11'></td>
+								<td id='week12'></td>
+								<td id='week13'></td>
+								<td id='week14'></td>
+								<td id='week15'></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--end tbl-->
+				
+			</div>
+			
+		</div>
+		
+</div>
+
+
+<script>
+	let listBody = $("#listBody");
+	let scoreGrade;
+	let allScore;
+	let stdId;
+	let lectId;
+	let atndScore;
+	let mtScore;
+	let ftScore;
+	let asgnScore;
+	let finScore;
+	
+	$('#selFinscore').on('change', function() {
+		finScore = $('#selFinscore').val();
+		console.log("finScore값?", finScore);
+	});
+	
+	
+	$(document).ready(function() {
+		$('td.std').on('click', function() {
+			stdId = $(this).attr('id');
+			lectId = $('#lectId').val();
+			
+			$.ajax({
+				url : "${pageContext.request.contextPath}/prof/scoreProc/selectStd",
+				method : "post",
+				data : {"stdId" : stdId,
+						"lectId" : lectId},
+				dataType : "json",
+				success : function(resp) {
+// 					console.log(JSON.stringify(resp));
+					
+					let atndLength = resp.atndList.length;
+					
+					atndScore = resp.atndScore * 10;
+					mtScore = Math.round((resp.mtScore*100) / 100);
+					ftScore = Math.round((resp.ftScore*100) / 100);
+					asgnScore = Math.round((resp.asgnScore*100) / 100);
+					
+					
+					let mtCrit = ${scoreCritList[0].scoreCritRatio } / 100;
+					let ftCrit = ${scoreCritList[1].scoreCritRatio } / 100;
+					let asgnCrit = ${scoreCritList[2].scoreCritRatio } / 100;
+					let atndCrit = ${scoreCritList[3].scoreCritRatio } / 100;
+					
+					$('#scoreList').html(`
+						<tr>
+							<td>시험</td>
+							<td>중간고사</td>
+							<td>` + mtScore + `</td>
+						</tr>
+						<tr>
+							<td>시험</td>
+							<td>기말고사</td>
+							<td>` + ftScore + `</td>
+						</tr>
+						<tr>
+							<td>출결</td>
+							<td>출결점수</td>
+							<td>` + atndScore + `</td>
+						</tr>
+						<tr>
+							<td>기타</td>
+							<td>과제</td>
+							<td>` + asgnScore + `</td>
+						</tr>
+					`);
+					
+					allScore = (mtScore * mtCrit) + (ftScore * ftCrit) + (asgnScore * asgnCrit) + (atndScore * atndCrit);
+					
+					$('#atndCnt').html('');
+					$('#lateCnt').html('');
+					$('#absnCnt').html('');
+					$('#earCnt').html('');
+					$('#depaCnt').html('');
+					
+					$('#atndCnt').html(resp.attendCnt[0].ATNDCNT + '/16');
+					$('#lateCnt').html(resp.attendCnt[0].LATECNT + '/16');
+					$('#absnCnt').html(resp.attendCnt[0].ABSNCNT + '/16');
+					$('#earCnt').html(resp.attendCnt[0].EARCNT + '/16');
+					$('#depaCnt').html(resp.attendCnt[0].DEPACNT + '/16');
+					
+					
+					for(let i = 0; i < 16; i++){
+						$('#week' + i).html('');
+					}
+					
+					
+					for(let i = 0; i < atndLength; i++){
+						$('#week' + i).html(resp.atndList[i].attendStat);
+					}
+					
+					$('#score').html(allScore + "/100");
+										
+					console.log('allScore값?', allScore);
+					
+					
+					if(allScore >= 95 && allScore <=100){
+						scoreGrade = 'A+';
+					} else if(allScore >= 90 && allScore < 95){
+						scoreGrade = 'A';
+					} else if(allScore >= 85 && allScore < 90){
+						scoreGrade = 'B+';
+					} else if(allScore >= 80 && allScore < 85){
+						scoreGrade = 'B';
+					} else if(allScore >= 75 && allScore < 80){
+						scoreGrade = 'C+';
+					} else if(allScore >= 70 && allScore < 75){
+						scoreGrade = 'C';
+					} else if(allScore >= 65 && allScore < 70){
+						scoreGrade = 'D+';
+					} else if(allScore >= 60 && allScore < 65){
+						scoreGrade = 'D';
+					} else if(allScore < 60){
+						scoreGrade = 'F';
+					}
+					
+					if(atndScore<70){
+						scoreGrade = 'F';
+					}
+					
+					$('#grade').html(scoreGrade);
+					
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			
+		});
+		
+		$('#submitBtn').on('click', function(){
+			console.log('등록');
+			$.ajax({
+				url : "${pageContext.request.contextPath}/prof/scoreProc/insertScore",
+				method : "post",
+				data : {"stdId" : stdId,
+						"lectId" : lectId,
+						"atndScore" : atndScore,
+						"mtScore" : mtScore,
+						"ftScore" : ftScore,
+						"asgnScore" : asgnScore,
+						"finScore" : finScore},
+				dataType : "json",
+				success : function(resp) {
+					alert('성적이 등록되었습니다.');
+					
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			
+		});
+	});
+	
+	
+
+</script>
