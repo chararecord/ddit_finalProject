@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.campus.facility.dao.FacilityDao">
+
+	
+	<resultMap type="FaciLentVO" id="facilityMap" autoMapping="true">
+		<id property="faciId" column="FACI_ID"/>
+		<association property="facilityVO" javaType="FacilityVO" autoMapping="true"/>
+		<collection property="facilityTimeList" ofType="FacilityTimeVO" autoMapping="true">
+			<id property="availTimeid" column="AVAIL_TIMEID"/>
+		</collection>
+	</resultMap>
+	
+	
+
+<!-- 시설 목록 띄우기 -->
+	<select id="selectFaciList" resultType="FacilityVO">
+		SELECT FACI_ID, FACI_NM, LOC, NUM_PPL
+  		  FROM FACI
+	</select>
+
+
+<!-- 시설 정보 띄우기 -->
+	<select id="selectFaciInfo" parameterType="String" resultType="FacilityVO">
+		SELECT FACI_ID, FACI_NM, LOC, NUM_PPL
+  		  FROM FACI
+  		 WHERE FACI_ID = #{faciId}
+	</select>
+
+
+<!-- 시설 예약 일정표 -->
+	<select id="selectFaciTableList" parameterType="String" resultType="hashMap">
+		<![CDATA[
+		WITH T AS(
+			SELECT A.T_NO, A.T_NAME, A.ST_TIME, A.ED_TIME
+					     , CASE WHEN SUBSTR(B.AVAIL_TIMEID,1,3)='MON' THEN B.FACI_LEASEID || '|' || B.FACI_ID || '|' || B.USER_ID || '|' || B.AVAIL_TIMEID
+					      || '|' || B.RESERV_DATE || '|' || B.NUM_USERS || '|' || B.PUR_USE || '|' || B.DAY END MON
+					     , CASE WHEN SUBSTR(B.AVAIL_TIMEID,1,3)='TUE' THEN B.FACI_LEASEID || '|' || B.FACI_ID || '|' || B.USER_ID || '|' || B.AVAIL_TIMEID
+					      || '|' || B.RESERV_DATE || '|' || B.NUM_USERS || '|' || B.PUR_USE || '|' || B.DAY END TUE
+					     , CASE WHEN SUBSTR(B.AVAIL_TIMEID,1,3)='WED' THEN B.FACI_LEASEID || '|' || B.FACI_ID || '|' || B.USER_ID || '|' || B.AVAIL_TIMEID
+					      || '|' || B.RESERV_DATE || '|' || B.NUM_USERS || '|' || B.PUR_USE || '|' || B.DAY END WED
+					     , CASE WHEN SUBSTR(B.AVAIL_TIMEID,1,3)='THU' THEN B.FACI_LEASEID || '|' || B.FACI_ID || '|' || B.USER_ID || '|' || B.AVAIL_TIMEID
+					      || '|' || B.RESERV_DATE || '|' || B.NUM_USERS || '|' || B.PUR_USE || '|' || B.DAY END THU
+					     , CASE WHEN SUBSTR(B.AVAIL_TIMEID,1,3)='FRI' THEN B.FACI_LEASEID || '|' || B.FACI_ID || '|' || B.USER_ID || '|' || B.AVAIL_TIMEID
+					      || '|' || B.RESERV_DATE || '|' || B.NUM_USERS || '|' || B.PUR_USE || '|' || B.DAY END FRI
+					FROM
+					(
+					    SELECT LEVEL T_NO
+					               , LEVEL||'교시' T_NAME
+					               , DECODE(LEVEL, 1, '0900',
+					                                          2, '1000',
+					                                          3, '1100',
+					                                          4, '1200',
+					                                          5, '1400',
+					                                          6, '1500',
+					                                          7, '1600',
+					                                          8, '1700') ST_TIME
+					               , DECODE(LEVEL, 1, '0950',
+					                                          2, '1059',
+					                                          3, '1159',
+					                                          4, '1259',
+					                                          5, '1459',
+					                                          6, '1559',
+					                                          7, '1659',
+					                                          8, '1759') ED_TIME
+					    FROM DUAL
+					    CONNECT BY LEVEL <= 8
+					) A, 
+					(
+					    SELECT A.FACI_LEASEID, A.FACI_ID, A.USER_ID, A.AVAIL_TIMEID, A.RESERV_DATE, A.NUM_USERS, A.PUR_USE
+					         , B.DAY, REPLACE(B.ST_TIME,':','') ST_TIME
+					    FROM   FACI_LENT A, FACI_TIME B
+					    WHERE  A.AVAIL_TIMEID = B.AVAIL_TIMEID
+					    AND    A.FACI_ID = #{faciId}
+					    AND    REPLACE(A.RESERV_DATE,'-','') BETWEEN 20230313 AND 20230317
+					) B
+					WHERE A.ST_TIME = B.ST_TIME(+)
+			)
+			SELECT T.T_NO, T.T_NAME, T.ST_TIME, T.ED_TIME, MAX(T.MON) MON, MAX(T.TUE) TUE, MAX(T.WED) WED, MAX(T.THU) THU, MAX(T.FRI) FRI
+			FROM   T
+			GROUP BY T.T_NO, T.T_NAME, T.ST_TIME, T.ED_TIME
+			ORDER BY T.ST_TIME
+ 		]]>
+	</select>
+	
+	
+	<insert id="insertFacilityRes" parameterType="FaciLentVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="faciLeaseid">
+		SELECT 'IB1'||LPAD(NOTI_SEQ.NEXTVAL, 4, '0')
+		    FROM DUAL
+		</selectKey>	
+		INSERT INTO FACI_LENT(
+		    FACI_LEASEID
+		    , FACI_ID
+		    , USER_ID
+		    , AVAIL_TIMEID
+		    , RESERV_DATE
+		    , NUM_USERS
+		    , PUR_USE
+		) VALUES (
+		    #{faciLeaseid,jdbcType=VARCHAR} 
+		    , #{faciId,jdbcType=VARCHAR}      
+		    , #{userId,jdbcType=NUMERIC}      
+		    , #{availTimeid,jdbcType=VARCHAR} 
+		    , TO_CHAR(TO_DATE(#{reservDate,jdbcType=VARCHAR},'YYYYMMDD'),'YYYY-MM-DD') 
+		    , #{numUsers,jdbcType=NUMERIC}    
+		    , #{purUse,jdbcType=VARCHAR}      
+		)
+	</insert>
+	
+	
+	
+	
+</mapper>

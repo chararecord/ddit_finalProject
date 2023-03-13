@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.campus.certificate.dao.CertHistoryDAO">
+	
+	<resultMap type="CertHistoryVO" id="certHistMap" autoMapping="true">
+		<id property="certHistId" column="CERT_HIST_ID" />
+		<association property="certVO" javaType="CertificateVO" autoMapping="true" />
+	</resultMap>
+	
+	<select id="selectHistoryList" parameterType="String" resultMap="certHistMap">
+		WITH A AS (
+  			SELECT 
+           		A.CERT_HIST_ID
+				, A.CERT_ID
+				, A.USER_ID
+				, TO_CHAR(A.CERT_DATE, 'YYYY-MM-DD HH24:MI') AS "CERT_DATE"
+				, A.CERT_CHKNUM
+				, B.CERT_NM
+				, B.CERT_CHARGE
+				, TO_CHAR(ADD_MONTHS(A.CERT_DATE, 1), 'YYYY-MM-DD HH24:MI') AS CERT_DUE_DATE
+			FROM CERT_HIST A LEFT OUTER JOIN CERT B ON A.CERT_ID = B.CERT_ID
+			ORDER BY CERT_DATE DESC
+        )
+        SELECT ROWNUM AS RNUM, A.*
+        FROM A
+        WHERE USER_ID = #{userId}
+	</select>
+	
+	<insert id="insertCertHistory" parameterType="CertHistoryVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="certHistId">
+			SELECT 
+				'BI' || TO_CHAR(SUBSTR(MAX(CERT_HIST_ID), 3)+1)
+			FROM CERT_HIST
+		</selectKey>
+		INSERT INTO CERT_HIST (
+			CERT_HIST_ID
+			, CERT_ID
+			, USER_ID
+			, CERT_DATE
+			, CERT_CHKNUM
+		) VALUES (
+			#{certHistId,jdbcType=VARCHAR}
+			, #{certId,jdbcType=VARCHAR}
+			, #{userId,jdbcType=NUMERIC}
+			, SYSDATE
+			, #{certChknum,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectEnrollment" parameterType="String" resultType="HashMap">
+		SELECT 
+		    A.USER_ID
+<!-- 		    , A.CERT_DATE -->
+            , SUBSTR(TO_CHAR(A.CERT_DATE, 'YYYY-MM-DD'), 1, 4) || '년 ' || SUBSTR(TO_CHAR(A.CERT_DATE, 'YYYY-MM-DD'), 6, 2) || '월 ' || SUBSTR(TO_CHAR(A.CERT_DATE, 'YYYY-MM-DD'), 9, 2) || '일' "CERT_DATE"
+		    , B.USER_NM
+            , SUBSTR(B.USER_BIR, 1, 4) || '년 ' || SUBSTR(B.USER_BIR, 6, 2) || '월 ' || SUBSTR(B.USER_BIR, 9) || '일' "USER_BIR"
+		    , B.COLL_NM
+		    , B.MAJOR_NM
+            , SUBSTR(B.ENT_DATE, 1, 4) || '년 ' || SUBSTR(B.ENT_DATE, 6, 2) || '월 ' || SUBSTR(B.ENT_DATE, 9) || '일' "ENT_DATE"
+		    , C.CAM_YEAR
+		FROM CERT_HIST A INNER JOIN V_STU B ON A.USER_ID = B.STD_ID
+		    INNER JOIN V_CAMYEAR C ON A.USER_ID = C.STD_ID
+		WHERE A.USER_ID = #{userId}
+		AND CERT_HIST_ID = #{certHistId}
+	</select>
+</mapper>

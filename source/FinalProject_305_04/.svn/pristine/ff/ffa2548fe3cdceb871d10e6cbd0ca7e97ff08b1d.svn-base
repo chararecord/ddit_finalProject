@@ -1,0 +1,269 @@
+package kr.or.ddit.emp.empInfo.controller;
+
+import java.io.Console;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.naming.AuthenticationException;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
+
+import kr.or.ddit.emp.empInfo.service.EmpInfoService;
+import kr.or.ddit.ui.PaginationRenderer;
+import kr.or.ddit.validate.InsertGroup;
+import kr.or.ddit.validate.UpdateGroup;
+import kr.or.ddit.vo.BuildingVO;
+import kr.or.ddit.vo.CommVO;
+import kr.or.ddit.vo.DeptVO;
+import kr.or.ddit.vo.EmpVO;
+import kr.or.ddit.vo.LaboVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.ProfessorVO;
+import kr.or.ddit.vo.SearchVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ *  교직원정보관리 컨트롤러
+ * @author 민경진
+ *
+ */
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/emp")
+public class EmployeeInfoController {
+
+	private final EmpInfoService service;
+	
+	
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+	
+	@Bean
+	public HiddenHttpMethodFilter hiddenHttpMethodFilter(){
+		return new HiddenHttpMethodFilter();
+	}
+	
+	
+	@ModelAttribute("empInfo")
+	public EmpVO empInfo() {
+		return new EmpVO();
+	}
+	
+	
+	
+	
+	/**
+	 * 리스트 출력
+	 * @param currentPage
+	 * @param searchVO
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("/empInfo")
+	public String empInfoList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage 
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+	) {
+		
+		PagingVO<EmpVO> pagingVO = new PagingVO<>(10,5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		System.out.println("pagingVO왔나!!!!!!!!!!!!!!!!" + pagingVO);
+		
+		service.retrieveEmpInfoList(pagingVO);
+		
+		model.addAttribute("pagingVO", pagingVO);
+		
+		return "emp/empInfo/empInfoList";
+	}
+	
+	
+	@GetMapping(value="empInfo", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public String empInfoListData(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			,@ModelAttribute("simpleCondition") SearchVO searchVO
+			,Model model
+	){
+		PagingVO<EmpVO> pagingVO = new PagingVO<>(10,5);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveEmpInfoList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		
+		return "jsonView";
+		
+	}
+	
+	
+	
+	/**
+	 * 상세조회
+	 * @param empId
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("empInfoView")
+	public String empInfoView(
+		@RequestParam("what") String empId
+		, Model model
+	) {
+		EmpVO empInfo = service.retrieveEmpInfo(empId);
+		model.addAttribute("empInfo", empInfo);
+		System.out.println("왔나!!! empinfo 뷰!!" + empInfo);
+		
+		return "emp/empInfo/empInfoView";
+	}
+	
+	
+	
+	/**
+	 * 등록하기
+	 * @param model
+	 * @return
+	 */
+	@GetMapping("/empInfoInsert")
+	public String empInfoForm(Model model) {
+		
+		//빌딩 셀렉트박스로 띄우기
+		List<CommVO> commVO = service.selectBuilding();
+		model.addAttribute("commVO", commVO);
+		
+		//직책 셀렉트박스로 띄우기
+		List<CommVO> commVOPos = service.selectPosList();
+		model.addAttribute("commVOPos", commVOPos);
+		
+		//부서 셀렉트박스로 띄우기
+		List<DeptVO> deptVO = service.selectDeptList();
+		model.addAttribute("deptVO", deptVO);
+		
+		return "emp/empInfo/empInfoForm";
+	}
+	
+	
+	//빌딩 호실 셀렉트박스 띄우기
+	@ResponseBody
+	@PostMapping("/selectBuildingNumList2")
+	public List<BuildingVO> selectBuildingNumList(@RequestBody CommVO commVO) {
+		List<BuildingVO> data = service.selectBuildingNum(commVO);
+		log.info("data : {}",data);
+		return data;
+	}
+	
+	@PostMapping("/empInfoInsert")
+	public String empInfoInsert(
+		@Validated(InsertGroup.class) @ModelAttribute("empInfo") EmpVO empVO, String empId,
+		Model model
+	) {
+		String viewName = null;
+		empVO.setEmpId(empId);
+		
+		String rowcnt = service.createEmpTotalEmpInfo(empVO);
+		if(rowcnt == "OK") {
+			viewName = "redirect:/emp/empInfoView?what="+empVO.getEmpId();
+		}
+		return viewName;
+	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * 수정하기
+	 * @param empId
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("/empInfoEdit")
+	public String updateForm(@RequestParam("what") String empId, Model model) {
+		
+		EmpVO emp = service.retrieveEmpInfo(empId);
+		model.addAttribute("empInfo", emp);
+		
+		//빌딩 셀렉트박스로 띄우기
+		List<CommVO> commVO = service.selectBuilding();
+		model.addAttribute("commVO", commVO);
+		
+		//부서 셀렉트박스로 띄우기
+		List<DeptVO> deptVO = service.selectDeptList();
+		model.addAttribute("deptVO", deptVO);
+		
+//		//직책 셀렉트박스로 띄우기
+		List<CommVO> commVOPos = service.selectPosList();
+		model.addAttribute("commVOPos", commVOPos);
+		
+		return "emp/empInfo/empInfoEdit";
+		
+	}
+	
+	
+	
+	@PostMapping("/empInfoEdit")
+	public String empInfoUpdate(
+		@Validated(UpdateGroup.class) @ModelAttribute("empInfo") EmpVO empVO
+		, Errors errors
+		, Model model
+	) throws AuthenticationException {
+		String viewName = null;
+		if(!errors.hasErrors()) {
+			String rowcnt = service.updateEmpTotalEmpInfo(empVO);
+			if(rowcnt == "OK") {
+				viewName = "redirect:/emp/empInfoView.do?what=" + empVO.getEmpId();
+			} else {
+				model.addAttribute("message", "서버 오류, 쫌따 다시");
+				viewName = "emp/empInfo/empInfoEdit";
+			}
+		} else {
+			viewName = "emp/empInfo/empInfoEdit";
+		}
+		return viewName;
+	}
+	
+	
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

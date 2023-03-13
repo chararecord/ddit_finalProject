@@ -1,0 +1,102 @@
+package kr.or.ddit.prof.test.dao;
+
+
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.vo.AssignmentVO;
+import kr.or.ddit.vo.LectureVO;
+import kr.or.ddit.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.TestPasgVO;
+import kr.or.ddit.vo.TestQueVO;
+import kr.or.ddit.vo.TestVO;
+
+@Mapper
+public interface TestProfDAO {
+
+	
+	/**
+	 * 게시글 개수 조회
+	 * @param pagingVO
+	 * @return
+	 */
+	public int selectTotalRecord(String profId);
+	
+	
+	/**
+	 * 출제한 전체 시험 목록 조회
+	 * @param pagingVO
+	 * @return
+	 */
+	public List<TestVO> testProfTotalList(PagingVO<TestVO> pagingVO);
+	
+	
+
+	/**
+	 * 시험 정보 뷰 
+	 * @param testVO
+	 * @return
+	 */
+	public List<TestVO> selectTestInfo (TestVO testVO);
+	
+	/**
+	 * 강의명 select 뷰
+	 * @return
+	 */
+	public List<LectureVO> selectLectureList(String profId);
+	
+	
+	
+	/**
+	 * 시험등록페이지
+	 * @param testVO
+	 * @return
+	 */
+	public int getTestQueSeq(); //TESTQUE_SEQ.NEXTVAL 값 가져오기(문제 기본키)
+	public int getTestPasgSeq(); //TESTPASG_SEQ.NEXTVAL 값 가져오기(보기 기본키)
+	public int insertTest(TestVO testVO); //testInfo 시험정보 insert
+	public int insertQue(TestQueVO testQueVO); // 문제 insert
+	public int insertPasg(TestPasgVO testPasgVO); //지문 insert
+	
+	
+	
+	/**
+	 * 시험별 제출학생 목록 뷰
+	 * @param testVO
+	 * @return
+	 */
+	public List<TestVO> selectSubmitStudentList(PagingVO<TestVO> pagingVO);
+	
+
+	/**
+	 *  제출한 학생 단건 조회
+	 * @param testAllowId
+	 * @return
+	 */
+	public TestVO selectSubmitStudentView(@Param("testId") String testId, @Param("stdId") String stdId);
+	
+	
+	
+	/**
+	 * 출제한 시험 상세조회 
+	 * 출제한 시험 "문제", "지문" 상세보기 
+	 */
+	public TestVO testView(String testId); // 시험정보
+	public List<TestVO> selectTestQue(String testId); //문제
+	public List<TestQueVO> selectTestPasg(String testId); //지문
+	
+	
+	/**
+	 * 시험 제출 삭제
+	 * @param testId
+	 * @return
+	 */
+	public int deleteTestView(String testId);
+	
+}
+
+
