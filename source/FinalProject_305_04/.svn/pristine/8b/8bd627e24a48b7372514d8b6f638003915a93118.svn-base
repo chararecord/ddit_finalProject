@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.prof.lectSylla.dao.LectureSyllabusDAO">
+
+<resultMap type="SyllabusVO" id="syllabusMap" autoMapping="true">
+	<id property="syllaId" column="SYLLA_ID"/>
+	<association property="semesterVO" autoMapping="true" javaType="SemesterVO">
+		<id property="semeId" column="SEME_ID"/>
+	</association>
+	<association property="professorVO" autoMapping="true" javaType="ProfessorVO"></association>
+	<association property="subMajorVO" autoMapping="true" javaType="SubMajorVO"></association>
+	<association property="buildingVO" autoMapping="true" javaType="BuildingVO"></association>
+	<association property="lectRoomVO" autoMapping="true" javaType="LectRoomVO"></association>
+	<association property="syllaApprVO" autoMapping="true" javaType="SyllaApprVO"></association>
+</resultMap>
+
+<!-- 해당 교수의 강의계획서 전체목록 조회 -->
+<select id="selectSyllabusList" parameterType="kr.or.ddit.vo.ProfessorVO" resultMap="syllabusMap">
+    SELECT A.SYLLA_ID,
+    	   B.SEME_YEAR,
+           B.SEME,
+           A.CAM_YEAR,
+           A.LECT_NM,
+           A.HOPE_MAX,
+        (SELECT COMM_DESC
+	       FROM COMM
+	      WHERE COMM.COMM_ID = C.ESTA_SUB) AS ESTA_SUB,
+          A.LECT_HOUR AS CREDIT,
+          A.HOPE_TIME,
+        (SELECT COMM_DESC
+	       FROM COMM
+	      WHERE COMM.COMM_ID = A.SYLLA_MEET) AS SYLLA_MEET,
+        (SELECT COMM_DESC
+           FROM COMM
+          WHERE COMM.COMM_ID = E.APRV_STATE) AS APRV_STATE,
+          (SELECT COMM_DESC
+             FROM COMM
+            WHERE COMM.COMM_ID = D.BUILD_ID) AS BUILD_ID,
+          D.BUILD_NUM
+    FROM SYLLABUS A INNER JOIN SEMESTER B ON (A.SEME_ID = B.SEME_ID)
+                    INNER JOIN SUB_MAJOR C ON (A.SUB_MAJOR_ID = C.SUB_MAJOR_ID)
+                    INNER JOIN LECT_ROOM D ON (A.LECT_ROOM_ID = D.LECT_ROOM_ID)
+                    INNER JOIN SYLLA_APPR E ON (A.SYLLA_ID = E.SYLLA_ID)
+    WHERE A.PROF_ID = #{profId}
+    ORDER BY B.SEME_YEAR DESC, B.SEME DESC, A.SYLLA_ID DESC
+</select>
+
+<!--해당 학과의 과목 조회 -->
+<select id="selectSubMajorList" parameterType="map" resultType="kr.or.ddit.vo.SubMajorVO">
+	SELECT A.SUB_MAJOR_ID, 
+	       A.SEME_ID, 
+	       (SELECT COMM_DESC
+	          FROM COMM
+	         WHERE COMM.COMM_ID = A.ESTA_SUB) AS ESTA_SUB,
+	       A.SUBJECT_NM, 
+	       A.CREDIT
+	FROM SUB_MAJOR A INNER JOIN PROFESSOR B ON(A.MAJOR_ID = B.MAJOR_ID)
+		                 INNER JOIN SEMESTER C ON(A.SEME_ID = C.SEME_ID)
+	WHERE B.PROF_ID = #{profId}
+	AND C.SEME_ID = #{semeId}
+</select>
+
+
+<select id="selectSemesterList" resultType="kr.or.ddit.vo.SemesterVO">
+	SELECT SEME_ID, 
+		   SEME_YEAR, 
+		   SEME
+	FROM SEMESTER
+	ORDER BY 2
+</select>
+
+
+<!-- 건물목록 가져오기 -->
+<select id="selectBuildingList" resultType="kr.or.ddit.vo.BuildingVO">
+	SELECT DISTINCT BUILD_ID, 
+		   B.COMM_DESC
+	FROM BUILDING A INNER JOIN COMM B ON (A.BUILD_ID = B.COMM_ID)
+	WHERE EXISTS (SELECT BUILD_ID FROM LECT_ROOM WHERE BUILD_ID = A.BUILD_ID)
+</select>
+
+
+<!-- 건물목록 중 한 건물을 선택하면 강의실 목록 가져오기 -->
+<select id="selectLectRoomList" parameterType="kr.or.ddit.vo.BuildingVO" resultType="kr.or.ddit.vo.LectRoomVO">
+	SELECT LECT_ROOM_ID, 
+		   BUILD_ID, 
+		   BUILD_NUM, 
+		   NUM_PPL
+	FROM LECT_ROOM
+	WHERE BUILD_ID = #{buildId}
+</select>
+
+<!-- 강의계획서 등록 -->
+<insert id="insertLectSyllabus" parameterType="kr.or.ddit.vo.SyllabusVO">
+	INSERT INTO SYLLABUS (
+	    SYLLA_ID,
+	    SEME_ID,
+	    PROF_ID,
+	    LECT_ROOM_ID,
+	    SUB_MAJOR_ID,
+	    LECT_NM,
+	    CAM_YEAR,
+	    LECT_HOUR,
+	    HOPE_TIME,
+	    HOPE_MAX,
+	    TEXTBOOK,
+	    LECT_COM,
+	    NOTE,
+	    SYLLA_MEET
+	) VALUES (
+    	(SELECT 'DD' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLABUS)
+		, #{semesterVO.semeId,jdbcType=VARCHAR}
+		, #{professorVO.profId,jdbcType=NUMERIC}
+		, #{lectRoomVO.lectRoomId,jdbcType=VARCHAR}
+		, #{subMajorVO.subMajorId,jdbcType=VARCHAR}
+		, #{lectNm,jdbcType=VARCHAR}
+		, #{camYear,jdbcType=NUMERIC}
+		, #{lectHour,jdbcType=NUMERIC}
+		, #{hopeTime,jdbcType=VARCHAR}
+		, #{hopeMax,jdbcType=NUMERIC}
+		, #{textbook,jdbcType=VARCHAR}
+		, #{lectCom,jdbcType=VARCHAR}
+		, #{note,jdbcType=VARCHAR}
+		, #{syllaMeet,jdbcType=VARCHAR}
+	)
+</insert>
+
+<select id="selectSyllaAppr" parameterType="SyllabusVO" resultMap="syllabusMap">
+	SELECT SYLLA_ID,
+       	   SEME_ID,
+       	   PROF_ID,
+       	   LECT_ROOM_ID,
+       	   SUB_MAJOR_ID,
+       	   LECT_NM,
+       	   CAM_YEAR,
+       	   LECT_HOUR,
+       	   HOPE_MAX,
+       	   TEXTBOOK,
+       	   LECT_COM,
+       	   NOTE,
+       	   SYLLA_MEET
+	  FROM SYLLABUS
+	 WHERE PROF_ID = #{professorVO.profId,jdbcType=NUMERIC}
+	   AND ROWNUM = 1
+	 ORDER BY 1 DESC
+</select>
+
+<!-- 강의계획서 등록 후 강의승인 테이블에 등록 -->
+<insert id="insertSyllaAppr" parameterType="kr.or.ddit.vo.SyllabusVO">
+	INSERT INTO SYLLA_APPR (
+	    SYLLA_APPR_ID,
+	    SYLLA_ID,
+	    PROF_ID,
+	    APRV_STATE
+	) VALUES (
+	     (SELECT 'DE' || TO_CHAR(SUBSTR(MAX(SYLLA_ID),3,5)+1)FROM SYLLA_APPR)
+	    , #{syllaId,jdbcType=VARCHAR}
+	    , #{professorVO.profId,jdbcType=NUMERIC}
+	    , '2'
+	)
+</insert>
+
+<insert id="insertScoreCrit" parameterType="SyllabusVO">
+	<foreach collection="scoreCritList" item="item" index="index" open="INSERT ALL" close="SELECT * FROM DUAL">
+	INTO SCORE_CRIT (
+	    SCORE_CRIT_ID,
+	    SCORE_CRIT_NM,
+	    SCORE_CRIT_RATIO,
+	    SYLLA_ID
+	) VALUES (
+	    (SELECT 'FB' || TO_CHAR(SUBSTR(MAX(SCORE_CRIT_ID),3,5)+#{index}+1)FROM SCORE_CRIT)
+		, #{item.scoreCritNm,jdbcType=VARCHAR}
+		, #{item.scoreCritRatio,jdbcType=VARCHAR}
+	    , #{syllaId,jdbcType=VARCHAR}
+	)
+	</foreach>	
+</insert>
+
+<insert id="insertLectWeek" parameterType="SyllabusVO">
+	<foreach collection="lectWeekList" item="item" index="index" open="INSERT ALL" close="SELECT * FROM DUAL">
+	INTO LECT_WEEK (
+	    LECT_WEEK_ID,
+	    SYLLA_ID,
+	    LECT_WEEK,
+	    LECT_WEEKLY
+	) VALUES (
+	    (SELECT 'DK' || TO_CHAR(SUBSTR(MAX(LECT_WEEK_ID),3,5)+#{index}+1)FROM LECT_WEEK)
+	    , #{syllaId,jdbcType=VARCHAR}
+	    , #{item.lectWeek,jdbcType=VARCHAR}
+	    , #{item.lectWeekly,jdbcType=VARCHAR}
+	)
+	</foreach>
+</insert>
+
+</mapper>
